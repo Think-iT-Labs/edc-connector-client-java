@@ -1,0 +1,7 @@
+[metadata]
+format.version = "1.1"
+
+[libraries]
+assertj = { module = "org.assertj:assertj-core", version = "3.24.2" }
+junit = { module = "org.junit.jupiter:junit-jupiter", version = "5.9.3" }
+testcontainers = { module = "org.testcontainers:junit-jupiter", version = "1.18.3" }
