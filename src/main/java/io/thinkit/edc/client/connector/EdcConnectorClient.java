@@ -1,28 +1,25 @@
 package io.thinkit.edc.client.connector;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-
 public class EdcConnectorClient {
-    private final String url;
+    private String managementUrl;
 
-    public EdcConnectorClient(String url) {
-        this.url = url;
+    public static EdcConnectorClient newInstance() {
+        return new EdcConnectorClient();
     }
 
-    public Object getAsset(String id) {
-        var request = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/%s".formatted(url, id)))
-                .GET().build();
-        try {
-            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-            return response.body();
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+    private EdcConnectorClient() {
+    }
+
+    public EdcConnectorClient managementUrl(String managementUrl) {
+        this.managementUrl = managementUrl;
+        return this;
+    }
+
+    public Assets assets() {
+        if (managementUrl == null) {
+            throw new IllegalArgumentException("Cannot instantiate Assets client without the management url");
         }
-
+        return new Assets(managementUrl);
     }
+
 }
