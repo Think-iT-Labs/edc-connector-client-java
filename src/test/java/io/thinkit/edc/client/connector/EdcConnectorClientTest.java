@@ -9,8 +9,9 @@ public class EdcConnectorClientTest {
 
     @Test
     void should_return_asset_client() {
-        var client = EdcConnectorClient.newInstance()
-                .managementUrl("http://127.0.0.1/management/url");
+        var client = EdcConnectorClient.newBuilder()
+                .managementUrl("http://127.0.0.1/management/url")
+                .build();
 
         var assets = client.assets();
 

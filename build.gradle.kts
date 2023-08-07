@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    `java-library`
 }
 
 group = "io.thinkit"
@@ -10,6 +11,12 @@ repositories {
 }
 
 dependencies {
+    api(libs.jakarta.json.api)
+
+    implementation(libs.titanium.json.ld)
+    implementation(libs.jakarta.json)
+    implementation(libs.parsson)
+
     testImplementation(libs.assertj)
     testImplementation(libs.junit)
     testImplementation(libs.testcontainers)
