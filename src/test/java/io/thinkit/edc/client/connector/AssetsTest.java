@@ -9,6 +9,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.io.File;
 import java.net.http.HttpClient;
 
+import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
@@ -37,11 +38,21 @@ class AssetsTest {
         var asset = assets.get("123");
 
         assertThat(asset.id()).isNotBlank();
-        assertThat(asset.properties()).containsEntry("https://w3id.org/edc/v0.0.1/ns/key", "value");
-        assertThat(asset.privateProperties()).containsEntry("https://w3id.org/edc/v0.0.1/ns/privateKey", "privateValue");
+        assertThat(asset.properties()).isNotNull().satisfies(properties -> {
+            assertThat(properties.size()).isGreaterThan(0);
+            assertThat(properties.getString(EDC_NAMESPACE + "key")).isEqualTo("value");
+            assertThat(properties.getString("key")).isEqualTo("value");
+            assertThat(properties.getString("not-existent")).isEqualTo(null);
+        });
+        assertThat(asset.privateProperties()).isNotNull().satisfies(privateProperties -> {
+            assertThat(privateProperties.size()).isGreaterThan(0);
+            assertThat(privateProperties.getString(EDC_NAMESPACE + "privateKey")).isEqualTo("privateValue");
+            assertThat(privateProperties.getString("privateKey")).isEqualTo("privateValue");
+            assertThat(privateProperties.getString("not-existent")).isEqualTo(null);
+        });
         assertThat(asset.dataAddress()).isNotNull().satisfies(dataAddress -> {
             assertThat(dataAddress.type()).isNotBlank();
-            assertThat(dataAddress.properties()).isNotEmpty();
+            assertThat(dataAddress.properties().size()).isGreaterThan(0);
         });
         assertThat(asset.createdAt()).isGreaterThan(0);
     }

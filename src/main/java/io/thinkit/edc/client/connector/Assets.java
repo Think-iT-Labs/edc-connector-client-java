@@ -23,21 +23,19 @@ public class Assets {
     }
 
     public Asset get(String id) {
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/%s".formatted(url, id)))
-                .GET();
-
-        var request = interceptor.apply(requestBuilder).build();
-
         try {
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v3/assets/%s".formatted(url, id)))
+                    .GET();
+
+            var request = interceptor.apply(requestBuilder).build();
+
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var jsonDocument = JsonDocument.of(response.body());
             var jsonArray = JsonLd.expand(jsonDocument).get();
 
             return new Asset(jsonArray.getJsonObject(0));
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (JsonLdError e) {
+        } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
     }

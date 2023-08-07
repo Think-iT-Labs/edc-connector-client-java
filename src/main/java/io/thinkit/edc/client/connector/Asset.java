@@ -2,10 +2,9 @@ package io.thinkit.edc.client.connector;
 
 import jakarta.json.JsonObject;
 
-import java.util.Map;
-
 import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
-import static java.util.stream.Collectors.toMap;
+import static io.thinkit.edc.client.connector.Constants.ID;
+import static io.thinkit.edc.client.connector.Constants.VALUE;
 
 public class Asset {
     private final JsonObject raw;
@@ -15,28 +14,22 @@ public class Asset {
     }
 
     public String id() {
-        return raw.getString("@id");
+        return raw.getString(ID);
     }
 
-    public Map<String, Object> properties() {
-        return getProperties("https://w3id.org/edc/v0.0.1/ns/properties");
+    public Properties properties() {
+        return new Properties(raw.getJsonArray(EDC_NAMESPACE + "properties").getJsonObject(0));
     }
 
-    public Map<String, Object> privateProperties() {
-        return getProperties("https://w3id.org/edc/v0.0.1/ns/privateProperties");
-    }
-
-    private Map<String, Object> getProperties(String key) {
-        return raw.getJsonArray(key).stream()
-                .flatMap(it -> it.asJsonObject().entrySet().stream())
-                .collect(toMap(Map.Entry::getKey, it -> it.getValue().asJsonArray().getJsonObject(0).getString("@value")));
+    public Properties privateProperties() {
+        return new Properties(raw.getJsonArray(EDC_NAMESPACE + "privateProperties").getJsonObject(0));
     }
 
     public DataAddress dataAddress() {
-        return new DataAddress(raw.getJsonArray("https://w3id.org/edc/v0.0.1/ns/dataAddress").getJsonObject(0));
+        return new DataAddress(raw.getJsonArray(EDC_NAMESPACE + "dataAddress").getJsonObject(0));
     }
 
     public long createdAt() {
-        return raw.getJsonArray(EDC_NAMESPACE + "createdAt").getJsonObject(0).getJsonNumber("@value").longValue();
+        return raw.getJsonArray(EDC_NAMESPACE + "createdAt").getJsonObject(0).getJsonNumber(VALUE).longValue();
     }
 }
