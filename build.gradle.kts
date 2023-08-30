@@ -16,6 +16,7 @@ dependencies {
     implementation(libs.titanium.json.ld)
     implementation(libs.jakarta.json)
     implementation(libs.parsson)
+    implementation(libs.jackson.databind)
 
     testImplementation(libs.assertj)
     testImplementation(libs.junit)

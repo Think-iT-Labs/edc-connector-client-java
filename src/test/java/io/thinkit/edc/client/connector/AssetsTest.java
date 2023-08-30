@@ -3,13 +3,17 @@ package io.thinkit.edc.client.connector;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.File;
 import java.net.http.HttpClient;
+import java.util.Collections;
+import java.util.Map;
 
 import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
+import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
@@ -19,7 +23,12 @@ class AssetsTest {
     private GenericContainer<?> prism = new GenericContainer<>("stoplight/prism:3.3.4")
             .withFileSystemBind(new File("").getAbsolutePath(),"/tmp")
             .withCommand("mock -h 0.0.0.0 -d https://api.swaggerhub.com/apis/eclipse-edc-bot/management-api/0.2.0")
-            .withExposedPorts(4010);
+            .withExposedPorts(4010)
+            .withLogConsumer(frame -> {
+                if (!frame.getUtf8String().contains("[CLI]")) {
+                    System.out.println(frame.getUtf8String());
+                }
+            });
     private final HttpClient http = HttpClient.newBuilder().build();
     private Assets assets;
 
@@ -57,4 +66,25 @@ class AssetsTest {
         assertThat(asset.createdAt()).isGreaterThan(0);
     }
 
+    @Test
+    void should_create_an_asset() {
+        Map<String, Object> properties = Map.of("key", Map.of("value", "value"));
+        Map<String, Object> privateProperties = Map.of("private-key", Map.of("private-value", "private-value"));
+        Map<String, Object> dataAddress = Map.of("type", "data-address-type");
+
+        boolean created = assets.create("assetId", properties, privateProperties, dataAddress);
+
+        assertThat(created).isTrue();
+    }
+
+    @Test
+    void should_not_create_an_asset_when_dataAddress_is_empty() {
+        Map<String, Object> properties = Map.of("key", "value");
+        Map<String, Object> privateProperties = Map.of("private-key", "private-value");
+        Map<String, Object> dataAddress = Collections.emptyMap();
+
+        boolean created = assets.create("assetId", properties, privateProperties, dataAddress);
+
+        assertThat(created).isFalse();
+    }
 }

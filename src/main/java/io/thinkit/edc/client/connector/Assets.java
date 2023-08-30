@@ -3,13 +3,18 @@ package io.thinkit.edc.client.connector;
 import com.apicatalog.jsonld.JsonLd;
 import com.apicatalog.jsonld.JsonLdError;
 import com.apicatalog.jsonld.document.JsonDocument;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Map;
 import java.util.function.UnaryOperator;
+
+import static io.thinkit.edc.client.connector.Constants.ID;
+import static io.thinkit.edc.client.connector.Constants.TYPE;
 
 public class Assets {
     private final String url;
@@ -36,6 +41,32 @@ public class Assets {
 
             return new Asset(jsonArray.getJsonObject(0));
         } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean create(String assetId, Map<String, Object> properties, Map<String, Object> privateProperties, Map<String, Object> dataAddress) {
+        try {
+            Map<String, Object> requestBody = Map.of(
+                    ID, assetId,
+                    TYPE, "https://w3id.org/edc/v0.0.1/ns/Asset",
+                    "properties", properties,
+                    "privateProperties", privateProperties,
+                    "dataAddress", dataAddress
+            );
+
+            var jsonRequestBody = new ObjectMapper().writeValueAsString(requestBody);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v3/assets".formatted(url)))
+                    .header("content-type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequestBody));
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 200;
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
