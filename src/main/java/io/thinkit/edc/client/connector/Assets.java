@@ -45,14 +45,14 @@ public class Assets {
         }
     }
 
-    public Result create(String assetId, Map<String, Object> properties, Map<String, Object> privateProperties, Map<String, Object> dataAddress) {
+    public Result create(AssetInput input) {
         try {
             Map<String, Object> requestBody = Map.of(
-                    ID, assetId,
+                    ID, input.id(),
                     TYPE, "https://w3id.org/edc/v0.0.1/ns/Asset",
-                    "properties", properties,
-                    "privateProperties", privateProperties,
-                    "dataAddress", dataAddress
+                    "properties", input.properties(),
+                    "privateProperties", input.privateProperties(),
+                    "dataAddress", input.dataAddress()
             );
 
             var jsonRequestBody = new ObjectMapper().writeValueAsString(requestBody);
