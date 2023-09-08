@@ -45,7 +45,7 @@ public class Assets {
         }
     }
 
-    public boolean create(String assetId, Map<String, Object> properties, Map<String, Object> privateProperties, Map<String, Object> dataAddress) {
+    public Result create(String assetId, Map<String, Object> properties, Map<String, Object> privateProperties, Map<String, Object> dataAddress) {
         try {
             Map<String, Object> requestBody = Map.of(
                     ID, assetId,
@@ -64,9 +64,22 @@ public class Assets {
 
             var request = interceptor.apply(requestBuilder).build();
 
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            return response.statusCode() == 200;
-        } catch (IOException | InterruptedException e) {
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            boolean succeeded = statusCode == 200;
+            if (succeeded){
+                var jsonDocument = JsonDocument.of(response.body());
+                var content = jsonDocument.getJsonContent().get();
+                String id = content.asJsonObject().getString("@id");
+                return new Result(true,id,null);
+            }
+            else {
+                String error = (statusCode == 400)?"Request body was malformed":"Could not create asset";
+                return new Result(false,null,error);
+
+            }
+
+        } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
     }

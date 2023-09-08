@@ -3,7 +3,6 @@ package io.thinkit.edc.client.connector;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -13,7 +12,6 @@ import java.util.Collections;
 import java.util.Map;
 
 import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
-import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
@@ -72,9 +70,10 @@ class AssetsTest {
         Map<String, Object> privateProperties = Map.of("private-key", Map.of("private-value", "private-value"));
         Map<String, Object> dataAddress = Map.of("type", "data-address-type");
 
-        boolean created = assets.create("assetId", properties, privateProperties, dataAddress);
+        Result created = assets.create("assetId", properties, privateProperties, dataAddress);
 
-        assertThat(created).isTrue();
+        assertThat(created.isSucceeded()).isTrue();
+        assertThat(created.getId()).isNotNull();
     }
 
     @Test
@@ -83,8 +82,9 @@ class AssetsTest {
         Map<String, Object> privateProperties = Map.of("private-key", "private-value");
         Map<String, Object> dataAddress = Collections.emptyMap();
 
-        boolean created = assets.create("assetId", properties, privateProperties, dataAddress);
+        Result created = assets.create("assetId", properties, privateProperties, dataAddress);
 
-        assertThat(created).isFalse();
+        assertThat(created.isSucceeded()).isFalse();
+        assertThat(created.getError()).isNotNull();
     }
 }
