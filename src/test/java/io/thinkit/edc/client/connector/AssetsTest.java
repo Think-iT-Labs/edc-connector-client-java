@@ -73,9 +73,10 @@ class AssetsTest {
         Map<String, Object> dataAddress = Map.of("type", "data-address-type");
         var assetInput = new AssetInput("assetId", properties, privateProperties, dataAddress);
 
-        boolean created = assets.create(assetInput);
+        Result created = assets.create(assetInput);
 
-        assertThat(created).isTrue();
+        assertThat(created.isSucceeded()).isTrue();
+        assertThat(created.getId()).isNotNull();
     }
 
     @Test
@@ -85,8 +86,9 @@ class AssetsTest {
         Map<String, Object> dataAddress = Collections.emptyMap();
         var assetInput = new AssetInput("assetId", properties, privateProperties, dataAddress);
 
-        boolean created = assets.create(assetInput);
+        Result created = assets.create(assetInput);
 
-        assertThat(created).isFalse();
+        assertThat(created.isSucceeded()).isFalse();
+        assertThat(created.getError()).isNotNull();
     }
 }
