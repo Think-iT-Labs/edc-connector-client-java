@@ -71,15 +71,48 @@ public class Assets {
                 var jsonDocument = JsonDocument.of(response.body());
                 var content = jsonDocument.getJsonContent().get();
                 String id = content.asJsonObject().getString("@id");
-                return new Result(true,id,null);
+                return new Result(true,id, "Asset was created successfully", null);
             }
             else {
                 String error = (statusCode == 400)?"Request body was malformed":"Could not create asset";
-                return new Result(false,null,error);
+                return new Result(false,null, null, error);
 
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Result update(AssetInput input) {
+        try {
+            Map<String, Object> requestBody = Map.of(
+                    ID, input.id(),
+                    TYPE, "https://w3id.org/edc/v0.0.1/ns/Asset",
+                    "properties", input.properties(),
+                    "privateProperties", input.privateProperties(),
+                    "dataAddress", input.dataAddress()
+            );
+
+            var jsonRequestBody = new ObjectMapper().writeValueAsString(requestBody);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v3/assets".formatted(url)))
+                    .header("content-type", "application/json")
+                    .PUT(HttpRequest.BodyPublishers.ofString(jsonRequestBody));
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            var statusCode = response.statusCode();
+            if (statusCode == 200){
+                return new Result(true,input.id(),"Asset was updated successfully",null);
+            }
+            else {
+                return new Result(false,null, null, "Asset could not be updated");
+            }
+
+        } catch (IOException | InterruptedException  e) {
             throw new RuntimeException(e);
         }
     }
