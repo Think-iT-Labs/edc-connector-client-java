@@ -91,4 +91,28 @@ class AssetsTest {
         assertThat(created.isSucceeded()).isFalse();
         assertThat(created.getError()).isNotNull();
     }
+    @Test
+    void should_update_an_asset() {
+        Map<String, Object> properties = Map.of("key", Map.of("value", "value"));
+        Map<String, Object> privateProperties = Map.of("private-key", Map.of("private-value", "private-value"));
+        Map<String, Object> dataAddress = Map.of("type", "data-address-type");
+        var assetInput = new AssetInput("assetId", properties, privateProperties, dataAddress);
+
+        Result created = assets.update(assetInput);
+
+        assertThat(created.isSucceeded()).isTrue();
+    }
+
+    @Test
+    void should_not_update_an_asset_when_id_is_empty() {
+        Map<String, Object> properties = Map.of("key", "value");
+        Map<String, Object> privateProperties = Map.of("private-key", "private-value");
+        Map<String, Object> dataAddress = Collections.emptyMap();
+        var assetInput = new AssetInput("", properties, privateProperties, dataAddress);
+
+        Result created = assets.update(assetInput);
+
+        assertThat(created.isSucceeded()).isFalse();
+        assertThat(created.getError()).isNotNull();
+    }
 }
