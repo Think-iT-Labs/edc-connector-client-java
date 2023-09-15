@@ -101,7 +101,6 @@ class AssetsTest {
         Result created = assets.update(assetInput);
 
         assertThat(created.isSucceeded()).isTrue();
-        assertThat(created.getSuccessMessage()).isNotNull();
     }
 
     @Test

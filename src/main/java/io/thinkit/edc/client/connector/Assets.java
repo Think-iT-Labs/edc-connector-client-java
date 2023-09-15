@@ -71,11 +71,11 @@ public class Assets {
                 var jsonDocument = JsonDocument.of(response.body());
                 var content = jsonDocument.getJsonContent().get();
                 String id = content.asJsonObject().getString("@id");
-                return new Result(true,id, "Asset was created successfully", null);
+                return new Result(true, id, null);
             }
             else {
                 String error = (statusCode == 400)?"Request body was malformed":"Could not create asset";
-                return new Result(false,null, null, error);
+                return new Result(false, null, error);
 
             }
 
@@ -106,10 +106,10 @@ public class Assets {
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             var statusCode = response.statusCode();
             if (statusCode == 200){
-                return new Result(true,input.id(),"Asset was updated successfully",null);
+                return new Result(true, input.id(), null);
             }
             else {
-                return new Result(false,null, null, "Asset could not be updated");
+                return new Result(false, null, "Asset could not be updated");
             }
 
         } catch (IOException | InterruptedException  e) {
