@@ -137,4 +137,35 @@ public class Assets {
             throw new RuntimeException(e);
         }
     }
+
+    public boolean getByFilter(FilterInput input) {
+        try {
+            Map<String, Object> requestBody = Map.of(
+                    TYPE, input.type(),
+                    "offset", input.offset(),
+                    "limit", input.limit(),
+                    "sortOrder", input.sortOrder(),
+                    "sortField",input.sortField(),
+                    "filterExpression",input.filterExpression()
+
+            );
+
+            var jsonRequestBody = new ObjectMapper().writeValueAsString(requestBody);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v3/assets/request".formatted(url)))
+                    .header("content-type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequestBody));
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            return statusCode == 200;
+
+
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

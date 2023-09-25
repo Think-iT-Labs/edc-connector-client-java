@@ -132,4 +132,20 @@ class AssetsTest {
         assertThat(deleted.isSucceeded()).isFalse();
         assertThat(deleted.getError()).isNotNull();
     }
+
+    @Test
+    void should_get_assets() {
+        var input = new FilterInput("QuerySpec",5,10,"DESC","fieldName",new String[]{});
+        boolean assetsList = assets.getByFilter(input);
+
+        assertThat(assetsList).isTrue();
+    }
+
+    @Test
+    void should_not_get_assets() {
+        var input = new FilterInput("",0,0,"","",new String[]{});
+        boolean assetsList = assets.getByFilter(input);
+
+        assertThat(assetsList).isFalse();
+    }
 }
