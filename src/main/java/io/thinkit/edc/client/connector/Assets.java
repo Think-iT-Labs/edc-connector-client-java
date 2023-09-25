@@ -116,4 +116,25 @@ public class Assets {
             throw new RuntimeException(e);
         }
     }
+    public Result delete(String id) {
+        try {
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v3/assets/%s".formatted(url, id)))
+                    .DELETE();
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            if (statusCode == 200){
+                return new Result(true, id, null);
+            }
+            else {
+                return new Result(false, null, "The asset cannot be deleted");
+            }
+        }
+        catch (IOException | InterruptedException  e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

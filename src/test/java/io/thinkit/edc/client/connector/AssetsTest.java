@@ -91,6 +91,7 @@ class AssetsTest {
         assertThat(created.isSucceeded()).isFalse();
         assertThat(created.getError()).isNotNull();
     }
+    
     @Test
     void should_update_an_asset() {
         Map<String, Object> properties = Map.of("key", Map.of("value", "value"));
@@ -114,5 +115,21 @@ class AssetsTest {
 
         assertThat(created.isSucceeded()).isFalse();
         assertThat(created.getError()).isNotNull();
+    }
+
+    @Test
+    void should_delete_an_asset() {
+
+        Result deleted = assets.delete("assetId");
+
+        assertThat(deleted.isSucceeded()).isTrue();
+    }
+
+    @Test
+    void should_not_delete_an_asset_when_id_is_empty() {
+        Result deleted = assets.delete("");
+
+        assertThat(deleted.isSucceeded()).isFalse();
+        assertThat(deleted.getError()).isNotNull();
     }
 }
