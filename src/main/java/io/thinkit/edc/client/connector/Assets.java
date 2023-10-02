@@ -10,6 +10,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
@@ -138,10 +140,10 @@ public class Assets {
         }
     }
 
-    public boolean getByFilter(FilterInput input) {
+    public List<Asset> request(QuerySpec input) {
         try {
             Map<String, Object> requestBody = Map.of(
-                    TYPE, input.type(),
+                    TYPE, "https://w3id.org/edc/v0.0.1/ns/QuerySpec",
                     "offset", input.offset(),
                     "limit", input.limit(),
                     "sortOrder", input.sortOrder(),
@@ -161,10 +163,22 @@ public class Assets {
 
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var statusCode = response.statusCode();
-            return statusCode == 200;
+            if  (statusCode == 200){
+                var jsonDocument = JsonDocument.of(response.body());
+                var jsonArray = JsonLd.expand(jsonDocument).get();
+                List<Asset> assets = new ArrayList<>() ;
+                for (var element: jsonArray
+                     ) {
+                    assets.add(new Asset(element.asJsonObject()));
+                }
+                return assets;
+            }
+            else {
+                return null;
+            }
 
 
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
     }

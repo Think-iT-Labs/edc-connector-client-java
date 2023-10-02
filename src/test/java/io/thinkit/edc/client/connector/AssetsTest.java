@@ -6,10 +6,12 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.MountableFile;
 
 import java.io.File;
 import java.net.http.HttpClient;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
@@ -22,7 +24,8 @@ class AssetsTest {
     @Container
     private GenericContainer<?> prism = new GenericContainer<>("stoplight/prism:3.3.4")
             .withFileSystemBind(new File("").getAbsolutePath(),"/tmp")
-            .withCommand("mock -h 0.0.0.0 -d https://api.swaggerhub.com/apis/eclipse-edc-bot/management-api/0.2.0")
+            .withCopyToContainer(MountableFile.forClasspathResource("/edcOpenAPi.yaml"),"/edcOpenAPi.yaml")
+            .withCommand("mock -h 0.0.0.0 -d /edcOpenAPi.yaml")
             .withExposedPorts(4010)
             .withLogConsumer(frame -> {
                 if (!frame.getUtf8String().contains("[CLI]")) {
@@ -135,17 +138,38 @@ class AssetsTest {
 
     @Test
     void should_get_assets() {
-        var input = new FilterInput("QuerySpec",5,10,"DESC","fieldName",new String[]{});
-        boolean assetsList = assets.getByFilter(input);
+        var input = new QuerySpec(5,10,"DESC","fieldName",new Criterion[]{});
+        List<Asset> assetsList = assets.request(input);
+        assertThat(assetsList).isNotNull();
 
-        assertThat(assetsList).isTrue();
+        Asset asset = assetsList.get(0);
+        assertThat(asset.id()).isNotBlank();
+        assertThat(asset.properties()).isNotNull().satisfies(properties -> {
+            assertThat(properties.size()).isGreaterThan(0);
+            assertThat(properties.getString(EDC_NAMESPACE + "key")).isEqualTo("value");
+            assertThat(properties.getString("key")).isEqualTo("value");
+            assertThat(properties.getString("not-existent")).isEqualTo(null);
+        });
+        assertThat(asset.privateProperties()).isNotNull().satisfies(privateProperties -> {
+            assertThat(privateProperties.size()).isGreaterThan(0);
+            assertThat(privateProperties.getString(EDC_NAMESPACE + "privateKey")).isEqualTo("privateValue");
+            assertThat(privateProperties.getString("privateKey")).isEqualTo("privateValue");
+            assertThat(privateProperties.getString("not-existent")).isEqualTo(null);
+        });
+        assertThat(asset.dataAddress()).isNotNull().satisfies(dataAddress -> {
+            assertThat(dataAddress.type()).isNotBlank();
+            assertThat(dataAddress.properties().size()).isGreaterThan(0);
+        });
+        assertThat(asset.createdAt()).isGreaterThan(0);
+
+
     }
 
     @Test
     void should_not_get_assets() {
-        var input = new FilterInput("",0,0,"","",new String[]{});
-        boolean assetsList = assets.getByFilter(input);
+        var input = new QuerySpec(0,0,"","",new Criterion[]{});
+        List<Asset> assetsList = assets.request(input);
 
-        assertThat(assetsList).isFalse();
+        assertThat(assetsList).isNull();
     }
 }

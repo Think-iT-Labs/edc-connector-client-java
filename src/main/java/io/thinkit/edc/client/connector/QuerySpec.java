@@ -1,14 +1,11 @@
 package io.thinkit.edc.client.connector;
 
-import java.util.Map;
-
-public record FilterInput(
-        String type,
+public record QuerySpec(
         int offset,
         int limit,
         String sortOrder,
         String sortField,
-        String[] filterExpression
+        Criterion[] filterExpression
 ) {
 
 }
