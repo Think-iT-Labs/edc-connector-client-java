@@ -139,28 +139,29 @@ class AssetsTest {
     @Test
     void should_get_assets() {
         var input = new QuerySpec(5,10,"DESC","fieldName",new Criterion[]{});
-        List<Asset> assetsList = assets.request(input);
-        assertThat(assetsList).isNotNull();
+        Result assetsList = assets.request(input);
+        assertThat(assetsList.isSucceeded()).isTrue();
+        assertThat(assetsList.getContent()).isNotNull().first().satisfies(asset ->{
+            assertThat(asset.id()).isNotBlank();
+            assertThat(asset.properties()).isNotNull().satisfies(properties -> {
+                assertThat(properties.size()).isGreaterThan(0);
+                assertThat(properties.getString(EDC_NAMESPACE + "key")).isEqualTo("value");
+                assertThat(properties.getString("key")).isEqualTo("value");
+                assertThat(properties.getString("not-existent")).isEqualTo(null);
+            });
+            assertThat(asset.privateProperties()).isNotNull().satisfies(privateProperties -> {
+                assertThat(privateProperties.size()).isGreaterThan(0);
+                assertThat(privateProperties.getString(EDC_NAMESPACE + "privateKey")).isEqualTo("privateValue");
+                assertThat(privateProperties.getString("privateKey")).isEqualTo("privateValue");
+                assertThat(privateProperties.getString("not-existent")).isEqualTo(null);
+            });
+            assertThat(asset.dataAddress()).isNotNull().satisfies(dataAddress -> {
+                assertThat(dataAddress.type()).isNotBlank();
+                assertThat(dataAddress.properties().size()).isGreaterThan(0);
+            });
+            assertThat(asset.createdAt()).isGreaterThan(0);
+        });
 
-        Asset asset = assetsList.get(0);
-        assertThat(asset.id()).isNotBlank();
-        assertThat(asset.properties()).isNotNull().satisfies(properties -> {
-            assertThat(properties.size()).isGreaterThan(0);
-            assertThat(properties.getString(EDC_NAMESPACE + "key")).isEqualTo("value");
-            assertThat(properties.getString("key")).isEqualTo("value");
-            assertThat(properties.getString("not-existent")).isEqualTo(null);
-        });
-        assertThat(asset.privateProperties()).isNotNull().satisfies(privateProperties -> {
-            assertThat(privateProperties.size()).isGreaterThan(0);
-            assertThat(privateProperties.getString(EDC_NAMESPACE + "privateKey")).isEqualTo("privateValue");
-            assertThat(privateProperties.getString("privateKey")).isEqualTo("privateValue");
-            assertThat(privateProperties.getString("not-existent")).isEqualTo(null);
-        });
-        assertThat(asset.dataAddress()).isNotNull().satisfies(dataAddress -> {
-            assertThat(dataAddress.type()).isNotBlank();
-            assertThat(dataAddress.properties().size()).isGreaterThan(0);
-        });
-        assertThat(asset.createdAt()).isGreaterThan(0);
 
 
     }
@@ -168,8 +169,9 @@ class AssetsTest {
     @Test
     void should_not_get_assets() {
         var input = new QuerySpec(0,0,"","",new Criterion[]{});
-        List<Asset> assetsList = assets.request(input);
+        Result assetsList = assets.request(input);
 
-        assertThat(assetsList).isNull();
+        assertThat(assetsList.isSucceeded()).isFalse();
+        assertThat(assetsList.getError()).isNotNull();
     }
 }

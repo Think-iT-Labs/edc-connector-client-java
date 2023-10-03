@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 import static io.thinkit.edc.client.connector.Constants.ID;
 import static io.thinkit.edc.client.connector.Constants.TYPE;
@@ -73,11 +74,11 @@ public class Assets {
                 var jsonDocument = JsonDocument.of(response.body());
                 var content = jsonDocument.getJsonContent().get();
                 String id = content.asJsonObject().getString("@id");
-                return new Result(true, id, null);
+                return new Result(true, id, null, null);
             }
             else {
                 String error = (statusCode == 400)?"Request body was malformed":"Could not create asset";
-                return new Result(false, null, error);
+                return new Result(false, null, null, error);
 
             }
 
@@ -108,10 +109,10 @@ public class Assets {
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             var statusCode = response.statusCode();
             if (statusCode == 200){
-                return new Result(true, input.id(), null);
+                return new Result(true, input.id(), null, null);
             }
             else {
-                return new Result(false, null, "Asset could not be updated");
+                return new Result(false, null, null, "Asset could not be updated");
             }
 
         } catch (IOException | InterruptedException  e) {
@@ -129,10 +130,10 @@ public class Assets {
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var statusCode = response.statusCode();
             if (statusCode == 200){
-                return new Result(true, id, null);
+                return new Result(true, id, null, null);
             }
             else {
-                return new Result(false, null, "The asset cannot be deleted");
+                return new Result(false, null, null, "The asset cannot be deleted");
             }
         }
         catch (IOException | InterruptedException  e) {
@@ -140,7 +141,7 @@ public class Assets {
         }
     }
 
-    public List<Asset> request(QuerySpec input) {
+    public Result request(QuerySpec input) {
         try {
             Map<String, Object> requestBody = Map.of(
                     TYPE, "https://w3id.org/edc/v0.0.1/ns/QuerySpec",
@@ -167,14 +168,12 @@ public class Assets {
                 var jsonDocument = JsonDocument.of(response.body());
                 var jsonArray = JsonLd.expand(jsonDocument).get();
                 List<Asset> assets = new ArrayList<>() ;
-                for (var element: jsonArray
-                     ) {
-                    assets.add(new Asset(element.asJsonObject()));
-                }
-                return assets;
+                assets =  jsonArray.stream().map(s -> new Asset(s.asJsonObject()))
+                        .collect(Collectors.toList());
+                return new Result(true, "", assets, null);
             }
             else {
-                return null;
+                return new Result(false, null, null, "Request body was malformed");
             }
 
 
