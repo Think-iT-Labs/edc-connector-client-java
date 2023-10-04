@@ -76,10 +76,10 @@ class AssetsTest {
         Map<String, Object> dataAddress = Map.of("type", "data-address-type");
         var assetInput = new AssetInput("assetId", properties, privateProperties, dataAddress);
 
-        Result<Asset> created = assets.create(assetInput);
+        Result<String> created = assets.create(assetInput);
 
         assertThat(created.isSucceeded()).isTrue();
-        assertThat(created.getId()).isNotNull();
+        assertThat(created.getContent()).isNotNull();
     }
 
     @Test
@@ -89,7 +89,7 @@ class AssetsTest {
         Map<String, Object> dataAddress = Collections.emptyMap();
         var assetInput = new AssetInput("assetId", properties, privateProperties, dataAddress);
 
-        Result<Asset> created = assets.create(assetInput);
+        Result<String> created = assets.create(assetInput);
 
         assertThat(created.isSucceeded()).isFalse();
         assertThat(created.getError()).isNotNull();
@@ -102,7 +102,7 @@ class AssetsTest {
         Map<String, Object> dataAddress = Map.of("type", "data-address-type");
         var assetInput = new AssetInput("assetId", properties, privateProperties, dataAddress);
 
-        Result<Asset> created = assets.update(assetInput);
+        Result<String> created = assets.update(assetInput);
 
         assertThat(created.isSucceeded()).isTrue();
     }
@@ -114,7 +114,7 @@ class AssetsTest {
         Map<String, Object> dataAddress = Collections.emptyMap();
         var assetInput = new AssetInput("", properties, privateProperties, dataAddress);
 
-        Result<Asset> created = assets.update(assetInput);
+        Result<String> created = assets.update(assetInput);
 
         assertThat(created.isSucceeded()).isFalse();
         assertThat(created.getError()).isNotNull();
@@ -123,14 +123,14 @@ class AssetsTest {
     @Test
     void should_delete_an_asset() {
 
-        Result<Asset> deleted = assets.delete("assetId");
+        Result<String> deleted = assets.delete("assetId");
 
         assertThat(deleted.isSucceeded()).isTrue();
     }
 
     @Test
     void should_not_delete_an_asset_when_id_is_empty() {
-        Result<Asset> deleted = assets.delete("");
+        Result<String> deleted = assets.delete("");
 
         assertThat(deleted.isSucceeded()).isFalse();
         assertThat(deleted.getError()).isNotNull();
@@ -139,7 +139,7 @@ class AssetsTest {
     @Test
     void should_get_assets() {
         var input = new QuerySpec(5,10,"DESC","fieldName",new Criterion[]{});
-        Result<Asset> assetsList = assets.request(input);
+        Result<List<Asset>> assetsList = assets.request(input);
         assertThat(assetsList.isSucceeded()).isTrue();
         assertThat(assetsList.getContent()).isNotNull().first().satisfies(asset ->{
             assertThat(asset.id()).isNotBlank();
@@ -169,7 +169,7 @@ class AssetsTest {
     @Test
     void should_not_get_assets() {
         var input = new QuerySpec(0,0,"","",new Criterion[]{});
-        Result<Asset> assetsList = assets.request(input);
+        Result<List<Asset>> assetsList = assets.request(input);
 
         assertThat(assetsList.isSucceeded()).isFalse();
         assertThat(assetsList.getError()).isNotNull();

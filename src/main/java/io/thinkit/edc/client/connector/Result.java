@@ -5,9 +5,7 @@ import java.util.List;
 public class Result<T>
 {
     private final boolean succeeded;
-    private String id;
-
-    private List<T> content;
+    private T content;
     private final String error;
 
     public Result(boolean succeeded, String error) {
@@ -15,13 +13,7 @@ public class Result<T>
         this.error = error;
     }
 
-    public Result(boolean succeeded, String id, String error) {
-        this.succeeded = succeeded;
-        this.id = id;
-        this.error = error;
-    }
-
-    public Result(boolean succeeded, List<T> content, String error) {
+    public Result(boolean succeeded, T content, String error) {
         this.succeeded = succeeded;
         this.content = content;
         this.error = error;
@@ -30,14 +22,11 @@ public class Result<T>
     public boolean isSucceeded(){
         return this.succeeded;
     }
-    public String getId(){
-        return this.id;
-    }
     public String getError() {
         return error;
     }
 
-    public List<T> getContent() {
+    public T getContent() {
         return content;
     }
 }
