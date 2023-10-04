@@ -48,7 +48,7 @@ public class Assets {
         }
     }
 
-    public Result create(AssetInput input) {
+    public Result<Asset> create(AssetInput input) {
         try {
             Map<String, Object> requestBody = Map.of(
                     ID, input.id(),
@@ -74,11 +74,11 @@ public class Assets {
                 var jsonDocument = JsonDocument.of(response.body());
                 var content = jsonDocument.getJsonContent().get();
                 String id = content.asJsonObject().getString("@id");
-                return new Result(true, id, null, null);
+                return new Result<Asset>(true, id, null);
             }
             else {
                 String error = (statusCode == 400)?"Request body was malformed":"Could not create asset";
-                return new Result(false, null, null, error);
+                return new Result<Asset>(false, error);
 
             }
 
@@ -87,7 +87,7 @@ public class Assets {
         }
     }
 
-    public Result update(AssetInput input) {
+    public Result<Asset> update(AssetInput input) {
         try {
             Map<String, Object> requestBody = Map.of(
                     ID, input.id(),
@@ -109,17 +109,17 @@ public class Assets {
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             var statusCode = response.statusCode();
             if (statusCode == 200){
-                return new Result(true, input.id(), null, null);
+                return new Result<Asset>(true, input.id(), null);
             }
             else {
-                return new Result(false, null, null, "Asset could not be updated");
+                return new Result<Asset>(false, "Asset could not be updated");
             }
 
         } catch (IOException | InterruptedException  e) {
             throw new RuntimeException(e);
         }
     }
-    public Result delete(String id) {
+    public Result<Asset> delete(String id) {
         try {
             var requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create("%s/v3/assets/%s".formatted(url, id)))
@@ -130,10 +130,10 @@ public class Assets {
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var statusCode = response.statusCode();
             if (statusCode == 200){
-                return new Result(true, id, null, null);
+                return new Result<Asset>(true, id, null);
             }
             else {
-                return new Result(false, null, null, "The asset cannot be deleted");
+                return new Result<Asset>(false, "The asset cannot be deleted");
             }
         }
         catch (IOException | InterruptedException  e) {
@@ -141,7 +141,7 @@ public class Assets {
         }
     }
 
-    public Result request(QuerySpec input) {
+    public Result<Asset> request(QuerySpec input) {
         try {
             Map<String, Object> requestBody = Map.of(
                     TYPE, "https://w3id.org/edc/v0.0.1/ns/QuerySpec",
@@ -170,10 +170,10 @@ public class Assets {
                 List<Asset> assets = new ArrayList<>() ;
                 assets =  jsonArray.stream().map(s -> new Asset(s.asJsonObject()))
                         .collect(Collectors.toList());
-                return new Result(true, "", assets, null);
+                return new Result<Asset>(true, assets, null);
             }
             else {
-                return new Result(false, null, null, "Request body was malformed");
+                return new Result<Asset>(false, "Request body was malformed");
             }
 
 
