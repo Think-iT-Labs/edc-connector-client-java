@@ -1,30 +1,27 @@
 package io.thinkit.edc.client.connector;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.output.OutputFrame;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.MountableFile;
+import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.net.http.HttpClient;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
-import static java.util.Collections.emptyMap;
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.MountableFile;
 
 @Testcontainers
 class AssetsTest {
 
     @Container
     private GenericContainer<?> prism = new GenericContainer<>("stoplight/prism:3.3.4")
-            .withFileSystemBind(new File("").getAbsolutePath(),"/tmp")
-            .withCopyToContainer(MountableFile.forClasspathResource("/edcOpenAPi.yaml"),"/edcOpenAPi.yaml")
+            .withFileSystemBind(new File("").getAbsolutePath(), "/tmp")
+            .withCopyToContainer(MountableFile.forClasspathResource("/edcOpenAPi.yaml"), "/edcOpenAPi.yaml")
             .withCommand("mock -h 0.0.0.0 -d /edcOpenAPi.yaml")
             .withExposedPorts(4010)
             .withLogConsumer(frame -> {
@@ -32,6 +29,7 @@ class AssetsTest {
                     System.out.println(frame.getUtf8String());
                 }
             });
+
     private final HttpClient http = HttpClient.newBuilder().build();
     private Assets assets;
 
@@ -58,7 +56,8 @@ class AssetsTest {
         });
         assertThat(asset.privateProperties()).isNotNull().satisfies(privateProperties -> {
             assertThat(privateProperties.size()).isGreaterThan(0);
-            assertThat(privateProperties.getString(EDC_NAMESPACE + "privateKey")).isEqualTo("privateValue");
+            assertThat(privateProperties.getString(EDC_NAMESPACE + "privateKey"))
+                    .isEqualTo("privateValue");
             assertThat(privateProperties.getString("privateKey")).isEqualTo("privateValue");
             assertThat(privateProperties.getString("not-existent")).isEqualTo(null);
         });
@@ -94,7 +93,7 @@ class AssetsTest {
         assertThat(created.isSucceeded()).isFalse();
         assertThat(created.getError()).isNotNull();
     }
-    
+
     @Test
     void should_update_an_asset() {
         Map<String, Object> properties = Map.of("key", Map.of("value", "value"));
@@ -138,10 +137,10 @@ class AssetsTest {
 
     @Test
     void should_get_assets() {
-        var input = new QuerySpec(5,10,"DESC","fieldName",new Criterion[]{});
+        var input = new QuerySpec(5, 10, "DESC", "fieldName", new Criterion[] {});
         Result<List<Asset>> assetsList = assets.request(input);
         assertThat(assetsList.isSucceeded()).isTrue();
-        assertThat(assetsList.getContent()).isNotNull().first().satisfies(asset ->{
+        assertThat(assetsList.getContent()).isNotNull().first().satisfies(asset -> {
             assertThat(asset.id()).isNotBlank();
             assertThat(asset.properties()).isNotNull().satisfies(properties -> {
                 assertThat(properties.size()).isGreaterThan(0);
@@ -151,7 +150,8 @@ class AssetsTest {
             });
             assertThat(asset.privateProperties()).isNotNull().satisfies(privateProperties -> {
                 assertThat(privateProperties.size()).isGreaterThan(0);
-                assertThat(privateProperties.getString(EDC_NAMESPACE + "privateKey")).isEqualTo("privateValue");
+                assertThat(privateProperties.getString(EDC_NAMESPACE + "privateKey"))
+                        .isEqualTo("privateValue");
                 assertThat(privateProperties.getString("privateKey")).isEqualTo("privateValue");
                 assertThat(privateProperties.getString("not-existent")).isEqualTo(null);
             });
@@ -161,14 +161,11 @@ class AssetsTest {
             });
             assertThat(asset.createdAt()).isGreaterThan(0);
         });
-
-
-
     }
 
     @Test
     void should_not_get_assets() {
-        var input = new QuerySpec(0,0,"","",new Criterion[]{});
+        var input = new QuerySpec(0, 0, "", "", new Criterion[] {});
         Result<List<Asset>> assetsList = assets.request(input);
 
         assertThat(assetsList.isSucceeded()).isFalse();

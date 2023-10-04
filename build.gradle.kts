@@ -1,6 +1,7 @@
 plugins {
     id("java")
     `java-library`
+    alias(libs.plugins.spotless)
 }
 
 group = "io.thinkit"
@@ -25,4 +26,21 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+spotless {
+    java {
+        palantirJavaFormat()
+    }
+}
+
+allprojects {
+    afterEvaluate {
+        val spotless = tasks.findByName("spotlessApply")
+        if (spotless != null) {
+            tasks.compileJava {
+                finalizedBy(spotless)
+            }
+        }
+    }
 }

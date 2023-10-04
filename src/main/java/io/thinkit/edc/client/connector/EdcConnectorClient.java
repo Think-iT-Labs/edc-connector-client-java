@@ -18,8 +18,7 @@ public class EdcConnectorClient {
         return new Builder();
     }
 
-    private EdcConnectorClient() {
-    }
+    private EdcConnectorClient() {}
 
     public Assets assets() {
         if (managementUrl == null) {
@@ -51,5 +50,4 @@ public class EdcConnectorClient {
             return client;
         }
     }
-
 }

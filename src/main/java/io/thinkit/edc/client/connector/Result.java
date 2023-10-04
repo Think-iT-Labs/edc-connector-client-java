@@ -1,9 +1,6 @@
 package io.thinkit.edc.client.connector;
 
-import java.util.List;
-
-public class Result<T>
-{
+public class Result<T> {
     private final boolean succeeded;
     private T content;
     private final String error;
@@ -19,9 +16,10 @@ public class Result<T>
         this.error = error;
     }
 
-    public boolean isSucceeded(){
+    public boolean isSucceeded() {
         return this.succeeded;
     }
+
     public String getError() {
         return error;
     }

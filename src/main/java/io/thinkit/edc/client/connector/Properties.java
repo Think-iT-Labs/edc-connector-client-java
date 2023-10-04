@@ -1,11 +1,10 @@
 package io.thinkit.edc.client.connector;
 
-import jakarta.json.JsonObject;
-
-import java.util.Optional;
-
 import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
 import static io.thinkit.edc.client.connector.Constants.VALUE;
+
+import jakarta.json.JsonObject;
+import java.util.Optional;
 
 public class Properties {
     private final JsonObject raw;
@@ -19,7 +18,8 @@ public class Properties {
     }
 
     public String getString(String key) {
-        var property = Optional.ofNullable(raw.getJsonArray(key)).orElseGet(() -> raw.getJsonArray(EDC_NAMESPACE + key));
+        var property =
+                Optional.ofNullable(raw.getJsonArray(key)).orElseGet(() -> raw.getJsonArray(EDC_NAMESPACE + key));
 
         return Optional.ofNullable(property)
                 .map(it -> it.getJsonObject(0))
