@@ -47,26 +47,26 @@ class AssetsTest {
 
     @Test
     void should_get_an_asset() {
-        var asset = assets.get("123");
+        Result<Asset> asset = assets.get("123");
 
-        assertThat(asset.id()).isNotBlank();
-        assertThat(asset.properties()).isNotNull().satisfies(properties -> {
+        assertThat(asset.getContent().id()).isNotBlank();
+        assertThat(asset.getContent().properties()).isNotNull().satisfies(properties -> {
             assertThat(properties.size()).isGreaterThan(0);
             assertThat(properties.getString(EDC_NAMESPACE + "key")).isEqualTo("value");
             assertThat(properties.getString("key")).isEqualTo("value");
             assertThat(properties.getString("not-existent")).isEqualTo(null);
         });
-        assertThat(asset.privateProperties()).isNotNull().satisfies(privateProperties -> {
+        assertThat(asset.getContent().privateProperties()).isNotNull().satisfies(privateProperties -> {
             assertThat(privateProperties.size()).isGreaterThan(0);
             assertThat(privateProperties.getString(EDC_NAMESPACE + "privateKey")).isEqualTo("privateValue");
             assertThat(privateProperties.getString("privateKey")).isEqualTo("privateValue");
             assertThat(privateProperties.getString("not-existent")).isEqualTo(null);
         });
-        assertThat(asset.dataAddress()).isNotNull().satisfies(dataAddress -> {
+        assertThat(asset.getContent().dataAddress()).isNotNull().satisfies(dataAddress -> {
             assertThat(dataAddress.type()).isNotBlank();
             assertThat(dataAddress.properties().size()).isGreaterThan(0);
         });
-        assertThat(asset.createdAt()).isGreaterThan(0);
+        assertThat(asset.getContent().createdAt()).isGreaterThan(0);
     }
 
     @Test

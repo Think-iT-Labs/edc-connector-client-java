@@ -30,7 +30,7 @@ public class Assets {
         this.interceptor = interceptor;
     }
 
-    public Asset get(String id) {
+    public Result<Asset> get(String id) {
         try {
             var requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create("%s/v3/assets/%s".formatted(url, id)))
@@ -39,10 +39,19 @@ public class Assets {
             var request = interceptor.apply(requestBuilder).build();
 
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            var jsonDocument = JsonDocument.of(response.body());
-            var jsonArray = JsonLd.expand(jsonDocument).get();
+            var statusCode = response.statusCode();
+            boolean succeeded = statusCode == 200;
+            if (succeeded){
+                var jsonDocument = JsonDocument.of(response.body());
+                var jsonArray = JsonLd.expand(jsonDocument).get();
+                Asset asset  = new Asset(jsonArray.getJsonObject(0));
+                return new Result<Asset>(true, asset, null);
+            }
+            else {
+                String error = (statusCode == 400)?"Request body was malformed":"An asset with the given ID does not exist";
+                return new Result<Asset>(false, error);
 
-            return new Asset(jsonArray.getJsonObject(0));
+            }
         } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
