@@ -6,7 +6,4 @@ public record AssetInput(
         String id,
         Map<String, Object> properties,
         Map<String, Object> privateProperties,
-        Map<String, Object> dataAddress
-) {
-
-}
+        Map<String, Object> dataAddress) {}

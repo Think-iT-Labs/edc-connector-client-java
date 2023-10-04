@@ -1,10 +1,10 @@
 package io.thinkit.edc.client.connector;
 
-import jakarta.json.JsonObject;
-
 import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
 import static io.thinkit.edc.client.connector.Constants.ID;
 import static io.thinkit.edc.client.connector.Constants.VALUE;
+
+import jakarta.json.JsonObject;
 
 public class Asset {
     private final JsonObject raw;
@@ -22,7 +22,8 @@ public class Asset {
     }
 
     public Properties privateProperties() {
-        return new Properties(raw.getJsonArray(EDC_NAMESPACE + "privateProperties").getJsonObject(0));
+        return new Properties(
+                raw.getJsonArray(EDC_NAMESPACE + "privateProperties").getJsonObject(0));
     }
 
     public DataAddress dataAddress() {
@@ -30,6 +31,9 @@ public class Asset {
     }
 
     public long createdAt() {
-        return raw.getJsonArray(EDC_NAMESPACE + "createdAt").getJsonObject(0).getJsonNumber(VALUE).longValue();
+        return raw.getJsonArray(EDC_NAMESPACE + "createdAt")
+                .getJsonObject(0)
+                .getJsonNumber(VALUE)
+                .longValue();
     }
 }

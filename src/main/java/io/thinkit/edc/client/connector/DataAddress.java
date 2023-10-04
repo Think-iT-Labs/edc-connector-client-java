@@ -1,9 +1,9 @@
 package io.thinkit.edc.client.connector;
 
-import jakarta.json.JsonObject;
-
 import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
 import static io.thinkit.edc.client.connector.Constants.VALUE;
+
+import jakarta.json.JsonObject;
 
 public class DataAddress {
 
