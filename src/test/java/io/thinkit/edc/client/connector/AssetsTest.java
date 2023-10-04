@@ -6,10 +6,12 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.MountableFile;
 
 import java.io.File;
 import java.net.http.HttpClient;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
@@ -22,7 +24,8 @@ class AssetsTest {
     @Container
     private GenericContainer<?> prism = new GenericContainer<>("stoplight/prism:3.3.4")
             .withFileSystemBind(new File("").getAbsolutePath(),"/tmp")
-            .withCommand("mock -h 0.0.0.0 -d https://api.swaggerhub.com/apis/eclipse-edc-bot/management-api/0.2.0")
+            .withCopyToContainer(MountableFile.forClasspathResource("/edcOpenAPi.yaml"),"/edcOpenAPi.yaml")
+            .withCommand("mock -h 0.0.0.0 -d /edcOpenAPi.yaml")
             .withExposedPorts(4010)
             .withLogConsumer(frame -> {
                 if (!frame.getUtf8String().contains("[CLI]")) {
@@ -73,10 +76,10 @@ class AssetsTest {
         Map<String, Object> dataAddress = Map.of("type", "data-address-type");
         var assetInput = new AssetInput("assetId", properties, privateProperties, dataAddress);
 
-        Result created = assets.create(assetInput);
+        Result<String> created = assets.create(assetInput);
 
         assertThat(created.isSucceeded()).isTrue();
-        assertThat(created.getId()).isNotNull();
+        assertThat(created.getContent()).isNotNull();
     }
 
     @Test
@@ -86,7 +89,7 @@ class AssetsTest {
         Map<String, Object> dataAddress = Collections.emptyMap();
         var assetInput = new AssetInput("assetId", properties, privateProperties, dataAddress);
 
-        Result created = assets.create(assetInput);
+        Result<String> created = assets.create(assetInput);
 
         assertThat(created.isSucceeded()).isFalse();
         assertThat(created.getError()).isNotNull();
@@ -99,7 +102,7 @@ class AssetsTest {
         Map<String, Object> dataAddress = Map.of("type", "data-address-type");
         var assetInput = new AssetInput("assetId", properties, privateProperties, dataAddress);
 
-        Result created = assets.update(assetInput);
+        Result<String> created = assets.update(assetInput);
 
         assertThat(created.isSucceeded()).isTrue();
     }
@@ -111,7 +114,7 @@ class AssetsTest {
         Map<String, Object> dataAddress = Collections.emptyMap();
         var assetInput = new AssetInput("", properties, privateProperties, dataAddress);
 
-        Result created = assets.update(assetInput);
+        Result<String> created = assets.update(assetInput);
 
         assertThat(created.isSucceeded()).isFalse();
         assertThat(created.getError()).isNotNull();
@@ -120,16 +123,55 @@ class AssetsTest {
     @Test
     void should_delete_an_asset() {
 
-        Result deleted = assets.delete("assetId");
+        Result<String> deleted = assets.delete("assetId");
 
         assertThat(deleted.isSucceeded()).isTrue();
     }
 
     @Test
     void should_not_delete_an_asset_when_id_is_empty() {
-        Result deleted = assets.delete("");
+        Result<String> deleted = assets.delete("");
 
         assertThat(deleted.isSucceeded()).isFalse();
         assertThat(deleted.getError()).isNotNull();
+    }
+
+    @Test
+    void should_get_assets() {
+        var input = new QuerySpec(5,10,"DESC","fieldName",new Criterion[]{});
+        Result<List<Asset>> assetsList = assets.request(input);
+        assertThat(assetsList.isSucceeded()).isTrue();
+        assertThat(assetsList.getContent()).isNotNull().first().satisfies(asset ->{
+            assertThat(asset.id()).isNotBlank();
+            assertThat(asset.properties()).isNotNull().satisfies(properties -> {
+                assertThat(properties.size()).isGreaterThan(0);
+                assertThat(properties.getString(EDC_NAMESPACE + "key")).isEqualTo("value");
+                assertThat(properties.getString("key")).isEqualTo("value");
+                assertThat(properties.getString("not-existent")).isEqualTo(null);
+            });
+            assertThat(asset.privateProperties()).isNotNull().satisfies(privateProperties -> {
+                assertThat(privateProperties.size()).isGreaterThan(0);
+                assertThat(privateProperties.getString(EDC_NAMESPACE + "privateKey")).isEqualTo("privateValue");
+                assertThat(privateProperties.getString("privateKey")).isEqualTo("privateValue");
+                assertThat(privateProperties.getString("not-existent")).isEqualTo(null);
+            });
+            assertThat(asset.dataAddress()).isNotNull().satisfies(dataAddress -> {
+                assertThat(dataAddress.type()).isNotBlank();
+                assertThat(dataAddress.properties().size()).isGreaterThan(0);
+            });
+            assertThat(asset.createdAt()).isGreaterThan(0);
+        });
+
+
+
+    }
+
+    @Test
+    void should_not_get_assets() {
+        var input = new QuerySpec(0,0,"","",new Criterion[]{});
+        Result<List<Asset>> assetsList = assets.request(input);
+
+        assertThat(assetsList.isSucceeded()).isFalse();
+        assertThat(assetsList.getError()).isNotNull();
     }
 }
