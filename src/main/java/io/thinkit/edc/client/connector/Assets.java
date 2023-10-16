@@ -12,9 +12,11 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 public class Assets {
     private final String url;
@@ -181,11 +183,12 @@ public class Assets {
             if (statusCode == 200) {
                 var jsonDocument = JsonDocument.of(response.body());
                 var jsonArray = JsonLd.expand(jsonDocument).get();
-                var assets =
-                        jsonArray.stream().map(s -> new Asset(s.asJsonObject())).toList();
-                return new Result<>(true, assets, null);
+                List<Asset> assets = new ArrayList<>();
+                assets =
+                        jsonArray.stream().map(s -> new Asset(s.asJsonObject())).collect(Collectors.toList());
+                return new Result<List<Asset>>(true, assets, null);
             } else {
-                return new Result<>(false, "Request body was malformed");
+                return new Result<List<Asset>>(false, "Request body was malformed");
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {
