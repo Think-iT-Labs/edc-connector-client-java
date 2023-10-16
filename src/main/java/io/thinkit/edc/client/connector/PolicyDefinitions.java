@@ -1,21 +1,14 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.Constants.TYPE;
-
 import com.apicatalog.jsonld.JsonLd;
 import com.apicatalog.jsonld.JsonLdError;
 import com.apicatalog.jsonld.document.JsonDocument;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 public class PolicyDefinitions {
     private final String url;
@@ -54,5 +47,4 @@ public class PolicyDefinitions {
             throw new RuntimeException(e);
         }
     }
-
 }

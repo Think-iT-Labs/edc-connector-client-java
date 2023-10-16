@@ -16,11 +16,11 @@ public class PolicyDefinition {
     }
 
     public Policy policy() {
-        return new Policy(raw.getJsonArray("odrl:policy").getJsonObject(0));
+        return new Policy(raw.getJsonArray(EDC_NAMESPACE + "policy").getJsonObject(0));
     }
 
     public long createdAt() {
-        return raw.getJsonArray("createdAt")
+        return raw.getJsonArray(EDC_NAMESPACE + "createdAt")
                 .getJsonObject(0)
                 .getJsonNumber(VALUE)
                 .longValue();
