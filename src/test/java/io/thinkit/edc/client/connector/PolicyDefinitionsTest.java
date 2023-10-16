@@ -41,6 +41,20 @@ public class PolicyDefinitionsTest {
         Result<PolicyDefinition> policyDefinition = policyDefinitions.get("definition-id");
 
         assertThat(policyDefinition.getContent().id()).isNotBlank();
-        assertThat(policyDefinition.getContent().policy()).isNotNull();
+        assertThat(policyDefinition.getContent().policy()).isNotNull().satisfies(policy -> {
+            assertThat(policy.permission().size()).isGreaterThan(0);
+            assertThat(policy.permission()).first().satisfies(permission -> {
+                assertThat(permission.target()).isEqualTo("http://example.com/asset:9898.movie");
+                assertThat(permission.action()).isEqualTo("display");
+                assertThat(permission.constraint().size()).isGreaterThan(0);
+                assertThat(permission.constraint()).first().satisfies(constraint -> {
+                    assertThat(constraint.leftOperand()).isEqualTo("spatial");
+                    assertThat(constraint.rightOperand()).isEqualTo("https://www.wikidata.org/wiki/Q183");
+                    assertThat(constraint.operator()).isEqualTo("eq");
+                    assertThat(constraint.comment()).isEqualTo("i.e Germany");
+                });
+            });
+        });
+        assertThat(policyDefinition.getContent().createdAt()).isGreaterThan(0);
     }
 }
