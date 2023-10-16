@@ -135,7 +135,7 @@ class AssetsTest {
 
     @Test
     void should_get_assets() {
-        var input = new QuerySpec(5, 10, "DESC", "fieldName", new Criterion[] {});
+        var input = new QuerySpec(5, 10, "DESC", "fieldName", new CriterionInput[] {});
         Result<List<Asset>> assetsList = assets.request(input);
         assertThat(assetsList.isSucceeded()).isTrue();
         assertThat(assetsList.getContent()).isNotNull().first().satisfies(asset -> {
@@ -163,7 +163,7 @@ class AssetsTest {
 
     @Test
     void should_not_get_assets() {
-        var input = new QuerySpec(0, 0, "", "", new Criterion[] {});
+        var input = new QuerySpec(0, 0, "", "", new CriterionInput[] {});
         Result<List<Asset>> assetsList = assets.request(input);
 
         assertThat(assetsList.isSucceeded()).isFalse();
