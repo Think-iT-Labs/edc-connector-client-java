@@ -44,12 +44,12 @@ public class Assets {
                 var jsonDocument = JsonDocument.of(response.body());
                 var jsonArray = JsonLd.expand(jsonDocument).get();
                 Asset asset = new Asset(jsonArray.getJsonObject(0));
-                return new Result<Asset>(true, asset, null);
+                return new Result<>(true, asset, null);
             } else {
                 String error = (statusCode == 400)
                         ? "Request body was malformed"
                         : "An asset with the given ID does not exist";
-                return new Result<Asset>(false, error);
+                return new Result<>(false, error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
