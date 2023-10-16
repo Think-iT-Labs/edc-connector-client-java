@@ -1,3 +1,5 @@
+import java.net.URL
+
 plugins {
     id("java")
     `java-library`
@@ -26,6 +28,7 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    dependsOn(downloadOpenapiSpec)
 }
 
 spotless {
@@ -44,3 +47,17 @@ allprojects {
         }
     }
 }
+
+val downloadOpenapiSpec by tasks.register("downloadOpenapiSpec") {
+    dependsOn(tasks.findByName("processTestResources"))
+    doLast {
+        sourceSets.test.get().output.resourcesDir?.let { resourcesFolder ->
+            resourcesFolder.mkdirs()
+            download("https://api.swaggerhub.com/apis/eclipse-edc-bot/management-api/${libs.versions.edc.get()}/yaml")
+                .replace("example: null", "")
+                .let { File("$resourcesFolder/management-api.yml").writeText(it) }
+        }
+    }
+}
+
+fun download(url: String): String = URL(url).openConnection().getInputStream().bufferedReader().use { it.readText() }
