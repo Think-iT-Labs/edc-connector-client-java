@@ -11,6 +11,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
@@ -54,15 +55,11 @@ public class ContractDefinitions {
 
     public Result<String> create(ContractDefinitionInput input) {
         try {
-            Map<String, Object> requestBody = Map.of(
-                    ID,
-                    input.id(),
-                    "accessPolicyId",
-                    input.accessPolicyId(),
-                    "contractPolicyId",
-                    input.contractPolicyId(),
-                    "assetsSelector",
-                    input.assetsSelector());
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put(ID, input.id());
+            requestBody.put("accessPolicyId", input.accessPolicyId());
+            requestBody.put("contractPolicyId", input.contractPolicyId());
+            requestBody.put("assetsSelector", input.assetsSelector());
 
             var jsonRequestBody = new ObjectMapper().writeValueAsString(requestBody);
 
