@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.BindMode;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -18,15 +16,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class AssetsTest {
 
     @Container
-    private GenericContainer<?> prism = new GenericContainer<>("stoplight/prism:3.3.4")
-            .withClasspathResourceMapping("/management-api.yml", "/management-api.yml", BindMode.READ_WRITE)
-            .withCommand("mock -h 0.0.0.0 -d /management-api.yml")
-            .withExposedPorts(4010)
-            .withLogConsumer(frame -> {
-                if (!frame.getUtf8String().contains("[CLI]")) {
-                    System.out.print(frame.getUtf8String());
-                }
-            });
+    private ManagementApiContainer prism = new ManagementApiContainer();
 
     private final HttpClient http = HttpClient.newBuilder().build();
     private Assets assets;

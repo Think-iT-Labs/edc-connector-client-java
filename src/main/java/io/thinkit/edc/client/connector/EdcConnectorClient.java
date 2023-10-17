@@ -29,7 +29,8 @@ public class EdcConnectorClient {
 
     public ContractDefinitions contractDefinitions() {
         if (managementUrl == null) {
-            throw new IllegalArgumentException("Cannot instantiate ContractDefinitions client without the management url");
+            throw new IllegalArgumentException(
+                    "Cannot instantiate ContractDefinitions client without the management url");
         }
         return new ContractDefinitions(managementUrl, httpClient, interceptor);
     }
