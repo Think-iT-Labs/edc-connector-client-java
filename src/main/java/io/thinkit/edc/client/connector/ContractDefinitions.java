@@ -53,6 +53,25 @@ public class ContractDefinitions {
         }
     }
 
+    public Result<String> delete(String id) {
+        try {
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/contractdefinitions/%s".formatted(url, id)))
+                    .DELETE();
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                return new Result<>(true, id, null);
+            } else {
+                return new Result<>(false, null, "The contract definition cannot be deleted");
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public Result<List<ContractDefinition>> request(QuerySpec input) {
         try {
             Map<String, Object> requestBody = Map.of(
