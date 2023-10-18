@@ -51,4 +51,21 @@ class ContractDefinitionsTest {
         assertThat(contractDefinition.isSucceeded()).isFalse();
         assertThat(contractDefinition.getError()).isNotNull();
     }
+
+    @Test
+    void should_delete_a_contract_definition() {
+
+        Result<String> deleted = contractDefinitions.delete("definition-id");
+
+        assertThat(deleted.isSucceeded()).isTrue();
+    }
+
+    @Test
+    void should_not_delete_a_contract_definition_when_id_is_empty() {
+
+        Result<String> deleted = contractDefinitions.delete("");
+
+        assertThat(deleted.isSucceeded()).isFalse();
+        assertThat(deleted.getError()).isNotNull();
+    }
 }
