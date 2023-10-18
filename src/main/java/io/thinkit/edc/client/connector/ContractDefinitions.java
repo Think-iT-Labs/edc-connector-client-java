@@ -11,11 +11,9 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 public class ContractDefinitions {
     private final String url;
@@ -85,10 +83,9 @@ public class ContractDefinitions {
             if (statusCode == 200) {
                 var jsonDocument = JsonDocument.of(response.body());
                 var jsonArray = JsonLd.expand(jsonDocument).get();
-                List<ContractDefinition> contractDefinitions = new ArrayList<>();
-                contractDefinitions = jsonArray.stream()
+                List<ContractDefinition> contractDefinitions = jsonArray.stream()
                         .map(s -> new ContractDefinition(s.asJsonObject()))
-                        .collect(Collectors.toList());
+                        .toList();
                 return new Result<>(true, contractDefinitions, null);
             } else {
                 return new Result<>(false, "Request body was malformed");
