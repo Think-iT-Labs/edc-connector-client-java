@@ -14,7 +14,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class ContractDefinitionsTest {
 
     @Container
-    private ManagementApiContainer prism = new ManagementApiContainer();
+    private final ManagementApiContainer prism = new ManagementApiContainer();
 
     private final HttpClient http = HttpClient.newBuilder().build();
     private ContractDefinitions contractDefinitions;
@@ -35,14 +35,12 @@ class ContractDefinitionsTest {
 
         assertThat(contractDefinition.isSucceeded()).isTrue();
         assertThat(contractDefinition.getContent().id()).isNotBlank();
-        assertThat(contractDefinition.getContent().accessPolicyId()).isNotNull().satisfies(accessPolicyId -> {
-            assertThat(accessPolicyId).isEqualTo("asset-policy-id");
-        });
+        assertThat(contractDefinition.getContent().accessPolicyId())
+                .isNotNull()
+                .satisfies(accessPolicyId -> assertThat(accessPolicyId).isEqualTo("asset-policy-id"));
         assertThat(contractDefinition.getContent().contractPolicyId())
                 .isNotNull()
-                .satisfies(contractPolicyId -> {
-                    assertThat(contractPolicyId).isEqualTo("contract-policy-id");
-                });
+                .satisfies(contractPolicyId -> assertThat(contractPolicyId).isEqualTo("contract-policy-id"));
         assertThat(contractDefinition.getContent().createdAt()).isGreaterThan(0);
     }
 
@@ -57,7 +55,7 @@ class ContractDefinitionsTest {
     @Test
     void should_create_a_contract_definition() {
         var contractDefinitionInput = new ContractDefinitionInput(
-                "definition-id", "asset-policy-id", "contract-policy-id", new ArrayList<CriterionInput>());
+                "definition-id", "asset-policy-id", "contract-policy-id", new ArrayList<>());
 
         Result<String> created = contractDefinitions.create(contractDefinitionInput);
 
@@ -67,8 +65,8 @@ class ContractDefinitionsTest {
 
     @Test
     void should__not_create_a_contract_definition_when_id_is_null() {
-        var contractDefinitionInput = new ContractDefinitionInput(
-                "definition-id", null, "contract-policy-id", new ArrayList<CriterionInput>());
+        var contractDefinitionInput =
+                new ContractDefinitionInput("definition-id", null, "contract-policy-id", new ArrayList<>());
 
         Result<String> created = contractDefinitions.create(contractDefinitionInput);
 
@@ -100,12 +98,12 @@ class ContractDefinitionsTest {
         assertThat(ContractDefinitionList.isSucceeded()).isTrue();
         assertThat(ContractDefinitionList.getContent()).isNotNull().first().satisfies(contractDefinition -> {
             assertThat(contractDefinition.id()).isNotBlank();
-            assertThat(contractDefinition.accessPolicyId()).isNotNull().satisfies(accessPolicyId -> {
-                assertThat(accessPolicyId).isEqualTo("asset-policy-id");
-            });
-            assertThat(contractDefinition.contractPolicyId()).isNotNull().satisfies(contractPolicyId -> {
-                assertThat(contractPolicyId).isEqualTo("contract-policy-id");
-            });
+            assertThat(contractDefinition.accessPolicyId())
+                    .isNotNull()
+                    .satisfies(accessPolicyId -> assertThat(accessPolicyId).isEqualTo("asset-policy-id"));
+            assertThat(contractDefinition.contractPolicyId())
+                    .isNotNull()
+                    .satisfies(contractPolicyId -> assertThat(contractPolicyId).isEqualTo("contract-policy-id"));
             assertThat(contractDefinition.createdAt()).isGreaterThan(0);
         });
     }

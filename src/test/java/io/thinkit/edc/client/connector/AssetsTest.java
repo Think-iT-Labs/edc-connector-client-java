@@ -16,7 +16,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class AssetsTest {
 
     @Container
-    private ManagementApiContainer prism = new ManagementApiContainer();
+    private final ManagementApiContainer prism = new ManagementApiContainer();
 
     private final HttpClient http = HttpClient.newBuilder().build();
     private Assets assets;

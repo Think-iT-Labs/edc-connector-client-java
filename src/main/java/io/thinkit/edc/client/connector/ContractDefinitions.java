@@ -43,12 +43,12 @@ public class ContractDefinitions {
                 var jsonDocument = JsonDocument.of(response.body());
                 var jsonArray = JsonLd.expand(jsonDocument).get();
                 ContractDefinition contractDefinition = new ContractDefinition(jsonArray.getJsonObject(0));
-                return new Result<>(true, contractDefinition, null);
+                return new Result<>(contractDefinition, null);
             } else {
                 String error = (statusCode == 400)
                         ? "Request body was malformed"
                         : "A contract definition with the given ID does not exist";
-                return new Result<>(false, error);
+                return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
@@ -79,11 +79,11 @@ public class ContractDefinitions {
                 var jsonDocument = JsonDocument.of(response.body());
                 var jsonArray = JsonLd.expand(jsonDocument).get();
                 String id = jsonArray.getJsonObject(0).getString(ID);
-                return new Result<>(true, id, null);
+                return new Result<>(id, null);
             } else {
                 String error =
                         (statusCode == 400) ? "Request body was malformed" : "Could not create contract definition";
-                return new Result<>(false, null, error);
+                return new Result<>(null, error);
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -102,9 +102,9 @@ public class ContractDefinitions {
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var statusCode = response.statusCode();
             if (statusCode == 200) {
-                return new Result<>(true, id, null);
+                return new Result<>(id, null);
             } else {
-                return new Result<>(false, null, "The contract definition cannot be deleted");
+                return new Result<>(null, "The contract definition cannot be deleted");
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
@@ -144,9 +144,9 @@ public class ContractDefinitions {
                 List<ContractDefinition> contractDefinitions = jsonArray.stream()
                         .map(s -> new ContractDefinition(s.asJsonObject()))
                         .toList();
-                return new Result<>(true, contractDefinitions, null);
+                return new Result<>(contractDefinitions, null);
             } else {
-                return new Result<>(false, "Request body was malformed");
+                return new Result<>("Request body was malformed");
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {
