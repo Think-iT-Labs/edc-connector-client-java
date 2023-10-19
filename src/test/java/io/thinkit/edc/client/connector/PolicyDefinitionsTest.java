@@ -1,5 +1,6 @@
 package io.thinkit.edc.client.connector;
 
+import static io.thinkit.edc.client.connector.Constants.ODRL_NAMESPACE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.http.HttpClient;
@@ -32,9 +33,9 @@ public class PolicyDefinitionsTest {
 
         assertThat(policyDefinition.isSucceeded()).isTrue();
         assertThat(policyDefinition.getContent().id()).isNotBlank();
-        assertThat(policyDefinition.getContent().policy())
-                .isNotNull()
-                .satisfies(policy -> assertThat(policy.permission().size()).isGreaterThan(0));
+        assertThat(policyDefinition.getContent().policy()).isNotNull().satisfies(policy -> assertThat(
+                        policy.getList(ODRL_NAMESPACE + "permission").size())
+                .isGreaterThan(0));
         assertThat(policyDefinition.getContent().createdAt()).isGreaterThan(0);
     }
 

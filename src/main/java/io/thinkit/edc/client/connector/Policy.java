@@ -1,6 +1,5 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.Constants.ODRL_NAMESPACE;
 import static io.thinkit.edc.client.connector.Constants.VALUE;
 
 import jakarta.json.JsonObject;
@@ -14,13 +13,11 @@ public class Policy {
         this.raw = raw;
     }
 
-    public String uid() {
-        return raw.getJsonArray("uid").getJsonObject(0).getString(VALUE);
+    public String getStringValue(String key) {
+        return raw.getJsonArray(key).getJsonObject(0).getString(VALUE);
     }
 
-    public List<JsonObject> permission() {
-        return raw.getJsonArray(ODRL_NAMESPACE + "permission").stream()
-                .map(JsonValue::asJsonObject)
-                .toList();
+    List<JsonObject> getList(String key) {
+        return raw.getJsonArray(key).stream().map(JsonValue::asJsonObject).toList();
     }
 }
