@@ -27,6 +27,14 @@ public class EdcConnectorClient {
         return new Assets(managementUrl, httpClient, interceptor);
     }
 
+    public PolicyDefinitions policyDefinitions() {
+        if (managementUrl == null) {
+            throw new IllegalArgumentException(
+                    "Cannot instantiate PolicyDefinitions client without the management url");
+        }
+        return new PolicyDefinitions(managementUrl, httpClient, interceptor);
+    }
+
     public ContractDefinitions contractDefinitions() {
         if (managementUrl == null) {
             throw new IllegalArgumentException(
