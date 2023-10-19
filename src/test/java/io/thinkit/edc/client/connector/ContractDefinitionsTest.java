@@ -118,4 +118,26 @@ class ContractDefinitionsTest {
         assertThat(ContractDefinitionList.isSucceeded()).isFalse();
         assertThat(ContractDefinitionList.getError()).isNotNull();
     }
+
+    @Test
+    void should_update_a_contract_definition() {
+        var contractDefinitionInput = new ContractDefinitionInput(
+                "definition-id", "asset-policy-id", "contract-policy-id", new ArrayList<CriterionInput>());
+
+        Result<String> created = contractDefinitions.update(contractDefinitionInput);
+
+        assertThat(created.isSucceeded()).isTrue();
+        assertThat(created.getContent()).isNotNull();
+    }
+
+    @Test
+    void should_not_update_a_contract_definition_when_id_is_empty() {
+        var contractDefinitionInput = new ContractDefinitionInput(
+                null, "asset-policy-id", "contract-policy-id", new ArrayList<CriterionInput>());
+
+        Result<String> created = contractDefinitions.update(contractDefinitionInput);
+
+        assertThat(created.isSucceeded()).isFalse();
+        assertThat(created.getError()).isNotNull();
+    }
 }
