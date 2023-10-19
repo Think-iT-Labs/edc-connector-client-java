@@ -1,7 +1,7 @@
 package io.thinkit.edc.client.connector;
 
 import static io.thinkit.edc.client.connector.Constants.ID;
-
+import static io.thinkit.edc.client.connector.Constants.TYPE;
 import com.apicatalog.jsonld.JsonLd;
 import com.apicatalog.jsonld.JsonLdError;
 import com.apicatalog.jsonld.document.JsonDocument;
@@ -12,6 +12,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
@@ -82,6 +83,68 @@ public class ContractDefinitions {
                 String error =
                         (statusCode == 400) ? "Request body was malformed" : "Could not create contract definition";
                 return new Result<String>(false, null, error);
+            }
+
+        } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Result<String> delete(String id) {
+        try {
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/contractdefinitions/%s".formatted(url, id)))
+                    .DELETE();
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                return new Result<>(true, id, null);
+            } else {
+                return new Result<>(false, null, "The contract definition cannot be deleted");
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public Result<List<ContractDefinition>> request(QuerySpec input) {
+        try {
+            Map<String, Object> requestBody = Map.of(
+                    TYPE,
+                    "https://w3id.org/edc/v0.0.1/ns/QuerySpec",
+                    "offset",
+                    input.offset(),
+                    "limit",
+                    input.limit(),
+                    "sortOrder",
+                    input.sortOrder(),
+                    "sortField",
+                    input.sortField(),
+                    "filterExpression",
+                    input.filterExpression());
+
+            var jsonRequestBody = new ObjectMapper().writeValueAsString(requestBody);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/contractdefinitions/request".formatted(url)))
+                    .header("content-type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequestBody));
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                var jsonDocument = JsonDocument.of(response.body());
+                var jsonArray = JsonLd.expand(jsonDocument).get();
+                List<ContractDefinition> contractDefinitions = jsonArray.stream()
+                        .map(s -> new ContractDefinition(s.asJsonObject()))
+                        .toList();
+                return new Result<>(true, contractDefinitions, null);
+            } else {
+                return new Result<>(false, "Request body was malformed");
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {

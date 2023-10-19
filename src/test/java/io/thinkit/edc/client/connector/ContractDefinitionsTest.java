@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.http.HttpClient;
 import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
@@ -73,5 +74,48 @@ class ContractDefinitionsTest {
 
         assertThat(created.isSucceeded()).isFalse();
         assertThat(created.getError()).isNotNull();
+    }
+
+    @Test
+    void should_delete_a_contract_definition() {
+
+        Result<String> deleted = contractDefinitions.delete("definition-id");
+
+        assertThat(deleted.isSucceeded()).isTrue();
+    }
+
+    @Test
+    void should_not_delete_a_contract_definition_when_id_is_empty() {
+
+        Result<String> deleted = contractDefinitions.delete("");
+
+        assertThat(deleted.isSucceeded()).isFalse();
+        assertThat(deleted.getError()).isNotNull();
+    }
+
+    @Test
+    void should_get_contract_definitions() {
+        var input = new QuerySpec(5, 10, "DESC", "fieldName", new CriterionInput[] {});
+        Result<List<ContractDefinition>> ContractDefinitionList = contractDefinitions.request(input);
+        assertThat(ContractDefinitionList.isSucceeded()).isTrue();
+        assertThat(ContractDefinitionList.getContent()).isNotNull().first().satisfies(contractDefinition -> {
+            assertThat(contractDefinition.id()).isNotBlank();
+            assertThat(contractDefinition.accessPolicyId()).isNotNull().satisfies(accessPolicyId -> {
+                assertThat(accessPolicyId).isEqualTo("asset-policy-id");
+            });
+            assertThat(contractDefinition.contractPolicyId()).isNotNull().satisfies(contractPolicyId -> {
+                assertThat(contractPolicyId).isEqualTo("contract-policy-id");
+            });
+            assertThat(contractDefinition.createdAt()).isGreaterThan(0);
+        });
+    }
+
+    @Test
+    void should_not_get_contract_definitions() {
+        var input = new QuerySpec(0, 0, "", "", new CriterionInput[] {});
+        Result<List<ContractDefinition>> ContractDefinitionList = contractDefinitions.request(input);
+
+        assertThat(ContractDefinitionList.isSucceeded()).isFalse();
+        assertThat(ContractDefinitionList.getError()).isNotNull();
     }
 }
