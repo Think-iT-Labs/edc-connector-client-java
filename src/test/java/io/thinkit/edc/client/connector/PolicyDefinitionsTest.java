@@ -32,7 +32,9 @@ public class PolicyDefinitionsTest {
 
         assertThat(policyDefinition.isSucceeded()).isTrue();
         assertThat(policyDefinition.getContent().id()).isNotBlank();
-        assertThat(policyDefinition.getContent().policy()).isNotNull().satisfies(policy -> assertThat(policy.permission().size()).isGreaterThan(0));
+        assertThat(policyDefinition.getContent().policy())
+                .isNotNull()
+                .satisfies(policy -> assertThat(policy.permission().size()).isGreaterThan(0));
         assertThat(policyDefinition.getContent().createdAt()).isGreaterThan(0);
     }
 
