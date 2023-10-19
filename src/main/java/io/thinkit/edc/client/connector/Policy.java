@@ -4,8 +4,8 @@ import static io.thinkit.edc.client.connector.Constants.ODRL_NAMESPACE;
 import static io.thinkit.edc.client.connector.Constants.VALUE;
 
 import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Policy {
     private final JsonObject raw;
@@ -18,9 +18,9 @@ public class Policy {
         return raw.getJsonArray("uid").getJsonObject(0).getString(VALUE);
     }
 
-    public List<Permission> permission() {
+    public List<JsonObject> permission() {
         return raw.getJsonArray(ODRL_NAMESPACE + "permission").stream()
-                .map(s -> new Permission(s.asJsonObject()))
-                .collect(Collectors.toList());
+                .map(JsonValue::asJsonObject)
+                .toList();
     }
 }

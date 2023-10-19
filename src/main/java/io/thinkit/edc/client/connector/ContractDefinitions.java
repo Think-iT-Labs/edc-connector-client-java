@@ -72,6 +72,7 @@ public class ContractDefinitions {
             throw new RuntimeException(e);
         }
     }
+
     public Result<List<ContractDefinition>> request(QuerySpec input) {
         try {
             Map<String, Object> requestBody = Map.of(

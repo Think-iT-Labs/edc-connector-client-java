@@ -36,12 +36,12 @@ public class PolicyDefinitions {
                 var jsonDocument = JsonDocument.of(response.body());
                 var jsonArray = JsonLd.expand(jsonDocument).get();
                 PolicyDefinition policyDefinition = new PolicyDefinition(jsonArray.getJsonObject(0));
-                return new Result<PolicyDefinition>(true, policyDefinition, null);
+                return new Result<>(true, policyDefinition, null);
             } else {
                 String error = (statusCode == 400)
                         ? "Request body was malformed"
-                        : "An asset with the given ID does not exist";
-                return new Result<PolicyDefinition>(false, error);
+                        : "A policy definition with the given ID does not exist";
+                return new Result<>(false, error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
