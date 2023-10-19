@@ -2,6 +2,7 @@ package io.thinkit.edc.client.connector;
 
 import static io.thinkit.edc.client.connector.Constants.ID;
 import static io.thinkit.edc.client.connector.Constants.TYPE;
+
 import com.apicatalog.jsonld.JsonLd;
 import com.apicatalog.jsonld.JsonLdError;
 import com.apicatalog.jsonld.document.JsonDocument;
@@ -42,12 +43,12 @@ public class ContractDefinitions {
                 var jsonDocument = JsonDocument.of(response.body());
                 var jsonArray = JsonLd.expand(jsonDocument).get();
                 ContractDefinition contractDefinition = new ContractDefinition(jsonArray.getJsonObject(0));
-                return new Result<ContractDefinition>(true, contractDefinition, null);
+                return new Result<>(true, contractDefinition, null);
             } else {
                 String error = (statusCode == 400)
                         ? "Request body was malformed"
                         : "A contract definition with the given ID does not exist";
-                return new Result<ContractDefinition>(false, error);
+                return new Result<>(false, error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
@@ -78,11 +79,11 @@ public class ContractDefinitions {
                 var jsonDocument = JsonDocument.of(response.body());
                 var jsonArray = JsonLd.expand(jsonDocument).get();
                 String id = jsonArray.getJsonObject(0).getString(ID);
-                return new Result<String>(true, id, null);
+                return new Result<>(true, id, null);
             } else {
                 String error =
                         (statusCode == 400) ? "Request body was malformed" : "Could not create contract definition";
-                return new Result<String>(false, null, error);
+                return new Result<>(false, null, error);
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -109,6 +110,7 @@ public class ContractDefinitions {
             throw new RuntimeException(e);
         }
     }
+
     public Result<List<ContractDefinition>> request(QuerySpec input) {
         try {
             Map<String, Object> requestBody = Map.of(
