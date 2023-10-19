@@ -1,5 +1,6 @@
 package io.thinkit.edc.client.connector;
 
+import static io.thinkit.edc.client.connector.Constants.ID;
 import static io.thinkit.edc.client.connector.Constants.TYPE;
 
 import com.apicatalog.jsonld.JsonLd;
@@ -11,6 +12,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
@@ -41,13 +43,49 @@ public class ContractDefinitions {
                 var jsonDocument = JsonDocument.of(response.body());
                 var jsonArray = JsonLd.expand(jsonDocument).get();
                 ContractDefinition contractDefinition = new ContractDefinition(jsonArray.getJsonObject(0));
-                return new Result<ContractDefinition>(true, contractDefinition, null);
+                return new Result<>(true, contractDefinition, null);
             } else {
                 String error = (statusCode == 400)
                         ? "Request body was malformed"
                         : "A contract definition with the given ID does not exist";
-                return new Result<ContractDefinition>(false, error);
+                return new Result<>(false, error);
             }
+        } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Result<String> create(ContractDefinitionInput input) {
+        try {
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put(ID, input.id());
+            requestBody.put("accessPolicyId", input.accessPolicyId());
+            requestBody.put("contractPolicyId", input.contractPolicyId());
+            requestBody.put("assetsSelector", input.assetsSelector());
+
+            var jsonRequestBody = new ObjectMapper().writeValueAsString(requestBody);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/contractdefinitions".formatted(url)))
+                    .header("content-type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequestBody));
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            boolean succeeded = statusCode == 200;
+            if (succeeded) {
+                var jsonDocument = JsonDocument.of(response.body());
+                var jsonArray = JsonLd.expand(jsonDocument).get();
+                String id = jsonArray.getJsonObject(0).getString(ID);
+                return new Result<>(true, id, null);
+            } else {
+                String error =
+                        (statusCode == 400) ? "Request body was malformed" : "Could not create contract definition";
+                return new Result<>(false, null, error);
+            }
+
         } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
@@ -72,6 +110,7 @@ public class ContractDefinitions {
             throw new RuntimeException(e);
         }
     }
+
     public Result<List<ContractDefinition>> request(QuerySpec input) {
         try {
             Map<String, Object> requestBody = Map.of(
