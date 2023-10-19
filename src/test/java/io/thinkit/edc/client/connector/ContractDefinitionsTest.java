@@ -67,7 +67,7 @@ class ContractDefinitionsTest {
     @Test
     void should__not_create_a_contract_definition_when_id_is_null() {
         var contractDefinitionInput = new ContractDefinitionInput(
-                null, "asset-policy-id", "contract-policy-id", new ArrayList<CriterionInput>());
+                "definition-id", null, "contract-policy-id", new ArrayList<CriterionInput>());
 
         Result<String> created = contractDefinitions.create(contractDefinitionInput);
 
