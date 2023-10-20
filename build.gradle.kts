@@ -50,12 +50,14 @@ allprojects {
 
 val downloadOpenapiSpec by tasks.register("downloadOpenapiSpec") {
     dependsOn(tasks.findByName("processTestResources"))
+    val managementApi = sourceSets.test.get().output.resourcesDir?.let { File("$it/management-api.yml") }
+    onlyIf { managementApi?.exists()?.not() ?: false }
     doLast {
-        sourceSets.test.get().output.resourcesDir?.let { resourcesFolder ->
-            resourcesFolder.mkdirs()
+        managementApi?.let { fileSpec ->
+            fileSpec.parentFile.mkdirs()
             download("https://api.swaggerhub.com/apis/eclipse-edc-bot/management-api/${libs.versions.edc.get()}/yaml")
                 .replace("example: null", "")
-                .let { File("$resourcesFolder/management-api.yml").writeText(it) }
+                .let { fileSpec.writeText(it) }
         }
     }
 }

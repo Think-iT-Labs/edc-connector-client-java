@@ -4,7 +4,6 @@ import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.http.HttpClient;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +24,6 @@ class AssetsTest {
     void setUp() {
         var client = EdcConnectorClient.newBuilder()
                 .httpClient(http)
-                .interceptor(r -> r.header("Prefer", "dynamic=false"))
                 .managementUrl("http://127.0.0.1:%s".formatted(prism.getFirstMappedPort()))
                 .build();
         assets = client.assets();
@@ -58,25 +56,34 @@ class AssetsTest {
 
     @Test
     void should_create_an_asset() {
-        Map<String, Object> properties = Map.of("key", Map.of("value", "value"));
-        Map<String, Object> privateProperties = Map.of("private-key", Map.of("private-value", "private-value"));
-        Map<String, Object> dataAddress = Map.of("type", "data-address-type");
-        var assetInput = new AssetInput("assetId", properties, privateProperties, dataAddress);
+        var properties = Map.of("key", Map.of("value", "value"));
+        var privateProperties = Map.of("private-key", Map.of("private-value", "private-value"));
+        var dataAddress = Map.of("type", "data-address-type");
 
-        Result<String> created = assets.create(assetInput);
+        var asset = Asset.Builder.newInstance()
+                .id("assetId")
+                .properties(properties)
+                .privateProperties(privateProperties)
+                .dataAddress(dataAddress)
+                .build();
+
+        var created = assets.create(asset);
 
         assertThat(created.isSucceeded()).isTrue();
         assertThat(created.getContent()).isNotNull();
     }
 
     @Test
-    void should_not_create_an_asset_when_dataAddress_is_empty() {
-        Map<String, Object> properties = Map.of("key", "value");
-        Map<String, Object> privateProperties = Map.of("private-key", "private-value");
-        Map<String, Object> dataAddress = Collections.emptyMap();
-        var assetInput = new AssetInput("assetId", properties, privateProperties, dataAddress);
+    void should_not_create_an_asset_when_data_address_is_missing() {
+        var properties = Map.of("key", "value");
+        var privateProperties = Map.of("private-key", "private-value");
+        var asset = Asset.Builder.newInstance()
+                .id("assetId")
+                .properties(properties)
+                .privateProperties(privateProperties)
+                .build();
 
-        Result<String> created = assets.create(assetInput);
+        var created = assets.create(asset);
 
         assertThat(created.isSucceeded()).isFalse();
         assertThat(created.getError()).isNotNull();
@@ -84,12 +91,17 @@ class AssetsTest {
 
     @Test
     void should_update_an_asset() {
-        Map<String, Object> properties = Map.of("key", Map.of("value", "value"));
-        Map<String, Object> privateProperties = Map.of("private-key", Map.of("private-value", "private-value"));
-        Map<String, Object> dataAddress = Map.of("type", "data-address-type");
-        var assetInput = new AssetInput("assetId", properties, privateProperties, dataAddress);
+        var properties = Map.of("key", Map.of("value", "value"));
+        var privateProperties = Map.of("private-key", Map.of("private-value", "private-value"));
+        var dataAddress = Map.of("type", "data-address-type");
+        var asset = Asset.Builder.newInstance()
+                .id("assetId")
+                .properties(properties)
+                .privateProperties(privateProperties)
+                .dataAddress(dataAddress)
+                .build();
 
-        Result<String> created = assets.update(assetInput);
+        var created = assets.update(asset);
 
         assertThat(created.isSucceeded()).isTrue();
     }
@@ -98,10 +110,13 @@ class AssetsTest {
     void should_not_update_an_asset_when_id_is_empty() {
         Map<String, Object> properties = Map.of("key", "value");
         Map<String, Object> privateProperties = Map.of("private-key", "private-value");
-        Map<String, Object> dataAddress = Collections.emptyMap();
-        var assetInput = new AssetInput("", properties, privateProperties, dataAddress);
+        var asset = Asset.Builder.newInstance()
+                .id("")
+                .properties(properties)
+                .privateProperties(privateProperties)
+                .build();
 
-        Result<String> created = assets.update(assetInput);
+        var created = assets.update(asset);
 
         assertThat(created.isSucceeded()).isFalse();
         assertThat(created.getError()).isNotNull();
@@ -110,14 +125,14 @@ class AssetsTest {
     @Test
     void should_delete_an_asset() {
 
-        Result<String> deleted = assets.delete("assetId");
+        var deleted = assets.delete("assetId");
 
         assertThat(deleted.isSucceeded()).isTrue();
     }
 
     @Test
     void should_not_delete_an_asset_when_id_is_empty() {
-        Result<String> deleted = assets.delete("");
+        var deleted = assets.delete("");
 
         assertThat(deleted.isSucceeded()).isFalse();
         assertThat(deleted.getError()).isNotNull();

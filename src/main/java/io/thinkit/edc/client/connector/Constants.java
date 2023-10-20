@@ -8,4 +8,6 @@ public interface Constants {
     String ID = "@id";
     String TYPE = "@type";
     String VALUE = "@value";
+    String CONTEXT = "@context";
+    String VOCAB = "@vocab";
 }

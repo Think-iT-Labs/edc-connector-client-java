@@ -23,7 +23,6 @@ class ContractDefinitionsTest {
     void setUp() {
         var client = EdcConnectorClient.newBuilder()
                 .httpClient(http)
-                .interceptor(r -> r.header("Prefer", "dynamic=false"))
                 .managementUrl("http://127.0.0.1:%s".formatted(prism.getFirstMappedPort()))
                 .build();
         contractDefinitions = client.contractDefinitions();
