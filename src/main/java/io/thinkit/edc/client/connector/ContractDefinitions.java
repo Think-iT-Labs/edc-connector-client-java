@@ -1,7 +1,10 @@
 package io.thinkit.edc.client.connector;
 
+import static io.thinkit.edc.client.connector.Constants.CONTEXT;
+import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
 import static io.thinkit.edc.client.connector.Constants.ID;
 import static io.thinkit.edc.client.connector.Constants.TYPE;
+import static io.thinkit.edc.client.connector.Constants.VOCAB;
 
 import com.apicatalog.jsonld.JsonLd;
 import com.apicatalog.jsonld.JsonLdError;
@@ -58,6 +61,7 @@ public class ContractDefinitions {
     public Result<String> create(ContractDefinitionInput input) {
         try {
             Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put(CONTEXT, Map.of(VOCAB, EDC_NAMESPACE));
             requestBody.put(ID, input.id());
             requestBody.put("accessPolicyId", input.accessPolicyId());
             requestBody.put("contractPolicyId", input.contractPolicyId());
@@ -157,6 +161,7 @@ public class ContractDefinitions {
     public Result<String> update(ContractDefinitionInput input) {
         try {
             Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put(CONTEXT, Map.of(VOCAB, EDC_NAMESPACE));
             requestBody.put(ID, input.id());
             requestBody.put("accessPolicyId", input.accessPolicyId());
             requestBody.put("contractPolicyId", input.contractPolicyId());
@@ -174,9 +179,9 @@ public class ContractDefinitions {
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             var statusCode = response.statusCode();
             if (statusCode == 204) {
-                return new Result<>(true, input.id(), null);
+                return new Result<>(input.id(), null);
             } else {
-                return new Result<>(false, null, "Contract definition could not be updated");
+                return new Result<>(null, "Contract definition could not be updated");
             }
 
         } catch (IOException | InterruptedException e) {

@@ -1,13 +1,15 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.Constants.ID;
-import static io.thinkit.edc.client.connector.Constants.TYPE;
-
 import com.apicatalog.jsonld.JsonLd;
 import com.apicatalog.jsonld.JsonLdError;
 import com.apicatalog.jsonld.document.JsonDocument;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -15,6 +17,13 @@ import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
+
+import static io.thinkit.edc.client.connector.Constants.CONTEXT;
+import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
+import static io.thinkit.edc.client.connector.Constants.ID;
+import static io.thinkit.edc.client.connector.Constants.TYPE;
+import static io.thinkit.edc.client.connector.Constants.VOCAB;
+import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 public class Assets {
     private final String url;
@@ -39,8 +48,7 @@ public class Assets {
             var statusCode = response.statusCode();
             boolean succeeded = statusCode == 200;
             if (succeeded) {
-                var jsonDocument = JsonDocument.of(response.body());
-                var jsonArray = JsonLd.expand(jsonDocument).get();
+                var jsonArray = expand(response.body());
                 Asset asset = new Asset(jsonArray.getJsonObject(0));
                 return new Result<>(asset, null);
             } else {
@@ -54,26 +62,14 @@ public class Assets {
         }
     }
 
-    public Result<String> create(AssetInput input) {
+    public Result<String> create(Asset input) {
         try {
-            Map<String, Object> requestBody = Map.of(
-                    ID,
-                    input.id(),
-                    TYPE,
-                    "https://w3id.org/edc/v0.0.1/ns/Asset",
-                    "properties",
-                    input.properties(),
-                    "privateProperties",
-                    input.privateProperties(),
-                    "dataAddress",
-                    input.dataAddress());
-
-            var jsonRequestBody = new ObjectMapper().writeValueAsString(requestBody);
+            var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create("%s/v3/assets".formatted(url)))
                     .header("content-type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequestBody));
+                    .POST(ofString(requestBody.toString()));
 
             var request = interceptor.apply(requestBuilder).build();
 
@@ -81,12 +77,11 @@ public class Assets {
             var statusCode = response.statusCode();
             boolean succeeded = statusCode == 200;
             if (succeeded) {
-                var jsonDocument = JsonDocument.of(response.body());
-                var content = jsonDocument.getJsonContent().get();
-                String id = content.asJsonObject().getString("@id");
+                var content = expand(response.body());
+                var id = content.getJsonObject(0).getString(ID);
                 return new Result<>(id, null);
             } else {
-                String error = (statusCode == 400) ? "Request body was malformed" : "Could not create asset";
+                var error = (statusCode == 400) ? "Request body was malformed" : "Could not create asset";
                 return new Result<>(null, error);
             }
 
@@ -95,38 +90,26 @@ public class Assets {
         }
     }
 
-    public Result<String> update(AssetInput input) {
+    public Result<String> update(Asset input) {
         try {
-            Map<String, Object> requestBody = Map.of(
-                    ID,
-                    input.id(),
-                    TYPE,
-                    "https://w3id.org/edc/v0.0.1/ns/Asset",
-                    "properties",
-                    input.properties(),
-                    "privateProperties",
-                    input.privateProperties(),
-                    "dataAddress",
-                    input.dataAddress());
-
-            var jsonRequestBody = new ObjectMapper().writeValueAsString(requestBody);
+            var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create("%s/v3/assets".formatted(url)))
                     .header("content-type", "application/json")
-                    .PUT(HttpRequest.BodyPublishers.ofString(jsonRequestBody));
+                    .PUT(ofString(requestBody.toString()));
 
             var request = interceptor.apply(requestBuilder).build();
 
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (statusCode == 204) {
                 return new Result<>(input.id(), null);
             } else {
                 return new Result<>(null, "Asset could not be updated");
             }
 
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -172,16 +155,15 @@ public class Assets {
             var requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create("%s/v3/assets/request".formatted(url)))
                     .header("content-type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequestBody));
+                    .POST(ofString(jsonRequestBody));
 
             var request = interceptor.apply(requestBuilder).build();
 
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var statusCode = response.statusCode();
             if (statusCode == 200) {
-                var jsonDocument = JsonDocument.of(response.body());
-                var jsonArray = JsonLd.expand(jsonDocument).get();
-                List<Asset> assets =
+                var jsonArray = expand(response.body());
+                var assets =
                         jsonArray.stream().map(s -> new Asset(s.asJsonObject())).toList();
                 return new Result<>(assets, null);
             } else {
@@ -191,5 +173,18 @@ public class Assets {
         } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private JsonArray expand(InputStream body) throws JsonLdError {
+        var jsonDocument = JsonDocument.of(body);
+        return JsonLd.expand(jsonDocument).get();
+    }
+
+    private JsonObject compact(Asset input) throws JsonLdError {
+        var expanded = JsonDocument.of(input.raw());
+        var context = JsonDocument.of(Json.createObjectBuilder()
+                .add(CONTEXT, Json.createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
+                .build());
+        return JsonLd.compact(expanded, context).get();
     }
 }
