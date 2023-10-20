@@ -12,11 +12,9 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 public class Assets {
     private final String url;
@@ -44,12 +42,12 @@ public class Assets {
                 var jsonDocument = JsonDocument.of(response.body());
                 var jsonArray = JsonLd.expand(jsonDocument).get();
                 Asset asset = new Asset(jsonArray.getJsonObject(0));
-                return new Result<>(true, asset, null);
+                return new Result<>(asset, null);
             } else {
                 String error = (statusCode == 400)
                         ? "Request body was malformed"
                         : "An asset with the given ID does not exist";
-                return new Result<>(false, error);
+                return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
@@ -86,10 +84,10 @@ public class Assets {
                 var jsonDocument = JsonDocument.of(response.body());
                 var content = jsonDocument.getJsonContent().get();
                 String id = content.asJsonObject().getString("@id");
-                return new Result(true, id, null);
+                return new Result<>(id, null);
             } else {
                 String error = (statusCode == 400) ? "Request body was malformed" : "Could not create asset";
-                return new Result(false, null, error);
+                return new Result<>(null, error);
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -123,9 +121,9 @@ public class Assets {
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             var statusCode = response.statusCode();
             if (statusCode == 200) {
-                return new Result(true, input.id(), null);
+                return new Result<>(input.id(), null);
             } else {
-                return new Result(false, null, "Asset could not be updated");
+                return new Result<>(null, "Asset could not be updated");
             }
 
         } catch (IOException | InterruptedException e) {
@@ -133,7 +131,7 @@ public class Assets {
         }
     }
 
-    public Result delete(String id) {
+    public Result<String> delete(String id) {
         try {
             var requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create("%s/v3/assets/%s".formatted(url, id)))
@@ -144,9 +142,9 @@ public class Assets {
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var statusCode = response.statusCode();
             if (statusCode == 200) {
-                return new Result(true, id, null);
+                return new Result<>(id, null);
             } else {
-                return new Result(false, null, "The asset cannot be deleted");
+                return new Result<>(null, "The asset cannot be deleted");
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
@@ -183,12 +181,11 @@ public class Assets {
             if (statusCode == 200) {
                 var jsonDocument = JsonDocument.of(response.body());
                 var jsonArray = JsonLd.expand(jsonDocument).get();
-                List<Asset> assets = new ArrayList<>();
-                assets =
-                        jsonArray.stream().map(s -> new Asset(s.asJsonObject())).collect(Collectors.toList());
-                return new Result<List<Asset>>(true, assets, null);
+                List<Asset> assets =
+                        jsonArray.stream().map(s -> new Asset(s.asJsonObject())).toList();
+                return new Result<>(assets, null);
             } else {
-                return new Result<List<Asset>>(false, "Request body was malformed");
+                return new Result<>("Request body was malformed");
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {
