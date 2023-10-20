@@ -153,4 +153,34 @@ public class ContractDefinitions {
             throw new RuntimeException(e);
         }
     }
+
+    public Result<String> update(ContractDefinitionInput input) {
+        try {
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put(ID, input.id());
+            requestBody.put("accessPolicyId", input.accessPolicyId());
+            requestBody.put("contractPolicyId", input.contractPolicyId());
+            requestBody.put("assetsSelector", input.assetsSelector());
+
+            var jsonRequestBody = new ObjectMapper().writeValueAsString(requestBody);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/contractdefinitions".formatted(url)))
+                    .header("content-type", "application/json")
+                    .PUT(HttpRequest.BodyPublishers.ofString(jsonRequestBody));
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            var statusCode = response.statusCode();
+            if (statusCode == 204) {
+                return new Result<>(true, input.id(), null);
+            } else {
+                return new Result<>(false, null, "Contract definition could not be updated");
+            }
+
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
