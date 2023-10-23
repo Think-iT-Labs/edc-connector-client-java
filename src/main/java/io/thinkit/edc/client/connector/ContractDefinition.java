@@ -31,7 +31,7 @@ public class ContractDefinition {
 
     public List<Criterion> assetsSelector() {
         return raw.getJsonArray(EDC_NAMESPACE + "assetsSelector").stream()
-                .map(s -> new Criterion(s.asJsonObject()))
+                .map(s -> Criterion.Builder.newInstance().raw(s.asJsonObject()).build())
                 .collect(Collectors.toList());
     }
 

@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.http.HttpClient;
 import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
@@ -30,7 +29,7 @@ class ContractDefinitionsTest {
 
     @Test
     void should_get_a_contract_definition() {
-        Result<ContractDefinition> contractDefinition = contractDefinitions.get("definition-id");
+        var contractDefinition = contractDefinitions.get("definition-id");
 
         assertThat(contractDefinition.isSucceeded()).isTrue();
         assertThat(contractDefinition.getContent().id()).isNotBlank();
@@ -45,7 +44,7 @@ class ContractDefinitionsTest {
 
     @Test
     void should_not_get_a_contract_definition_when_id_is_empty() {
-        Result<ContractDefinition> contractDefinition = contractDefinitions.get("");
+        var contractDefinition = contractDefinitions.get("");
 
         assertThat(contractDefinition.isSucceeded()).isFalse();
         assertThat(contractDefinition.getError()).isNotNull();
@@ -56,7 +55,7 @@ class ContractDefinitionsTest {
         var contractDefinitionInput = new ContractDefinitionInput(
                 "definition-id", "asset-policy-id", "contract-policy-id", new ArrayList<>());
 
-        Result<String> created = contractDefinitions.create(contractDefinitionInput);
+        var created = contractDefinitions.create(contractDefinitionInput);
 
         assertThat(created.isSucceeded()).isTrue();
         assertThat(created.getContent()).isNotNull();
@@ -67,7 +66,7 @@ class ContractDefinitionsTest {
         var contractDefinitionInput =
                 new ContractDefinitionInput("definition-id", null, "contract-policy-id", new ArrayList<>());
 
-        Result<String> created = contractDefinitions.create(contractDefinitionInput);
+        var created = contractDefinitions.create(contractDefinitionInput);
 
         assertThat(created.isSucceeded()).isFalse();
         assertThat(created.getError()).isNotNull();
@@ -76,15 +75,14 @@ class ContractDefinitionsTest {
     @Test
     void should_delete_a_contract_definition() {
 
-        Result<String> deleted = contractDefinitions.delete("definition-id");
+        var deleted = contractDefinitions.delete("definition-id");
 
         assertThat(deleted.isSucceeded()).isTrue();
     }
 
     @Test
     void should_not_delete_a_contract_definition_when_id_is_empty() {
-
-        Result<String> deleted = contractDefinitions.delete("");
+        var deleted = contractDefinitions.delete("");
 
         assertThat(deleted.isSucceeded()).isFalse();
         assertThat(deleted.getError()).isNotNull();
@@ -92,8 +90,15 @@ class ContractDefinitionsTest {
 
     @Test
     void should_get_contract_definitions() {
-        var input = new QuerySpec(5, 10, "DESC", "fieldName", new CriterionInput[] {});
-        Result<List<ContractDefinition>> ContractDefinitionList = contractDefinitions.request(input);
+        var input = QuerySpec.Builder.newInstance()
+                .offset(0)
+                .limit(10)
+                .sortOrder("DESC")
+                .sortField("fieldName")
+                .build();
+
+        var ContractDefinitionList = contractDefinitions.request(input);
+
         assertThat(ContractDefinitionList.isSucceeded()).isTrue();
         assertThat(ContractDefinitionList.getContent()).isNotNull().first().satisfies(contractDefinition -> {
             assertThat(contractDefinition.id()).isNotBlank();
@@ -109,19 +114,20 @@ class ContractDefinitionsTest {
 
     @Test
     void should_not_get_contract_definitions() {
-        var input = new QuerySpec(0, 0, "", "", new CriterionInput[] {});
-        Result<List<ContractDefinition>> ContractDefinitionList = contractDefinitions.request(input);
+        var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
 
-        assertThat(ContractDefinitionList.isSucceeded()).isFalse();
-        assertThat(ContractDefinitionList.getError()).isNotNull();
+        var result = contractDefinitions.request(input);
+
+        assertThat(result.isSucceeded()).isFalse();
+        assertThat(result.getError()).isNotNull();
     }
 
     @Test
     void should_update_a_contract_definition() {
         var contractDefinitionInput = new ContractDefinitionInput(
-                "definition-id", "asset-policy-id", "contract-policy-id", new ArrayList<CriterionInput>());
+                "definition-id", "asset-policy-id", "contract-policy-id", new ArrayList<>());
 
-        Result<String> created = contractDefinitions.update(contractDefinitionInput);
+        var created = contractDefinitions.update(contractDefinitionInput);
 
         assertThat(created.isSucceeded()).isTrue();
         assertThat(created.getContent()).isNotNull();
@@ -129,10 +135,10 @@ class ContractDefinitionsTest {
 
     @Test
     void should_not_update_a_contract_definition_when_id_is_empty() {
-        var contractDefinitionInput = new ContractDefinitionInput(
-                null, "asset-policy-id", "contract-policy-id", new ArrayList<CriterionInput>());
+        var contractDefinitionInput =
+                new ContractDefinitionInput(null, "asset-policy-id", "contract-policy-id", new ArrayList<>());
 
-        Result<String> created = contractDefinitions.update(contractDefinitionInput);
+        var created = contractDefinitions.update(contractDefinitionInput);
 
         assertThat(created.isSucceeded()).isFalse();
         assertThat(created.getError()).isNotNull();

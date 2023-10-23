@@ -1,29 +1,18 @@
 package io.thinkit.edc.client.connector;
 
-import com.apicatalog.jsonld.JsonLd;
-import com.apicatalog.jsonld.JsonLdError;
-import com.apicatalog.jsonld.document.JsonDocument;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.json.Json;
-import jakarta.json.JsonArray;
-import jakarta.json.JsonObject;
+import static io.thinkit.edc.client.connector.Constants.ID;
+import static io.thinkit.edc.client.connector.JsonLdUtil.compact;
+import static io.thinkit.edc.client.connector.JsonLdUtil.expand;
+import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
+import com.apicatalog.jsonld.JsonLdError;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
-import java.util.Map;
 import java.util.function.UnaryOperator;
-
-import static io.thinkit.edc.client.connector.Constants.CONTEXT;
-import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
-import static io.thinkit.edc.client.connector.Constants.ID;
-import static io.thinkit.edc.client.connector.Constants.TYPE;
-import static io.thinkit.edc.client.connector.Constants.VOCAB;
-import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 public class Assets {
     private final String url;
@@ -46,13 +35,14 @@ public class Assets {
 
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var statusCode = response.statusCode();
-            boolean succeeded = statusCode == 200;
-            if (succeeded) {
+            if (statusCode == 200) {
                 var jsonArray = expand(response.body());
-                Asset asset = new Asset(jsonArray.getJsonObject(0));
+                var asset = Asset.Builder.newInstance()
+                        .raw(jsonArray.getJsonObject(0))
+                        .build();
                 return new Result<>(asset, null);
             } else {
-                String error = (statusCode == 400)
+                var error = (statusCode == 400)
                         ? "Request body was malformed"
                         : "An asset with the given ID does not exist";
                 return new Result<>(error);
@@ -75,8 +65,7 @@ public class Assets {
 
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var statusCode = response.statusCode();
-            boolean succeeded = statusCode == 200;
-            if (succeeded) {
+            if (statusCode == 200) {
                 var content = expand(response.body());
                 var id = content.getJsonObject(0).getString(ID);
                 return new Result<>(id, null);
@@ -136,26 +125,12 @@ public class Assets {
 
     public Result<List<Asset>> request(QuerySpec input) {
         try {
-            Map<String, Object> requestBody = Map.of(
-                    TYPE,
-                    "https://w3id.org/edc/v0.0.1/ns/QuerySpec",
-                    "offset",
-                    input.offset(),
-                    "limit",
-                    input.limit(),
-                    "sortOrder",
-                    input.sortOrder(),
-                    "sortField",
-                    input.sortField(),
-                    "filterExpression",
-                    input.filterExpression());
-
-            var jsonRequestBody = new ObjectMapper().writeValueAsString(requestBody);
+            var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create("%s/v3/assets/request".formatted(url)))
                     .header("content-type", "application/json")
-                    .POST(ofString(jsonRequestBody));
+                    .POST(ofString(requestBody.toString()));
 
             var request = interceptor.apply(requestBuilder).build();
 
@@ -163,8 +138,11 @@ public class Assets {
             var statusCode = response.statusCode();
             if (statusCode == 200) {
                 var jsonArray = expand(response.body());
-                var assets =
-                        jsonArray.stream().map(s -> new Asset(s.asJsonObject())).toList();
+                var assets = jsonArray.stream()
+                        .map(s -> Asset.Builder.newInstance()
+                                .raw(s.asJsonObject())
+                                .build())
+                        .toList();
                 return new Result<>(assets, null);
             } else {
                 return new Result<>("Request body was malformed");
@@ -173,18 +151,5 @@ public class Assets {
         } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private JsonArray expand(InputStream body) throws JsonLdError {
-        var jsonDocument = JsonDocument.of(body);
-        return JsonLd.expand(jsonDocument).get();
-    }
-
-    private JsonObject compact(Asset input) throws JsonLdError {
-        var expanded = JsonDocument.of(input.raw());
-        var context = JsonDocument.of(Json.createObjectBuilder()
-                .add(CONTEXT, Json.createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
-                .build());
-        return JsonLd.compact(expanded, context).get();
     }
 }

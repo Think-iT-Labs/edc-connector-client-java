@@ -3,8 +3,9 @@ package io.thinkit.edc.client.connector;
 import static io.thinkit.edc.client.connector.Constants.CONTEXT;
 import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
 import static io.thinkit.edc.client.connector.Constants.ID;
-import static io.thinkit.edc.client.connector.Constants.TYPE;
 import static io.thinkit.edc.client.connector.Constants.VOCAB;
+import static io.thinkit.edc.client.connector.JsonLdUtil.compact;
+import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import com.apicatalog.jsonld.JsonLd;
 import com.apicatalog.jsonld.JsonLdError;
@@ -41,14 +42,14 @@ public class ContractDefinitions {
 
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var statusCode = response.statusCode();
-            boolean succeeded = statusCode == 200;
+            var succeeded = statusCode == 200;
             if (succeeded) {
                 var jsonDocument = JsonDocument.of(response.body());
                 var jsonArray = JsonLd.expand(jsonDocument).get();
-                ContractDefinition contractDefinition = new ContractDefinition(jsonArray.getJsonObject(0));
+                var contractDefinition = new ContractDefinition(jsonArray.getJsonObject(0));
                 return new Result<>(contractDefinition, null);
             } else {
-                String error = (statusCode == 400)
+                var error = (statusCode == 400)
                         ? "Request body was malformed"
                         : "A contract definition with the given ID does not exist";
                 return new Result<>(error);
@@ -72,21 +73,20 @@ public class ContractDefinitions {
             var requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create("%s/v2/contractdefinitions".formatted(url)))
                     .header("content-type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequestBody));
+                    .POST(ofString(jsonRequestBody));
 
             var request = interceptor.apply(requestBuilder).build();
 
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var statusCode = response.statusCode();
-            boolean succeeded = statusCode == 200;
+            var succeeded = statusCode == 200;
             if (succeeded) {
                 var jsonDocument = JsonDocument.of(response.body());
                 var jsonArray = JsonLd.expand(jsonDocument).get();
-                String id = jsonArray.getJsonObject(0).getString(ID);
+                var id = jsonArray.getJsonObject(0).getString(ID);
                 return new Result<>(id, null);
             } else {
-                String error =
-                        (statusCode == 400) ? "Request body was malformed" : "Could not create contract definition";
+                var error = (statusCode == 400) ? "Request body was malformed" : "Could not create contract definition";
                 return new Result<>(null, error);
             }
 
@@ -117,26 +117,12 @@ public class ContractDefinitions {
 
     public Result<List<ContractDefinition>> request(QuerySpec input) {
         try {
-            Map<String, Object> requestBody = Map.of(
-                    TYPE,
-                    "https://w3id.org/edc/v0.0.1/ns/QuerySpec",
-                    "offset",
-                    input.offset(),
-                    "limit",
-                    input.limit(),
-                    "sortOrder",
-                    input.sortOrder(),
-                    "sortField",
-                    input.sortField(),
-                    "filterExpression",
-                    input.filterExpression());
-
-            var jsonRequestBody = new ObjectMapper().writeValueAsString(requestBody);
+            var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create("%s/v2/contractdefinitions/request".formatted(url)))
                     .header("content-type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequestBody));
+                    .POST(ofString(requestBody.toString()));
 
             var request = interceptor.apply(requestBuilder).build();
 
@@ -145,7 +131,7 @@ public class ContractDefinitions {
             if (statusCode == 200) {
                 var jsonDocument = JsonDocument.of(response.body());
                 var jsonArray = JsonLd.expand(jsonDocument).get();
-                List<ContractDefinition> contractDefinitions = jsonArray.stream()
+                var contractDefinitions = jsonArray.stream()
                         .map(s -> new ContractDefinition(s.asJsonObject()))
                         .toList();
                 return new Result<>(contractDefinitions, null);
@@ -172,7 +158,7 @@ public class ContractDefinitions {
             var requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create("%s/v2/contractdefinitions".formatted(url)))
                     .header("content-type", "application/json")
-                    .PUT(HttpRequest.BodyPublishers.ofString(jsonRequestBody));
+                    .PUT(ofString(jsonRequestBody));
 
             var request = interceptor.apply(requestBuilder).build();
 
