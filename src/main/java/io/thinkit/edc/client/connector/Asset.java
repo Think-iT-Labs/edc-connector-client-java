@@ -1,90 +1,87 @@
 package io.thinkit.edc.client.connector;
 
+import static io.thinkit.edc.client.connector.Constants.CONTEXT;
 import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
 import static io.thinkit.edc.client.connector.Constants.ID;
-import static io.thinkit.edc.client.connector.Constants.VALUE;
+import static io.thinkit.edc.client.connector.Constants.TYPE;
 import static io.thinkit.edc.client.connector.Constants.VOCAB;
 import static jakarta.json.Json.createObjectBuilder;
 
+import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import java.util.Map;
 
-public class Asset {
+public class Asset extends JsonLdObject {
 
+    private static final String TYPE_ASSET = EDC_NAMESPACE + "Asset";
     private static final String ASSET_PROPERTIES = EDC_NAMESPACE + "properties";
     private static final String ASSET_PRIVATE_PROPERTIES = EDC_NAMESPACE + "privateProperties";
     private static final String ASSET_DATA_ADDRESS = EDC_NAMESPACE + "dataAddress";
+    private static final String ASSET_CREATED_AT = EDC_NAMESPACE + "createdAt";
 
-    private final JsonObject raw;
-
-    public Asset(JsonObject raw) {
-        this.raw = raw;
-    }
-
-    public String id() {
-        return raw.getString(ID);
+    private Asset(JsonObject raw) {
+        super(raw);
     }
 
     public Properties properties() {
-        return new Properties(raw.getJsonArray(ASSET_PROPERTIES).getJsonObject(0));
+        return new Properties(object(ASSET_PROPERTIES));
     }
 
     public Properties privateProperties() {
-        return new Properties(raw.getJsonArray(ASSET_PRIVATE_PROPERTIES).getJsonObject(0));
+        return new Properties(object(ASSET_PRIVATE_PROPERTIES));
     }
 
     public DataAddress dataAddress() {
-        return new DataAddress(raw.getJsonArray(ASSET_DATA_ADDRESS).getJsonObject(0));
+        return new DataAddress(object(ASSET_DATA_ADDRESS));
     }
 
     public long createdAt() {
-        return raw.getJsonArray(EDC_NAMESPACE + "createdAt")
-                .getJsonObject(0)
-                .getJsonNumber(VALUE)
-                .longValue();
-    }
-
-    public JsonObject raw() {
-        return raw;
+        return longValue(ASSET_CREATED_AT);
     }
 
     public static class Builder {
 
-        private final JsonObjectBuilder raw = createObjectBuilder()
-                .add(Constants.CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE));
+        private final JsonObjectBuilder builder = createObjectBuilder()
+                .add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
+                .add(TYPE, TYPE_ASSET);
 
         public static Builder newInstance() {
             return new Builder();
         }
 
         public Asset build() {
-            return new Asset(raw.build());
+            return new Asset(builder.build());
         }
 
         public Builder id(String id) {
-            raw.add(ID, id);
+            builder.add(ID, id);
             return this;
         }
 
         public Builder properties(Map<String, ?> properties) {
-            var builder = Properties.Builder.newInstance();
-            properties.forEach(builder::property);
-            raw.add(ASSET_PROPERTIES, builder.build().raw());
+            var propertiesBuilder = Properties.Builder.newInstance();
+            properties.forEach(propertiesBuilder::property);
+            builder.add(ASSET_PROPERTIES, propertiesBuilder.build().raw());
             return this;
         }
 
         public Builder privateProperties(Map<String, ?> properties) {
-            var builder = Properties.Builder.newInstance();
-            properties.forEach(builder::property);
-            raw.add(ASSET_PRIVATE_PROPERTIES, builder.build().raw());
+            var propertiesBuilder = Properties.Builder.newInstance();
+            properties.forEach(propertiesBuilder::property);
+            builder.add(ASSET_PRIVATE_PROPERTIES, propertiesBuilder.build().raw());
             return this;
         }
 
         public Builder dataAddress(Map<String, ?> properties) {
-            var builder = Properties.Builder.newInstance();
-            properties.forEach(builder::property);
-            raw.add(ASSET_DATA_ADDRESS, builder.build().raw());
+            var propertiesBuilder = Properties.Builder.newInstance();
+            properties.forEach(propertiesBuilder::property);
+            builder.add(ASSET_DATA_ADDRESS, propertiesBuilder.build().raw());
+            return this;
+        }
+
+        public Builder raw(JsonObject raw) {
+            builder.addAll(Json.createObjectBuilder(raw));
             return this;
         }
     }

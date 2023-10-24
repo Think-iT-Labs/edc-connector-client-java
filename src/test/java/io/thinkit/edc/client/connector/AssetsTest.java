@@ -1,10 +1,10 @@
 package io.thinkit.edc.client.connector;
 
 import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.http.HttpClient;
-import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ class AssetsTest {
 
     @Test
     void should_get_an_asset() {
-        Result<Asset> asset = assets.get("123");
+        var asset = assets.get("123");
 
         assertThat(asset.getContent().id()).isNotBlank();
         assertThat(asset.getContent().properties()).isNotNull().satisfies(properties -> {
@@ -124,7 +124,6 @@ class AssetsTest {
 
     @Test
     void should_delete_an_asset() {
-
         var deleted = assets.delete("assetId");
 
         assertThat(deleted.isSucceeded()).isTrue();
@@ -140,8 +139,16 @@ class AssetsTest {
 
     @Test
     void should_get_assets() {
-        var input = new QuerySpec(5, 10, "DESC", "fieldName", new CriterionInput[] {});
-        Result<List<Asset>> assetsList = assets.request(input);
+        var query = QuerySpec.Builder.newInstance()
+                .offset(5)
+                .limit(10)
+                .sortOrder("DESC")
+                .sortField("fieldName")
+                .filterExpression(emptyList())
+                .build();
+
+        var assetsList = assets.request(query);
+
         assertThat(assetsList.isSucceeded()).isTrue();
         assertThat(assetsList.getContent()).isNotNull().first().satisfies(asset -> {
             assertThat(asset.id()).isNotBlank();
@@ -167,9 +174,10 @@ class AssetsTest {
     }
 
     @Test
-    void should_not_get_assets() {
-        var input = new QuerySpec(0, 0, "", "", new CriterionInput[] {});
-        Result<List<Asset>> assetsList = assets.request(input);
+    void should_not_get_assets_when_sort_schema_is_not_as_expected() {
+        var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+
+        var assetsList = assets.request(input);
 
         assertThat(assetsList.isSucceeded()).isFalse();
         assertThat(assetsList.getError()).isNotNull();
