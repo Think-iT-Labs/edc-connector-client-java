@@ -25,8 +25,9 @@ public class PolicyDefinition extends JsonLdObject {
 
     public static class Builder {
 
-        private final JsonObjectBuilder builder =
-                createObjectBuilder().add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE));
+        private final JsonObjectBuilder builder = createObjectBuilder()
+                .add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
+                .add(TYPE, EDC_NAMESPACE + "PolicyDefinition");
 
         public static PolicyDefinition.Builder newInstance() {
             return new PolicyDefinition.Builder();
