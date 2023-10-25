@@ -1,9 +1,9 @@
 package io.thinkit.edc.client.connector;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.http.HttpClient;
-import java.util.ArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
@@ -52,9 +52,12 @@ class ContractDefinitionsTest {
 
     @Test
     void should_create_a_contract_definition() {
-        var contractDefinitionInput = new ContractDefinitionInput(
-                "definition-id", "asset-policy-id", "contract-policy-id", new ArrayList<>());
-
+        var contractDefinitionInput = ContractDefinition.Builder.newInstance()
+                .id("definition-id")
+                .accessPolicyId("asset-policy-id")
+                .contractPolicyId("contract-policy-id")
+                .assetsSelector(emptyList())
+                .build();
         var created = contractDefinitions.create(contractDefinitionInput);
 
         assertThat(created.isSucceeded()).isTrue();
@@ -63,9 +66,11 @@ class ContractDefinitionsTest {
 
     @Test
     void should__not_create_a_contract_definition_when_id_is_null() {
-        var contractDefinitionInput =
-                new ContractDefinitionInput("definition-id", null, "contract-policy-id", new ArrayList<>());
-
+        var contractDefinitionInput = ContractDefinition.Builder.newInstance()
+                .id("definition-id")
+                .contractPolicyId("contract-policy-id")
+                .assetsSelector(emptyList())
+                .build();
         var created = contractDefinitions.create(contractDefinitionInput);
 
         assertThat(created.isSucceeded()).isFalse();
@@ -124,9 +129,12 @@ class ContractDefinitionsTest {
 
     @Test
     void should_update_a_contract_definition() {
-        var contractDefinitionInput = new ContractDefinitionInput(
-                "definition-id", "asset-policy-id", "contract-policy-id", new ArrayList<>());
-
+        var contractDefinitionInput = ContractDefinition.Builder.newInstance()
+                .id("definition-id")
+                .accessPolicyId("asset-policy-id")
+                .contractPolicyId("contract-policy-id")
+                .assetsSelector(emptyList())
+                .build();
         var created = contractDefinitions.update(contractDefinitionInput);
 
         assertThat(created.isSucceeded()).isTrue();
@@ -135,9 +143,11 @@ class ContractDefinitionsTest {
 
     @Test
     void should_not_update_a_contract_definition_when_id_is_empty() {
-        var contractDefinitionInput =
-                new ContractDefinitionInput(null, "asset-policy-id", "contract-policy-id", new ArrayList<>());
-
+        var contractDefinitionInput = ContractDefinition.Builder.newInstance()
+                .id("definition-id")
+                .contractPolicyId("contract-policy-id")
+                .assetsSelector(emptyList())
+                .build();
         var created = contractDefinitions.update(contractDefinitionInput);
 
         assertThat(created.isSucceeded()).isFalse();

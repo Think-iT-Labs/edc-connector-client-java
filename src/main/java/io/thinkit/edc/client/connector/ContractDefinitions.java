@@ -1,24 +1,17 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.Constants.CONTEXT;
-import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
 import static io.thinkit.edc.client.connector.Constants.ID;
-import static io.thinkit.edc.client.connector.Constants.VOCAB;
 import static io.thinkit.edc.client.connector.JsonLdUtil.compact;
+import static io.thinkit.edc.client.connector.JsonLdUtil.expand;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
-import com.apicatalog.jsonld.JsonLd;
 import com.apicatalog.jsonld.JsonLdError;
-import com.apicatalog.jsonld.document.JsonDocument;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.UnaryOperator;
 
 public class ContractDefinitions {
@@ -42,11 +35,11 @@ public class ContractDefinitions {
 
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var statusCode = response.statusCode();
-            var succeeded = statusCode == 200;
-            if (succeeded) {
-                var jsonDocument = JsonDocument.of(response.body());
-                var jsonArray = JsonLd.expand(jsonDocument).get();
-                var contractDefinition = new ContractDefinition(jsonArray.getJsonObject(0));
+            if (statusCode == 200) {
+                var jsonArray = expand(response.body());
+                var contractDefinition = ContractDefinition.Builder.newInstance()
+                        .raw(jsonArray.getJsonObject(0))
+                        .build();
                 return new Result<>(contractDefinition, null);
             } else {
                 var error = (statusCode == 400)
@@ -59,31 +52,22 @@ public class ContractDefinitions {
         }
     }
 
-    public Result<String> create(ContractDefinitionInput input) {
+    public Result<String> create(ContractDefinition input) {
         try {
-            Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put(CONTEXT, Map.of(VOCAB, EDC_NAMESPACE));
-            requestBody.put(ID, input.id());
-            requestBody.put("accessPolicyId", input.accessPolicyId());
-            requestBody.put("contractPolicyId", input.contractPolicyId());
-            requestBody.put("assetsSelector", input.assetsSelector());
-
-            var jsonRequestBody = new ObjectMapper().writeValueAsString(requestBody);
+            var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create("%s/v2/contractdefinitions".formatted(url)))
                     .header("content-type", "application/json")
-                    .POST(ofString(jsonRequestBody));
+                    .POST(ofString(requestBody.toString()));
 
             var request = interceptor.apply(requestBuilder).build();
 
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var statusCode = response.statusCode();
-            var succeeded = statusCode == 200;
-            if (succeeded) {
-                var jsonDocument = JsonDocument.of(response.body());
-                var jsonArray = JsonLd.expand(jsonDocument).get();
-                var id = jsonArray.getJsonObject(0).getString(ID);
+            if (statusCode == 200) {
+                var content = expand(response.body());
+                var id = content.getJsonObject(0).getString(ID);
                 return new Result<>(id, null);
             } else {
                 var error = (statusCode == 400) ? "Request body was malformed" : "Could not create contract definition";
@@ -129,10 +113,11 @@ public class ContractDefinitions {
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var statusCode = response.statusCode();
             if (statusCode == 200) {
-                var jsonDocument = JsonDocument.of(response.body());
-                var jsonArray = JsonLd.expand(jsonDocument).get();
+                var jsonArray = expand(response.body());
                 var contractDefinitions = jsonArray.stream()
-                        .map(s -> new ContractDefinition(s.asJsonObject()))
+                        .map(s -> ContractDefinition.Builder.newInstance()
+                                .raw(s.asJsonObject())
+                                .build())
                         .toList();
                 return new Result<>(contractDefinitions, null);
             } else {
@@ -144,21 +129,14 @@ public class ContractDefinitions {
         }
     }
 
-    public Result<String> update(ContractDefinitionInput input) {
+    public Result<String> update(ContractDefinition input) {
         try {
-            Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put(CONTEXT, Map.of(VOCAB, EDC_NAMESPACE));
-            requestBody.put(ID, input.id());
-            requestBody.put("accessPolicyId", input.accessPolicyId());
-            requestBody.put("contractPolicyId", input.contractPolicyId());
-            requestBody.put("assetsSelector", input.assetsSelector());
-
-            var jsonRequestBody = new ObjectMapper().writeValueAsString(requestBody);
+            var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create("%s/v2/contractdefinitions".formatted(url)))
                     .header("content-type", "application/json")
-                    .PUT(ofString(jsonRequestBody));
+                    .PUT(ofString(requestBody.toString()));
 
             var request = interceptor.apply(requestBuilder).build();
 
@@ -170,7 +148,7 @@ public class ContractDefinitions {
                 return new Result<>(null, "Contract definition could not be updated");
             }
 
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
