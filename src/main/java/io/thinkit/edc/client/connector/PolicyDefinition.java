@@ -1,28 +1,54 @@
 package io.thinkit.edc.client.connector;
 
 import static io.thinkit.edc.client.connector.Constants.*;
+import static jakarta.json.Json.createObjectBuilder;
 
+import jakarta.json.Json;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 
-public class PolicyDefinition {
-    private final JsonObject raw;
+public class PolicyDefinition extends JsonLdObject {
+    private static final String POLICY_DEFINITION_POLICY = EDC_NAMESPACE + "policy";
+    private static final String POLICY_DEFINITION_CREATED_AT = EDC_NAMESPACE + "createdAt";
 
-    public PolicyDefinition(JsonObject raw) {
-        this.raw = raw;
-    }
-
-    public String id() {
-        return raw.getString(ID);
+    private PolicyDefinition(JsonObject raw) {
+        super(raw);
     }
 
     public Policy policy() {
-        return new Policy(raw.getJsonArray(EDC_NAMESPACE + "policy").getJsonObject(0));
+        return new Policy(object(POLICY_DEFINITION_POLICY));
     }
 
     public long createdAt() {
-        return raw.getJsonArray(EDC_NAMESPACE + "createdAt")
-                .getJsonObject(0)
-                .getJsonNumber(VALUE)
-                .longValue();
+        return longValue(POLICY_DEFINITION_CREATED_AT);
+    }
+
+    public static class Builder {
+
+        private final JsonObjectBuilder builder =
+                createObjectBuilder().add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE));
+
+        public static PolicyDefinition.Builder newInstance() {
+            return new PolicyDefinition.Builder();
+        }
+
+        public PolicyDefinition build() {
+            return new PolicyDefinition(builder.build());
+        }
+
+        public PolicyDefinition.Builder id(String id) {
+            builder.add(ID, id);
+            return this;
+        }
+
+        public PolicyDefinition.Builder policy(Policy policy) {
+            builder.add(POLICY_DEFINITION_POLICY, Json.createObjectBuilder(policy.raw()));
+            return this;
+        }
+
+        public PolicyDefinition.Builder raw(JsonObject raw) {
+            builder.addAll(Json.createObjectBuilder(raw));
+            return this;
+        }
     }
 }
