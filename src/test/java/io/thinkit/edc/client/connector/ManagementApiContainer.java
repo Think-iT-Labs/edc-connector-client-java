@@ -17,4 +17,8 @@ public class ManagementApiContainer extends GenericContainer<ManagementApiContai
             }
         });
     }
+
+    public String getUrl() {
+        return "http://127.0.0.1:%s".formatted(getFirstMappedPort());
+    }
 }

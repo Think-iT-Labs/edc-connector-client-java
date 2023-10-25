@@ -21,7 +21,7 @@ public class PolicyDefinitionsTest {
     void setUp() {
         var client = EdcConnectorClient.newBuilder()
                 .httpClient(http)
-                .managementUrl("http://127.0.0.1:%s".formatted(prism.getFirstMappedPort()))
+                .managementUrl(prism.getUrl())
                 .build();
         policyDefinitions = client.policyDefinitions();
     }
