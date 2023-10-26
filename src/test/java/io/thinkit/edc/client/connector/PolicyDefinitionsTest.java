@@ -1,9 +1,12 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.Constants.ODRL_NAMESPACE;
+import static io.thinkit.edc.client.connector.Constants.*;
+import static jakarta.json.Json.createObjectBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import jakarta.json.Json;
 import java.net.http.HttpClient;
+import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
@@ -44,5 +47,49 @@ public class PolicyDefinitionsTest {
 
         assertThat(policyDefinition.isSucceeded()).isFalse();
         assertThat(policyDefinition.getError()).isNotNull();
+    }
+
+    @Test
+    void should_create_a_policy_definition() {
+
+        var constraints = Json.createArrayBuilder()
+                .add(createObjectBuilder()
+                        .add("leftOperand", "spatial")
+                        .add("operator", "eq")
+                        .add("rightOperand", "https://www.wikidata.org/wiki/Q183")
+                        .add("comment", "i.e Germany"))
+                .build();
+        var permissions = Json.createArrayBuilder()
+                .add(createObjectBuilder()
+                        .add("target", "http://example.com/asset:9898.movie")
+                        .add("action", "display")
+                        .add("constraints", constraints))
+                .build();
+
+        var policy = Policy.Builder.newInstance()
+                .raw(createObjectBuilder().add("permission", permissions).build())
+                .build();
+
+        var policyDefinition = PolicyDefinition.Builder.newInstance()
+                .id("definition-id")
+                .policy(policy)
+                .build();
+
+        var created = policyDefinitions.create(policyDefinition);
+
+        assertThat(created.isSucceeded()).isTrue();
+        assertThat(created.getContent()).isNotNull();
+    }
+
+    @Test
+    void should_not_create_a_policy_definition() {
+
+        var policyDefinition =
+                PolicyDefinition.Builder.newInstance().id("definition-id").build();
+
+        var created = policyDefinitions.create(policyDefinition);
+
+        assertThat(created.isSucceeded()).isFalse();
+        assertThat(created.getError()).isNotNull();
     }
 }

@@ -1,5 +1,10 @@
 package io.thinkit.edc.client.connector;
 
+import static io.thinkit.edc.client.connector.Constants.ID;
+import static io.thinkit.edc.client.connector.JsonLdUtil.compact;
+import static io.thinkit.edc.client.connector.JsonLdUtil.expand;
+import static java.net.http.HttpRequest.BodyPublishers.ofString;
+
 import com.apicatalog.jsonld.JsonLd;
 import com.apicatalog.jsonld.JsonLdError;
 import com.apicatalog.jsonld.document.JsonDocument;
@@ -31,18 +36,46 @@ public class PolicyDefinitions {
 
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var statusCode = response.statusCode();
-            boolean succeeded = statusCode == 200;
-            if (succeeded) {
+            if (statusCode == 200) {
                 var jsonDocument = JsonDocument.of(response.body());
                 var jsonArray = JsonLd.expand(jsonDocument).get();
-                PolicyDefinition policyDefinition = new PolicyDefinition(jsonArray.getJsonObject(0));
+                var policyDefinition = PolicyDefinition.Builder.newInstance()
+                        .raw(jsonArray.getJsonObject(0))
+                        .build();
                 return new Result<>(policyDefinition, null);
             } else {
-                String error = (statusCode == 400)
+                var error = (statusCode == 400)
                         ? "Request body was malformed"
                         : "A policy definition with the given ID does not exist";
                 return new Result<>(error);
             }
+        } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Result<String> create(PolicyDefinition input) {
+        try {
+            var requestBody = compact(input);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/policydefinitions".formatted(url)))
+                    .header("content-type", "application/json")
+                    .POST(ofString(requestBody.toString()));
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                var content = expand(response.body());
+                var id = content.getJsonObject(0).getString(ID);
+                return new Result<>(id, null);
+            } else {
+                var error = (statusCode == 400) ? "Request body was malformed" : "Could not create policy definition";
+                return new Result<>(null, error);
+            }
+
         } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
