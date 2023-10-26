@@ -92,4 +92,46 @@ public class PolicyDefinitionsTest {
         assertThat(created.isSucceeded()).isFalse();
         assertThat(created.getError()).isNotNull();
     }
+
+    @Test
+    void should_update_a_policy_definition() {
+        var constraints = Json.createArrayBuilder()
+                .add(createObjectBuilder()
+                        .add("leftOperand", "spatial")
+                        .add("operator", "eq")
+                        .add("rightOperand", "https://www.wikidata.org/wiki/Q183")
+                        .add("comment", "i.e Germany"))
+                .build();
+        var permissions = Json.createArrayBuilder()
+                .add(createObjectBuilder()
+                        .add("target", "http://example.com/asset:9898.movie")
+                        .add("action", "display")
+                        .add("constraints", constraints))
+                .build();
+
+        var policy = Policy.Builder.newInstance()
+                .raw(createObjectBuilder().add("permission", permissions).build())
+                .build();
+
+        var policyDefinition = PolicyDefinition.Builder.newInstance()
+                .id("definition-id")
+                .policy(policy)
+                .build();
+
+        var updated = policyDefinitions.update(policyDefinition);
+
+        assertThat(updated.isSucceeded()).isTrue();
+    }
+
+    @Test
+    void should_not_update_a_policy_definition() {
+
+        var policyDefinition =
+                PolicyDefinition.Builder.newInstance().id("definition-id").build();
+
+        var updated = policyDefinitions.update(policyDefinition);
+
+        assertThat(updated.isSucceeded()).isFalse();
+        assertThat(updated.getError()).isNotNull();
+    }
 }
