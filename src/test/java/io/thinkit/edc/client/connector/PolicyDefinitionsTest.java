@@ -92,4 +92,19 @@ public class PolicyDefinitionsTest {
         assertThat(created.isSucceeded()).isFalse();
         assertThat(created.getError()).isNotNull();
     }
+
+    @Test
+    void should_delete_a_policy_definition() {
+        var deleted = policyDefinitions.delete("definition-id");
+
+        assertThat(deleted.isSucceeded()).isTrue();
+    }
+
+    @Test
+    void should_not_delete_a_policy_definition_when_id_is_empty() {
+        var deleted = policyDefinitions.delete("");
+
+        assertThat(deleted.isSucceeded()).isFalse();
+        assertThat(deleted.getError()).isNotNull();
+    }
 }
