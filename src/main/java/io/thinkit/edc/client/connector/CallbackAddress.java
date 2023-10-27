@@ -55,31 +55,31 @@ public class CallbackAddress extends JsonLdObject {
             return new CallbackAddress(builder.build());
         }
 
-        public CallbackAddress.Builder authCodeId(String accessPolicyId) {
+        public CallbackAddress.Builder authCodeId(String authCodeId) {
             builder.add(
                     CALLBACK_ADDRESS_AUTH_CODE_ID,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, accessPolicyId)));
+                    createArrayBuilder().add(createObjectBuilder().add(VALUE, authCodeId)));
             return this;
         }
 
-        public CallbackAddress.Builder authKey(String CALLBACKPolicyId) {
+        public CallbackAddress.Builder authKey(String authKey) {
             builder.add(
                     CALLBACK_ADDRESS_AUTH_KEY,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, CALLBACKPolicyId)));
+                    createArrayBuilder().add(createObjectBuilder().add(VALUE, authKey)));
             return this;
         }
 
-        public CallbackAddress.Builder transactional(Boolean CALLBACKPolicyId) {
+        public CallbackAddress.Builder transactional(Boolean transactional) {
             builder.add(
                     CALLBACK_ADDRESS_TRANSACTIONAL,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, CALLBACKPolicyId)));
+                    createArrayBuilder().add(createObjectBuilder().add(VALUE, transactional)));
             return this;
         }
 
-        public CallbackAddress.Builder uri(String CALLBACKPolicyId) {
+        public CallbackAddress.Builder uri(String uri) {
             builder.add(
                     CALLBACK_ADDRESS_URI,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, CALLBACKPolicyId)));
+                    createArrayBuilder().add(createObjectBuilder().add(VALUE, uri)));
             return this;
         }
 
