@@ -5,9 +5,7 @@ import static io.thinkit.edc.client.connector.JsonLdUtil.compact;
 import static io.thinkit.edc.client.connector.JsonLdUtil.expand;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
-import com.apicatalog.jsonld.JsonLd;
 import com.apicatalog.jsonld.JsonLdError;
-import com.apicatalog.jsonld.document.JsonDocument;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -37,8 +35,7 @@ public class PolicyDefinitions {
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var statusCode = response.statusCode();
             if (statusCode == 200) {
-                var jsonDocument = JsonDocument.of(response.body());
-                var jsonArray = JsonLd.expand(jsonDocument).get();
+                var jsonArray = expand(response.body());
                 var policyDefinition = PolicyDefinition.Builder.newInstance()
                         .raw(jsonArray.getJsonObject(0))
                         .build();
@@ -74,6 +71,30 @@ public class PolicyDefinitions {
             } else {
                 var error = (statusCode == 400) ? "Request body was malformed" : "Could not create policy definition";
                 return new Result<>(null, error);
+            }
+
+        } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Result<String> update(PolicyDefinition input) {
+        try {
+            var requestBody = compact(input);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/policydefinitions/%s".formatted(url, input.id())))
+                    .header("content-type", "application/json")
+                    .PUT(ofString(requestBody.toString()));
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            var statusCode = response.statusCode();
+            if (statusCode == 204) {
+                return new Result<>(input.id(), null);
+            } else {
+                return new Result<>(null, "Policy Definition could not be updated");
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {
