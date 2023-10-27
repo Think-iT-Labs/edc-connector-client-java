@@ -42,4 +42,8 @@ public class JsonLdObject {
     protected int intValue(String key) {
         return raw.getJsonArray(key).getJsonObject(0).getJsonNumber(VALUE).intValue();
     }
+
+    protected Boolean booleanValue(String key) {
+        return raw.getJsonArray(key).getJsonObject(0).getBoolean(VALUE);
+    }
 }
