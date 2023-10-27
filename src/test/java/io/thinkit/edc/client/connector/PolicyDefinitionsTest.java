@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.json.Json;
 import java.net.http.HttpClient;
-import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
@@ -148,5 +147,36 @@ public class PolicyDefinitionsTest {
 
         assertThat(deleted.isSucceeded()).isFalse();
         assertThat(deleted.getError()).isNotNull();
+    }
+
+    @Test
+    void should_get_policy_definitions() {
+        var input = QuerySpec.Builder.newInstance()
+                .offset(0)
+                .limit(10)
+                .sortOrder("DESC")
+                .sortField("fieldName")
+                .build();
+
+        var PolicyDefinitionList = policyDefinitions.request(input);
+
+        assertThat(PolicyDefinitionList.isSucceeded()).isTrue();
+        assertThat(PolicyDefinitionList.getContent()).isNotNull().first().satisfies(policyDefinition -> {
+            assertThat(policyDefinition.id()).isNotBlank();
+            assertThat(policyDefinition.policy()).isNotNull().satisfies(policy -> assertThat(
+                            policy.getList(ODRL_NAMESPACE + "permission").size())
+                    .isGreaterThan(0));
+            assertThat(policyDefinition.createdAt()).isGreaterThan(0);
+        });
+    }
+
+    @Test
+    void should_not_get_policy_definitions() {
+        var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+
+        var result = policyDefinitions.request(input);
+
+        assertThat(result.isSucceeded()).isFalse();
+        assertThat(result.getError()).isNotNull();
     }
 }
