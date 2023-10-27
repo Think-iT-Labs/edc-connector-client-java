@@ -93,6 +93,63 @@ public class PolicyDefinitionsTest {
     }
 
     @Test
+    void should_update_a_policy_definition() {
+        var constraints = Json.createArrayBuilder()
+                .add(createObjectBuilder()
+                        .add("leftOperand", "spatial")
+                        .add("operator", "eq")
+                        .add("rightOperand", "https://www.wikidata.org/wiki/Q183")
+                        .add("comment", "i.e Germany"))
+                .build();
+        var permissions = Json.createArrayBuilder()
+                .add(createObjectBuilder()
+                        .add("target", "http://example.com/asset:9898.movie")
+                        .add("action", "display")
+                        .add("constraints", constraints))
+                .build();
+
+        var policy = Policy.Builder.newInstance()
+                .raw(createObjectBuilder().add("permission", permissions).build())
+                .build();
+
+        var policyDefinition = PolicyDefinition.Builder.newInstance()
+                .id("definition-id")
+                .policy(policy)
+                .build();
+
+        var updated = policyDefinitions.update(policyDefinition);
+
+        assertThat(updated.isSucceeded()).isTrue();
+    }
+
+    @Test
+    void should_not_update_a_policy_definition() {
+
+        var policyDefinition =
+                PolicyDefinition.Builder.newInstance().id("definition-id").build();
+
+        var updated = policyDefinitions.update(policyDefinition);
+
+        assertThat(updated.isSucceeded()).isFalse();
+        assertThat(updated.getError()).isNotNull();
+    }
+
+    @Test
+    void should_delete_a_policy_definition() {
+        var deleted = policyDefinitions.delete("definition-id");
+
+        assertThat(deleted.isSucceeded()).isTrue();
+    }
+
+    @Test
+    void should_not_delete_a_policy_definition_when_id_is_empty() {
+        var deleted = policyDefinitions.delete("");
+
+        assertThat(deleted.isSucceeded()).isFalse();
+        assertThat(deleted.getError()).isNotNull();
+    }
+
+    @Test
     void should_get_policy_definitions() {
         var input = QuerySpec.Builder.newInstance()
                 .offset(0)
