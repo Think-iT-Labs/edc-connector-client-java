@@ -84,7 +84,7 @@ public class CallbackAddress extends JsonLdObject {
         }
 
         public CallbackAddress.Builder events(List<String> events) {
-            builder.add(CALLBACK_ADDRESS_TRANSACTIONAL, Json.createArrayBuilder(events));
+            builder.add(CALLBACK_ADDRESS_EVENTS, Json.createArrayBuilder(events));
             return this;
         }
 
