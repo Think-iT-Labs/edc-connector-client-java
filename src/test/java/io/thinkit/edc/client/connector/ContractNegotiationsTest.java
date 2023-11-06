@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.json.Json;
 import java.net.http.HttpClient;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
@@ -98,18 +100,19 @@ class ContractNegotiationsTest {
                 .assetId("asset-id")
                 .policy(policy)
                 .build();
-        /*var callbackAddresses = CallbackAddress.Builder.newInstance()
-        .transactional(false)
-        .uri("http://callback/url")
-        .authKey("auth-key")
-        .authCodeId("auth-code-id")
-        .events(Arrays.asList("contract.negotiation", "transfer.process"))
-        .build();*/
+        var callbackAddresses = CallbackAddress.Builder.newInstance()
+                .transactional(false)
+                .uri("http://callback/url")
+                .authKey("auth-key")
+                .authCodeId("auth-code-id")
+                .events(Arrays.asList("contract.negotiation", "transfer.process"))
+                .build();
         var contractNegotiation = ContractRequest.Builder.newInstance()
                 .connectorAddress("http://provider-address")
                 .protocol("dataspace-protocol-http")
                 .providerId("provider-id")
                 .offer(offer)
+                .callbackAddresses(List.of(callbackAddresses, callbackAddresses))
                 .build();
 
         var created = contractNegotiations.create(contractNegotiation);
