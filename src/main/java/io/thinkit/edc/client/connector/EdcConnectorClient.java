@@ -43,6 +43,13 @@ public class EdcConnectorClient {
         return new ContractDefinitions(managementUrl, httpClient, interceptor);
     }
 
+    public ContractNegotiations contractNegotiations() {
+        if (managementUrl == null) {
+            throw new IllegalArgumentException(
+                    "Cannot instantiate ContractNegotiations client without the management url");
+        }
+        return new ContractNegotiations(managementUrl, httpClient, interceptor);
+    }
     public ContractAgreements contractAgreements() {
         if (managementUrl == null) {
             throw new IllegalArgumentException(
