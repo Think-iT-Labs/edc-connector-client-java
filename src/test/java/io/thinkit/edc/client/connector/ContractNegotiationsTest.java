@@ -80,4 +80,28 @@ class ContractNegotiationsTest {
         assertThat(contractDefinition.isSucceeded()).isFalse();
         assertThat(contractDefinition.getError()).isNotNull();
     }
+
+    @Test
+    void should_terminate_a_contract_negotiation() {
+        var input = TerminateNegotiation.Builder.newInstance()
+                .id("negotiation-id")
+                .reason("a reason to terminate")
+                .build();
+        var terminated = contractNegotiations.terminate(input);
+
+        assertThat(terminated.isSucceeded()).isTrue();
+        assertThat(terminated.getContent()).isNotNull();
+    }
+
+    @Test
+    void should_not_terminate_a_contract_negotiation_when_id_is_empty() {
+        var input = TerminateNegotiation.Builder.newInstance()
+                .id("")
+                .reason("a reason to terminate")
+                .build();
+        var terminated = contractNegotiations.terminate(input);
+
+        assertThat(terminated.isSucceeded()).isFalse();
+        assertThat(terminated.getError()).isNotNull();
+    }
 }
