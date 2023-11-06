@@ -20,7 +20,7 @@ public class ContractNegotiation extends JsonLdObject {
     private static final String CONTRACT_NEGOTIATION_CONTRACT_AGREEMENT_ID = EDC_NAMESPACE + "contractAgreementId";
     private static final String CONTRACT_NEGOTIATION_ERROR_DETAIL = EDC_NAMESPACE + "errorDetail";
     private static final String CONTRACT_NEGOTIATION_CALLBACK_ADDRESSES = EDC_NAMESPACE + "callbackAddresses";
-    private static final String CONTRACT_NEGOTIATION__CREATED_AT = EDC_NAMESPACE + "createdAt";
+    private static final String CONTRACT_NEGOTIATION_CREATED_AT = EDC_NAMESPACE + "createdAt";
 
     private ContractNegotiation(JsonObject raw) {
         super(raw);
@@ -61,7 +61,7 @@ public class ContractNegotiation extends JsonLdObject {
     }
 
     public long createdAt() {
-        return longValue(CONTRACT_NEGOTIATION__CREATED_AT);
+        return longValue(CONTRACT_NEGOTIATION_CREATED_AT);
     }
 
     public static class Builder {
