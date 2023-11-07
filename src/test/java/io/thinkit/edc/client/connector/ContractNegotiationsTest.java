@@ -1,8 +1,12 @@
 package io.thinkit.edc.client.connector;
 
+import static jakarta.json.Json.createObjectBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import jakarta.json.Json;
 import java.net.http.HttpClient;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
@@ -27,7 +31,7 @@ class ContractNegotiationsTest {
     }
 
     @Test
-    void should_get_a_contract_Negotiation() {
+    void should_get_a_contract_negotiation() {
         var contractDefinition = contractNegotiations.get("negotiation-id");
 
         assertThat(contractDefinition.isSucceeded()).isTrue();
@@ -74,10 +78,60 @@ class ContractNegotiationsTest {
     }
 
     @Test
-    void should_not_get_a_contract_Negotiation_when_id_is_empty() {
+    void should_not_get_a_contract_negotiation_when_id_is_empty() {
         var contractDefinition = contractNegotiations.get("");
 
         assertThat(contractDefinition.isSucceeded()).isFalse();
         assertThat(contractDefinition.getError()).isNotNull();
+    }
+
+    @Test
+    void should_create_a_contract_negotiation() {
+
+        var permissions = Json.createArrayBuilder()
+                .add(createObjectBuilder().add("target", "asset-id").add("action", "display"))
+                .build();
+
+        var policy = Policy.Builder.newInstance()
+                .raw(createObjectBuilder().add("permission", permissions).build())
+                .build();
+        var offer = ContractOfferDescription.Builder.newInstance()
+                .offerId("offer-id")
+                .assetId("asset-id")
+                .policy(policy)
+                .build();
+        var callbackAddresses = CallbackAddress.Builder.newInstance()
+                .transactional(false)
+                .uri("http://callback/url")
+                .authKey("auth-key")
+                .authCodeId("auth-code-id")
+                .events(Arrays.asList("contract.negotiation", "transfer.process"))
+                .build();
+        var contractNegotiation = ContractRequest.Builder.newInstance()
+                .connectorAddress("http://provider-address")
+                .protocol("dataspace-protocol-http")
+                .providerId("provider-id")
+                .offer(offer)
+                .callbackAddresses(List.of(callbackAddresses, callbackAddresses))
+                .build();
+
+        var created = contractNegotiations.create(contractNegotiation);
+
+        assertThat(created.isSucceeded()).isTrue();
+        assertThat(created.getContent()).isNotNull();
+    }
+
+    @Test
+    void should_not_create_a_contract_negotiation_when_provider_id_is_empty() {
+
+        var contractNegotiation = ContractRequest.Builder.newInstance()
+                .connectorAddress("http://provider-address")
+                .protocol("dataspace-protocol-http")
+                .build();
+
+        var created = contractNegotiations.create(contractNegotiation);
+
+        assertThat(created.isSucceeded()).isFalse();
+        assertThat(created.getError()).isNotNull();
     }
 }
