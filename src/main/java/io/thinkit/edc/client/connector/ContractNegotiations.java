@@ -6,6 +6,7 @@ import static io.thinkit.edc.client.connector.JsonLdUtil.expand;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import com.apicatalog.jsonld.JsonLdError;
+import com.apicatalog.jsonld.document.JsonDocument;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -124,6 +125,32 @@ public class ContractNegotiations {
                 return new Result<>(null, "The contract negotiation cannot be terminated");
             }
 
+        } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Result<String> getState(String id) {
+        try {
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/contractnegotiations/%s/state".formatted(url, id)))
+                    .GET();
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                var jsonDocument = JsonDocument.of(response.body());
+                var content = jsonDocument.getJsonContent().get();
+                var state = content.asJsonObject().getString("state");
+                return new Result<>(state, null);
+            } else {
+                var error = (statusCode == 400)
+                        ? "Request body was malformed"
+                        : "A contract negotiation with the given ID does not exist";
+                return new Result<>(error);
+            }
         } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }

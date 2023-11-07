@@ -182,4 +182,22 @@ class ContractNegotiationsTest {
         assertThat(terminated.isSucceeded()).isFalse();
         assertThat(terminated.getError()).isNotNull();
     }
+
+    @Test
+    void should_get_a_contract_negotiation_state() {
+
+        var state = contractNegotiations.getState("negotiation-id");
+
+        assertThat(state.isSucceeded()).isTrue();
+        assertThat(state.getContent()).isNotNull().isEqualTo("string");
+    }
+
+    @Test
+    void should_not_get_a_contract_negotiation_state() {
+
+        var state = contractNegotiations.getState("");
+
+        assertThat(state.isSucceeded()).isFalse();
+        assertThat(state.getError()).isNotNull();
+    }
 }
