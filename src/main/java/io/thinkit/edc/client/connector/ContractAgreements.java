@@ -47,4 +47,31 @@ public class ContractAgreements {
             throw new RuntimeException(e);
         }
     }
+
+    public Result<ContractNegotiation> getNegotiation(String id) {
+        try {
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/contractagreements/%s/negotiation".formatted(url, id)))
+                    .GET();
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                var jsonArray = expand(response.body());
+                var contractNegotiation = ContractNegotiation.Builder.newInstance()
+                        .raw(jsonArray.getJsonObject(0))
+                        .build();
+                return new Result<>(contractNegotiation, null);
+            } else {
+                var error = (statusCode == 400)
+                        ? "Request body was malformed"
+                        : "A contract agreement with the given ID does not exist";
+                return new Result<>(error);
+            }
+        } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

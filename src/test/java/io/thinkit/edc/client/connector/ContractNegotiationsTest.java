@@ -1,8 +1,13 @@
 package io.thinkit.edc.client.connector;
 
+import static io.thinkit.edc.client.connector.Constants.ODRL_NAMESPACE;
+import static jakarta.json.Json.createObjectBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import jakarta.json.Json;
 import java.net.http.HttpClient;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
@@ -27,32 +32,32 @@ class ContractNegotiationsTest {
     }
 
     @Test
-    void should_get_a_contract_Negotiation() {
-        var contractDefinition = contractNegotiations.get("negotiation-id");
+    void should_get_a_contract_negotiation() {
+        var contractNegotiation = contractNegotiations.get("negotiation-id");
 
-        assertThat(contractDefinition.isSucceeded()).isTrue();
-        assertThat(contractDefinition.getContent().id()).isNotBlank();
-        assertThat(contractDefinition.getContent().type()).isNotNull().satisfies(type -> assertThat(type)
+        assertThat(contractNegotiation.isSucceeded()).isTrue();
+        assertThat(contractNegotiation.getContent().id()).isNotBlank();
+        assertThat(contractNegotiation.getContent().type()).isNotNull().satisfies(type -> assertThat(type)
                 .isEqualTo("PROVIDER"));
-        assertThat(contractDefinition.getContent().protocol()).isNotNull().satisfies(protocol -> assertThat(protocol)
+        assertThat(contractNegotiation.getContent().protocol()).isNotNull().satisfies(protocol -> assertThat(protocol)
                 .isEqualTo("dataspace-protocol-http"));
-        assertThat(contractDefinition.getContent().counterPartyId())
+        assertThat(contractNegotiation.getContent().counterPartyId())
                 .isNotNull()
                 .satisfies(counterPartyId -> assertThat(counterPartyId).isEqualTo("counter-party-id"));
-        assertThat(contractDefinition.getContent().counterPartyAddress())
+        assertThat(contractNegotiation.getContent().counterPartyAddress())
                 .isNotNull()
                 .satisfies(counterPartyAddress ->
                         assertThat(counterPartyAddress).isEqualTo("http://counter/party/address"));
-        assertThat(contractDefinition.getContent().state()).isNotNull().satisfies(state -> assertThat(state)
+        assertThat(contractNegotiation.getContent().state()).isNotNull().satisfies(state -> assertThat(state)
                 .isEqualTo("VERIFIED"));
-        assertThat(contractDefinition.getContent().contractAgreementId())
+        assertThat(contractNegotiation.getContent().contractAgreementId())
                 .isNotNull()
                 .satisfies(
                         contractAgreementId -> assertThat(contractAgreementId).isEqualTo("contract:agreement:id"));
-        assertThat(contractDefinition.getContent().errorDetail())
+        assertThat(contractNegotiation.getContent().errorDetail())
                 .isNotNull()
                 .satisfies(errorDetail -> assertThat(errorDetail).isEqualTo("eventual-error-detail"));
-        assertThat(contractDefinition.getContent().callbackAddresses())
+        assertThat(contractNegotiation.getContent().callbackAddresses())
                 .isNotNull()
                 .first()
                 .satisfies(callbackAddress -> {
@@ -70,15 +75,88 @@ class ContractNegotiationsTest {
                         assertThat(uri.get(1)).isEqualTo("transfer.process");
                     });
                 });
-        assertThat(contractDefinition.getContent().createdAt()).isGreaterThan(0);
+        assertThat(contractNegotiation.getContent().createdAt()).isGreaterThan(0);
     }
 
     @Test
-    void should_not_get_a_contract_Negotiation_when_id_is_empty() {
-        var contractDefinition = contractNegotiations.get("");
+    void should_not_get_a_contract_negotiation_when_id_is_empty() {
+        var contractNegotiation = contractNegotiations.get("");
 
-        assertThat(contractDefinition.isSucceeded()).isFalse();
-        assertThat(contractDefinition.getError()).isNotNull();
+        assertThat(contractNegotiation.isSucceeded()).isFalse();
+        assertThat(contractNegotiation.getError()).isNotNull();
+    }
+
+    @Test
+    void should_create_a_contract_negotiation() {
+
+        var permissions = Json.createArrayBuilder()
+                .add(createObjectBuilder().add("target", "asset-id").add("action", "display"))
+                .build();
+
+        var policy = Policy.Builder.newInstance()
+                .raw(createObjectBuilder().add("permission", permissions).build())
+                .build();
+        var offer = ContractOfferDescription.Builder.newInstance()
+                .offerId("offer-id")
+                .assetId("asset-id")
+                .policy(policy)
+                .build();
+        var callbackAddresses = CallbackAddress.Builder.newInstance()
+                .transactional(false)
+                .uri("http://callback/url")
+                .authKey("auth-key")
+                .authCodeId("auth-code-id")
+                .events(Arrays.asList("contract.negotiation", "transfer.process"))
+                .build();
+        var contractNegotiation = ContractRequest.Builder.newInstance()
+                .connectorAddress("http://provider-address")
+                .protocol("dataspace-protocol-http")
+                .providerId("provider-id")
+                .offer(offer)
+                .callbackAddresses(List.of(callbackAddresses, callbackAddresses))
+                .build();
+
+        var created = contractNegotiations.create(contractNegotiation);
+
+        assertThat(created.isSucceeded()).isTrue();
+        assertThat(created.getContent()).isNotNull();
+    }
+
+    @Test
+    void should_not_create_a_contract_negotiation_when_provider_id_is_empty() {
+
+        var contractNegotiation = ContractRequest.Builder.newInstance()
+                .connectorAddress("http://provider-address")
+                .protocol("dataspace-protocol-http")
+                .build();
+
+        var created = contractNegotiations.create(contractNegotiation);
+
+        assertThat(created.isSucceeded()).isFalse();
+        assertThat(created.getError()).isNotNull();
+    }
+
+    @Test
+    void should_get_a_contract_negotiation_attached_agreement() {
+        var contractAgreement = contractNegotiations.getAgreement("negotiation-id");
+
+        assertThat(contractAgreement.isSucceeded()).isTrue();
+        assertThat(contractAgreement.getContent().id()).isNotBlank();
+        assertThat(contractAgreement.getContent().providerId()).isEqualTo("provider-id");
+        assertThat(contractAgreement.getContent().consumerId()).isEqualTo("consumer-id");
+        assertThat(contractAgreement.getContent().assetId()).isEqualTo("asset-id");
+        assertThat(contractAgreement.getContent().contractSigningDate()).isGreaterThan(0);
+        assertThat(contractAgreement.getContent().policy()).isNotNull().satisfies(policy -> assertThat(
+                        policy.getList(ODRL_NAMESPACE + "permission").size())
+                .isGreaterThan(0));
+    }
+
+    @Test
+    void should_not_get_a_contract_negotiation_attached_agreement() {
+        var contractAgreement = contractNegotiations.getAgreement("");
+
+        assertThat(contractAgreement.isSucceeded()).isFalse();
+        assertThat(contractAgreement.getError()).isNotNull();
     }
 
     @Test
