@@ -104,4 +104,28 @@ public class ContractNegotiations {
             throw new RuntimeException(e);
         }
     }
+
+    public Result<String> terminate(TerminateNegotiation input) {
+        try {
+            var requestBody = compact(input);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/contractnegotiations/%s/terminate".formatted(url, input.id())))
+                    .header("content-type", "application/json")
+                    .POST(ofString(requestBody.toString()));
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                return new Result<>(input.id(), null);
+            } else {
+                return new Result<>(null, "The contract negotiation cannot be terminated");
+            }
+
+        } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
