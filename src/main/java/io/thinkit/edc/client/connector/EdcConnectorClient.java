@@ -50,6 +50,7 @@ public class EdcConnectorClient {
         }
         return new ContractNegotiations(managementUrl, httpClient, interceptor);
     }
+
     public ContractAgreements contractAgreements() {
         if (managementUrl == null) {
             throw new IllegalArgumentException(

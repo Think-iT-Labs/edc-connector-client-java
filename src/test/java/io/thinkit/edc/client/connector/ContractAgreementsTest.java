@@ -48,4 +48,59 @@ public class ContractAgreementsTest {
         assertThat(contractAgreement.isSucceeded()).isFalse();
         assertThat(contractAgreement.getError()).isNotNull();
     }
+
+    @Test
+    void should_get_a_contract_agreement_negotiation() {
+        var contractNegotiation = contractAgreements.getNegotiation("agreement-id");
+
+        assertThat(contractNegotiation.isSucceeded()).isTrue();
+        assertThat(contractNegotiation.getContent().id()).isNotBlank();
+        assertThat(contractNegotiation.getContent().type()).isNotNull().satisfies(type -> assertThat(type)
+                .isEqualTo("PROVIDER"));
+        assertThat(contractNegotiation.getContent().protocol()).isNotNull().satisfies(protocol -> assertThat(protocol)
+                .isEqualTo("dataspace-protocol-http"));
+        assertThat(contractNegotiation.getContent().counterPartyId())
+                .isNotNull()
+                .satisfies(counterPartyId -> assertThat(counterPartyId).isEqualTo("counter-party-id"));
+        assertThat(contractNegotiation.getContent().counterPartyAddress())
+                .isNotNull()
+                .satisfies(counterPartyAddress ->
+                        assertThat(counterPartyAddress).isEqualTo("http://counter/party/address"));
+        assertThat(contractNegotiation.getContent().state()).isNotNull().satisfies(state -> assertThat(state)
+                .isEqualTo("VERIFIED"));
+        assertThat(contractNegotiation.getContent().contractAgreementId())
+                .isNotNull()
+                .satisfies(
+                        contractAgreementId -> assertThat(contractAgreementId).isEqualTo("contract:agreement:id"));
+        assertThat(contractNegotiation.getContent().errorDetail())
+                .isNotNull()
+                .satisfies(errorDetail -> assertThat(errorDetail).isEqualTo("eventual-error-detail"));
+        assertThat(contractNegotiation.getContent().callbackAddresses())
+                .isNotNull()
+                .first()
+                .satisfies(callbackAddress -> {
+                    assertThat(callbackAddress.authCodeId()).isNotNull().satisfies(authCodeId -> assertThat(authCodeId)
+                            .isEqualTo("auth-code-id"));
+                    assertThat(callbackAddress.authKey()).isNotNull().satisfies(authKey -> assertThat(authKey)
+                            .isEqualTo("auth-key"));
+                    assertThat(callbackAddress.transactional()).isNotNull().satisfies(transactional -> assertThat(
+                                    transactional)
+                            .isFalse());
+                    assertThat(callbackAddress.uri()).isNotNull().satisfies(uri -> assertThat(uri)
+                            .isEqualTo("http://callback/url"));
+                    assertThat(callbackAddress.events()).isNotNull().satisfies(uri -> {
+                        assertThat(uri.get(0)).isEqualTo("contract.negotiation");
+                        assertThat(uri.get(1)).isEqualTo("transfer.process");
+                    });
+                });
+        assertThat(contractNegotiation.getContent().createdAt()).isGreaterThan(0);
+    }
+
+    @Test
+    void should_not_get_a_contract_agreement_negotiation_when_id_is_empty() {
+        var contractNegotiation = contractAgreements.getNegotiation("");
+
+        assertThat(contractNegotiation.isSucceeded()).isFalse();
+        assertThat(contractNegotiation.getError()).isNotNull();
+    }
 }
