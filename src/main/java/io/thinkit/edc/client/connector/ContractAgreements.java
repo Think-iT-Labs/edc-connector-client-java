@@ -1,6 +1,8 @@
 package io.thinkit.edc.client.connector;
 
+import static io.thinkit.edc.client.connector.JsonLdUtil.compact;
 import static io.thinkit.edc.client.connector.JsonLdUtil.expand;
+import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import com.apicatalog.jsonld.JsonLdError;
 import java.io.IOException;
@@ -8,6 +10,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.function.UnaryOperator;
 
 public class ContractAgreements {
@@ -70,6 +73,36 @@ public class ContractAgreements {
                         : "A contract agreement with the given ID does not exist";
                 return new Result<>(error);
             }
+        } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Result<List<ContractAgreement>> request(QuerySpec input) {
+        try {
+            var requestBody = compact(input);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/contractagreements/request".formatted(url)))
+                    .header("content-type", "application/json")
+                    .POST(ofString(requestBody.toString()));
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                var jsonArray = expand(response.body());
+                var contractAgreements = jsonArray.stream()
+                        .map(s -> ContractAgreement.Builder.newInstance()
+                                .raw(s.asJsonObject())
+                                .build())
+                        .toList();
+                return new Result<>(contractAgreements, null);
+            } else {
+                return new Result<>("Request body was malformed");
+            }
+
         } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
