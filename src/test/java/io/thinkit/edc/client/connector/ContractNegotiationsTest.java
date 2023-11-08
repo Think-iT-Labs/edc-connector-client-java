@@ -182,4 +182,70 @@ class ContractNegotiationsTest {
         assertThat(terminated.isSucceeded()).isFalse();
         assertThat(terminated.getError()).isNotNull();
     }
+
+    @Test
+    void should_get_contract_negotiations() {
+        var input = QuerySpec.Builder.newInstance()
+                .offset(0)
+                .limit(10)
+                .sortOrder("DESC")
+                .sortField("fieldName")
+                .build();
+
+        var ContractNegotiationList = contractNegotiations.request(input);
+
+        assertThat(ContractNegotiationList.isSucceeded()).isTrue();
+        assertThat(ContractNegotiationList.getContent()).isNotNull().first().satisfies(contractNegotiation -> {
+            assertThat(contractNegotiation.id()).isNotBlank();
+            assertThat(contractNegotiation.type()).isNotNull().satisfies(type -> assertThat(type)
+                    .isEqualTo("PROVIDER"));
+            assertThat(contractNegotiation.protocol()).isNotNull().satisfies(protocol -> assertThat(protocol)
+                    .isEqualTo("dataspace-protocol-http"));
+            assertThat(contractNegotiation.counterPartyId())
+                    .isNotNull()
+                    .satisfies(counterPartyId -> assertThat(counterPartyId).isEqualTo("counter-party-id"));
+            assertThat(contractNegotiation.counterPartyAddress())
+                    .isNotNull()
+                    .satisfies(counterPartyAddress ->
+                            assertThat(counterPartyAddress).isEqualTo("http://counter/party/address"));
+            assertThat(contractNegotiation.state()).isNotNull().satisfies(state -> assertThat(state)
+                    .isEqualTo("VERIFIED"));
+            assertThat(contractNegotiation.contractAgreementId())
+                    .isNotNull()
+                    .satisfies(contractAgreementId ->
+                            assertThat(contractAgreementId).isEqualTo("contract:agreement:id"));
+            assertThat(contractNegotiation.errorDetail()).isNotNull().satisfies(errorDetail -> assertThat(errorDetail)
+                    .isEqualTo("eventual-error-detail"));
+            assertThat(contractNegotiation.callbackAddresses())
+                    .isNotNull()
+                    .first()
+                    .satisfies(callbackAddress -> {
+                        assertThat(callbackAddress.authCodeId())
+                                .isNotNull()
+                                .satisfies(authCodeId -> assertThat(authCodeId).isEqualTo("auth-code-id"));
+                        assertThat(callbackAddress.authKey()).isNotNull().satisfies(authKey -> assertThat(authKey)
+                                .isEqualTo("auth-key"));
+                        assertThat(callbackAddress.transactional()).isNotNull().satisfies(transactional -> assertThat(
+                                        transactional)
+                                .isFalse());
+                        assertThat(callbackAddress.uri()).isNotNull().satisfies(uri -> assertThat(uri)
+                                .isEqualTo("http://callback/url"));
+                        assertThat(callbackAddress.events()).isNotNull().satisfies(uri -> {
+                            assertThat(uri.get(0)).isEqualTo("contract.negotiation");
+                            assertThat(uri.get(1)).isEqualTo("transfer.process");
+                        });
+                    });
+            assertThat(contractNegotiation.createdAt()).isGreaterThan(0);
+        });
+    }
+
+    @Test
+    void should_not_get_contract_negotiations() {
+        var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+
+        var result = contractNegotiations.request(input);
+
+        assertThat(result.isSucceeded()).isFalse();
+        assertThat(result.getError()).isNotNull();
+    }
 }
