@@ -103,4 +103,37 @@ public class ContractAgreementsTest {
         assertThat(contractNegotiation.isSucceeded()).isFalse();
         assertThat(contractNegotiation.getError()).isNotNull();
     }
+
+    @Test
+    void should_get_a_contract_agreements() {
+        var input = QuerySpec.Builder.newInstance()
+                .offset(5)
+                .limit(10)
+                .sortOrder("DESC")
+                .sortField("fieldName")
+                .build();
+        var contractAgreementList = contractAgreements.request(input);
+
+        assertThat(contractAgreementList.isSucceeded()).isTrue();
+        assertThat(contractAgreementList.getContent()).isNotNull().first().satisfies(contractAgreement -> {
+            assertThat(contractAgreement.id()).isNotBlank();
+            assertThat(contractAgreement.providerId()).isEqualTo("provider-id");
+            assertThat(contractAgreement.consumerId()).isEqualTo("consumer-id");
+            assertThat(contractAgreement.assetId()).isEqualTo("asset-id");
+            assertThat(contractAgreement.contractSigningDate()).isGreaterThan(0);
+            assertThat(contractAgreement.policy()).isNotNull().satisfies(policy -> assertThat(
+                            policy.getList(ODRL_NAMESPACE + "permission").size())
+                    .isGreaterThan(0));
+        });
+    }
+
+    @Test
+    void should_not_get_contract_agreements() {
+        var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+
+        var result = contractAgreements.request(input);
+
+        assertThat(result.isSucceeded()).isFalse();
+        assertThat(result.getError()).isNotNull();
+    }
 }

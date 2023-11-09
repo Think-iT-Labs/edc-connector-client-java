@@ -12,6 +12,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.function.UnaryOperator;
 
 public class ContractNegotiations {
@@ -123,6 +124,36 @@ public class ContractNegotiations {
                 return new Result<>(input.id(), null);
             } else {
                 return new Result<>(null, "The contract negotiation cannot be terminated");
+            }
+
+        } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Result<List<ContractNegotiation>> request(QuerySpec input) {
+        try {
+            var requestBody = compact(input);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/contractnegotiations/request".formatted(url)))
+                    .header("content-type", "application/json")
+                    .POST(ofString(requestBody.toString()));
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                var jsonArray = expand(response.body());
+                var contractNegotiations = jsonArray.stream()
+                        .map(s -> ContractNegotiation.Builder.newInstance()
+                                .raw(s.asJsonObject())
+                                .build())
+                        .toList();
+                return new Result<>(contractNegotiations, null);
+            } else {
+                return new Result<>("Request body was malformed");
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {
