@@ -59,6 +59,14 @@ public class EdcConnectorClient {
         return new ContractAgreements(managementUrl, httpClient, interceptor);
     }
 
+    public TransferProcesses transferProcesses() {
+        if (managementUrl == null) {
+            throw new IllegalArgumentException(
+                    "Cannot instantiate transferProcesses client without the management url");
+        }
+        return new TransferProcesses(managementUrl, httpClient, interceptor);
+    }
+
     public static class Builder {
 
         private final EdcConnectorClient client = new EdcConnectorClient();
