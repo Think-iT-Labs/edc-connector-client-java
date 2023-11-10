@@ -71,4 +71,28 @@ class TransferProcessesTest {
         assertThat(transferProcess.isSucceeded()).isFalse();
         assertThat(transferProcess.getError()).isNotNull();
     }
+
+    @Test
+    void should_terminate_a_transfer_process() {
+        var input = TerminateTransfer.Builder.newInstance()
+                .id("process-id")
+                .reason("a reason to terminate")
+                .build();
+        var terminated = transferProcesses.terminate(input);
+
+        assertThat(terminated.isSucceeded()).isTrue();
+        assertThat(terminated.getContent()).isNotNull();
+    }
+
+    @Test
+    void should_not_terminate_a_transfer_process_when_id_is_empty() {
+        var input = TerminateTransfer.Builder.newInstance()
+                .id("")
+                .reason("a reason to terminate")
+                .build();
+        var terminated = transferProcesses.terminate(input);
+
+        assertThat(terminated.isSucceeded()).isFalse();
+        assertThat(terminated.getError()).isNotNull();
+    }
 }
