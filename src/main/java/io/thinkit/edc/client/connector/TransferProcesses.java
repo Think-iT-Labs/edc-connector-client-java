@@ -1,5 +1,6 @@
 package io.thinkit.edc.client.connector;
 
+import static io.thinkit.edc.client.connector.Constants.ID;
 import static io.thinkit.edc.client.connector.JsonLdUtil.compact;
 import static io.thinkit.edc.client.connector.JsonLdUtil.expand;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
@@ -43,6 +44,60 @@ public class TransferProcesses {
                 var error = (statusCode == 400)
                         ? "Request body was malformed"
                         : "A transfer process with the given ID does not exist";
+                return new Result<>(error);
+            }
+        } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Result<String> create(TransferRequest input) {
+        try {
+            var requestBody = compact(input);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/transferprocesses".formatted(url)))
+                    .header("content-type", "application/json")
+                    .POST(ofString(requestBody.toString()));
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                var content = expand(response.body());
+                var id = content.getJsonObject(0).getString(ID);
+                return new Result<>(id, null);
+            } else {
+                var error = (statusCode == 400) ? "Request body was malformed" : "Could not create transfer request";
+                return new Result<>(null, error);
+            }
+
+        } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Result<TransferState> getState(String id) {
+        try {
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/transferprocesses/%s/state".formatted(url, id)))
+                    .GET();
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                var jsonArray = expand(response.body());
+                var state = TransferState.Builder.newInstance()
+                        .raw(jsonArray.getJsonObject(0))
+                        .build();
+                return new Result<>(state, null);
+            } else {
+                var error = (statusCode == 400)
+                        ? "Request body was malformed"
+                        : "An transfer process with the given ID does not exist";
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
