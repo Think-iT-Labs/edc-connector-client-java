@@ -3,6 +3,9 @@ package io.thinkit.edc.client.connector;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.http.HttpClient;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
@@ -70,6 +73,52 @@ class TransferProcessesTest {
 
         assertThat(transferProcess.isSucceeded()).isFalse();
         assertThat(transferProcess.getError()).isNotNull();
+    }
+
+    @Test
+    void should_create_a_transfer_process() {
+        var privateProperties = Map.of("private-key", "data-destination-type");
+        var dataDestination = Map.of("type", "data-destination-type");
+        var callbackAddresses = CallbackAddress.Builder.newInstance()
+                .transactional(false)
+                .uri("http://callback/url")
+                .authKey("auth-key")
+                .authCodeId("auth-code-id")
+                .events(Arrays.asList("contract.negotiation", "transfer.process"))
+                .build();
+        var transferRequest = TransferRequest.Builder.newInstance()
+                .protocol("dataspace-protocol-http")
+                .connectorAddress("http://provider-address")
+                .connectorId("provider-id")
+                .contractId("contract-id")
+                .assetId("asset-id")
+                .dataDestination(dataDestination)
+                .privateProperties(privateProperties)
+                .callbackAddresses(List.of(callbackAddresses, callbackAddresses))
+                .build();
+
+        var created = transferProcesses.create(transferRequest);
+
+        assertThat(created.isSucceeded()).isTrue();
+        assertThat(created.getContent()).isNotNull();
+    }
+
+    @Test
+    void should_not_create_a_transfer_process_when_data_destination_is_empty() {
+        var privateProperties = Map.of("private-key", "data-destination-type");
+        var transferRequest = TransferRequest.Builder.newInstance()
+                .protocol("dataspace-protocol-http")
+                .connectorAddress("http://provider-address")
+                .connectorId("provider-id")
+                .contractId("contract-id")
+                .assetId("asset-id")
+                .privateProperties(privateProperties)
+                .build();
+
+        var created = transferProcesses.create(transferRequest);
+
+        assertThat(created.isSucceeded()).isFalse();
+        assertThat(created.getError()).isNotNull();
     }
 
     @Test
