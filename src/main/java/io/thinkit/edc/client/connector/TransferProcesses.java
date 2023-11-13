@@ -77,4 +77,31 @@ public class TransferProcesses {
             throw new RuntimeException(e);
         }
     }
+
+    public Result<TransferState> getState(String id) {
+        try {
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/transferprocesses/%s/state".formatted(url, id)))
+                    .GET();
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                var jsonArray = expand(response.body());
+                var state = TransferState.Builder.newInstance()
+                        .raw(jsonArray.getJsonObject(0))
+                        .build();
+                return new Result<>(state, null);
+            } else {
+                var error = (statusCode == 400)
+                        ? "Request body was malformed"
+                        : "An transfer process with the given ID does not exist";
+                return new Result<>(error);
+            }
+        } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

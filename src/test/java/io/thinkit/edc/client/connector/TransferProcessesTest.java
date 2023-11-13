@@ -120,4 +120,22 @@ class TransferProcessesTest {
         assertThat(created.isSucceeded()).isFalse();
         assertThat(created.getError()).isNotNull();
     }
+
+    @Test
+    void should_get_a_transfer_process_state() {
+
+        var state = transferProcesses.getState("process-id");
+
+        assertThat(state.isSucceeded()).isTrue();
+        assertThat(state.getContent().state()).isNotNull().isEqualTo("STARTED");
+    }
+
+    @Test
+    void should_not_get_a_transfer_process_state_when_id_is_empty() {
+
+        var state = transferProcesses.getState("");
+
+        assertThat(state.isSucceeded()).isFalse();
+        assertThat(state.getError()).isNotNull();
+    }
 }
