@@ -128,4 +128,27 @@ public class TransferProcesses {
             throw new RuntimeException(e);
         }
     }
+
+    public Result<String> deprovision(String id) {
+        try {
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/transferprocesses/%s/deprovision".formatted(url, id)))
+                    .header("content-type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.noBody());
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                return new Result<>(id, null);
+            } else {
+                return new Result<>(null, "Request body was malformed");
+            }
+
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

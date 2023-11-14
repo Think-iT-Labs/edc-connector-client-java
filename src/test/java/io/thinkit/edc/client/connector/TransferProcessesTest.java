@@ -162,4 +162,20 @@ class TransferProcessesTest {
         assertThat(terminated.isSucceeded()).isFalse();
         assertThat(terminated.getError()).isNotNull();
     }
+
+    @Test
+    void should_request_to_deprovision_the_transfer_process() {
+        var result = transferProcesses.deprovision("process-id");
+
+        assertThat(result.isSucceeded()).isTrue();
+        assertThat(result.getContent()).isNotNull();
+    }
+
+    @Test
+    void should_not_request_to_deprovision_the_transfer_process_when_id_is_empty() {
+        var result = transferProcesses.deprovision("");
+
+        assertThat(result.isSucceeded()).isFalse();
+        assertThat(result.getError()).isNotNull();
+    }
 }
