@@ -129,7 +129,7 @@ public class TransferProcesses {
         }
     }
 
-    public Result<String> requestToDeprovision(String id) {
+    public Result<String> deprovision(String id) {
         try {
 
             var requestBuilder = HttpRequest.newBuilder()

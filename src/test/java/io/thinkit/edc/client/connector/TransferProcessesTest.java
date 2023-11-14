@@ -165,7 +165,7 @@ class TransferProcessesTest {
 
     @Test
     void should_request_to_deprovision_the_transfer_process() {
-        var result = transferProcesses.requestToDeprovision("process-id");
+        var result = transferProcesses.deprovision("process-id");
 
         assertThat(result.isSucceeded()).isTrue();
         assertThat(result.getContent()).isNotNull();
@@ -173,7 +173,7 @@ class TransferProcessesTest {
 
     @Test
     void should_not_request_to_deprovision_the_transfer_process_when_id_is_empty() {
-        var result = transferProcesses.requestToDeprovision("");
+        var result = transferProcesses.deprovision("");
 
         assertThat(result.isSucceeded()).isFalse();
         assertThat(result.getError()).isNotNull();
