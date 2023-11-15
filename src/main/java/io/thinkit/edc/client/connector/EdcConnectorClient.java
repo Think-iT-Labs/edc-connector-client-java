@@ -67,6 +67,14 @@ public class EdcConnectorClient {
         return new TransferProcesses(managementUrl, httpClient, interceptor);
     }
 
+    public Dataplanes dataplanes() {
+        if (managementUrl == null) {
+            throw new IllegalArgumentException(
+                    "Cannot instantiate dataplanes client without the management url");
+        }
+        return new Dataplanes(managementUrl, httpClient, interceptor);
+    }
+
     public static class Builder {
 
         private final EdcConnectorClient client = new EdcConnectorClient();
