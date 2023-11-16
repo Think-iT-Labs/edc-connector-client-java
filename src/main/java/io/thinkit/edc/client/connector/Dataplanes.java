@@ -5,6 +5,7 @@ import static io.thinkit.edc.client.connector.JsonLdUtil.compact;
 import static io.thinkit.edc.client.connector.JsonLdUtil.expand;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
+
 import com.apicatalog.jsonld.JsonLdError;
 import java.io.IOException;
 import java.net.URI;
