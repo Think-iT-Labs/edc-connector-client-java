@@ -14,7 +14,7 @@ import java.util.Map;
 public class TransferRequest extends JsonLdObject {
     private static final String TYPE_TRANSFER_REQUEST = EDC_NAMESPACE + "TransferRequest";
     private static final String TRANSFER_REQUEST_PROTOCOL = EDC_NAMESPACE + "protocol";
-    private static final String TRANSFER_REQUEST_CONNECTOR_ADDRESS = EDC_NAMESPACE + "connectorAddress";
+    private static final String TRANSFER_REQUEST_COUNTER_PARTY_ADDRESS = EDC_NAMESPACE + "counterPartyAddress";
     private static final String TRANSFER_REQUEST_CONNECTOR_ID = EDC_NAMESPACE + "connectorId";
     private static final String TRANSFER_REQUEST_CONTRACT_ID = EDC_NAMESPACE + "contractId";
     private static final String TRANSFER_REQUEST_ASSET_ID = EDC_NAMESPACE + "assetId";
@@ -30,8 +30,8 @@ public class TransferRequest extends JsonLdObject {
         return stringValue(TRANSFER_REQUEST_PROTOCOL);
     }
 
-    public String connectorAddress() {
-        return stringValue(TRANSFER_REQUEST_CONNECTOR_ADDRESS);
+    public String counterPartyAddress() {
+        return stringValue(TRANSFER_REQUEST_COUNTER_PARTY_ADDRESS);
     }
 
     public String connectorId() {
@@ -86,10 +86,10 @@ public class TransferRequest extends JsonLdObject {
             return this;
         }
 
-        public TransferRequest.Builder connectorAddress(String connectorAddress) {
+        public TransferRequest.Builder counterPartyAddress(String counterPartyAddress) {
             builder.add(
-                    TRANSFER_REQUEST_CONNECTOR_ADDRESS,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, connectorAddress)));
+                    TRANSFER_REQUEST_COUNTER_PARTY_ADDRESS,
+                    createArrayBuilder().add(createObjectBuilder().add(VALUE, counterPartyAddress)));
             return this;
         }
 

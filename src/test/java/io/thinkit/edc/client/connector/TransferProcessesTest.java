@@ -88,7 +88,7 @@ class TransferProcessesTest {
                 .build();
         var transferRequest = TransferRequest.Builder.newInstance()
                 .protocol("dataspace-protocol-http")
-                .connectorAddress("http://provider-address")
+                .counterPartyAddress("http://provider-address")
                 .connectorId("provider-id")
                 .contractId("contract-id")
                 .assetId("asset-id")
@@ -108,7 +108,7 @@ class TransferProcessesTest {
         var privateProperties = Map.of("private-key", "data-destination-type");
         var transferRequest = TransferRequest.Builder.newInstance()
                 .protocol("dataspace-protocol-http")
-                .connectorAddress("http://provider-address")
+                .counterPartyAddress("http://provider-address")
                 .connectorId("provider-id")
                 .contractId("contract-id")
                 .assetId("asset-id")
