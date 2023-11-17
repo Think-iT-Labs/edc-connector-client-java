@@ -96,11 +96,6 @@ class ContractNegotiationsTest {
         var policy = Policy.Builder.newInstance()
                 .raw(createObjectBuilder().add("permission", permissions).build())
                 .build();
-        var offer = ContractOfferDescription.Builder.newInstance()
-                .offerId("offer-id")
-                .assetId("asset-id")
-                .policy(policy)
-                .build();
         var callbackAddresses = CallbackAddress.Builder.newInstance()
                 .transactional(false)
                 .uri("http://callback/url")
@@ -109,10 +104,10 @@ class ContractNegotiationsTest {
                 .events(Arrays.asList("contract.negotiation", "transfer.process"))
                 .build();
         var contractNegotiation = ContractRequest.Builder.newInstance()
-                .connectorAddress("http://provider-address")
+                .counterPartyAddress("http://provider-address")
                 .protocol("dataspace-protocol-http")
                 .providerId("provider-id")
-                .offer(offer)
+                .policy(policy)
                 .callbackAddresses(List.of(callbackAddresses, callbackAddresses))
                 .build();
 
@@ -126,7 +121,7 @@ class ContractNegotiationsTest {
     void should_not_create_a_contract_negotiation_when_provider_id_is_empty() {
 
         var contractNegotiation = ContractRequest.Builder.newInstance()
-                .connectorAddress("http://provider-address")
+                .counterPartyAddress("http://provider-address")
                 .protocol("dataspace-protocol-http")
                 .build();
 
