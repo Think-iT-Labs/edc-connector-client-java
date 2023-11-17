@@ -12,18 +12,18 @@ import java.util.List;
 
 public class ContractRequest extends JsonLdObject {
     private static final String TYPE_CONTRACT_REQUEST = EDC_NAMESPACE + "ContractRequest";
-    private static final String CONTRACT_REQUEST_CONNECTOR_ADDRESS = EDC_NAMESPACE + "connectorAddress";
+    private static final String CONTRACT_REQUEST_COUNTER_PARTY_ADDRESS = EDC_NAMESPACE + "counterPartyAddress";
     private static final String CONTRACT_REQUEST_PROTOCOL = EDC_NAMESPACE + "protocol";
     private static final String CONTRACT_REQUEST_PROVIDER_ID = EDC_NAMESPACE + "providerId";
-    private static final String CONTRACT_REQUEST_OFFER = EDC_NAMESPACE + "offer";
+    private static final String CONTRACT_REQUEST_POLICY = EDC_NAMESPACE + "policy";
     private static final String CONTRACT_REQUEST_CALLBACK_ADDRESSES = EDC_NAMESPACE + "callbackAddresses";
 
     private ContractRequest(JsonObject raw) {
         super(raw);
     }
 
-    public String connectorAddress() {
-        return stringValue(CONTRACT_REQUEST_CONNECTOR_ADDRESS);
+    public String counterPartyAddress() {
+        return stringValue(CONTRACT_REQUEST_COUNTER_PARTY_ADDRESS);
     }
 
     public String protocol() {
@@ -34,8 +34,8 @@ public class ContractRequest extends JsonLdObject {
         return stringValue(CONTRACT_REQUEST_PROVIDER_ID);
     }
 
-    public String offer() {
-        return stringValue(CONTRACT_REQUEST_OFFER);
+    public Policy policy() {
+        return new Policy(object(CONTRACT_REQUEST_POLICY));
     }
 
     public List<CallbackAddress> callbackAddresses() {
@@ -63,10 +63,10 @@ public class ContractRequest extends JsonLdObject {
             return this;
         }
 
-        public ContractRequest.Builder connectorAddress(String connectorAddress) {
+        public ContractRequest.Builder counterPartyAddress(String counterPartyAddress) {
             builder.add(
-                    CONTRACT_REQUEST_CONNECTOR_ADDRESS,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, connectorAddress)));
+                    CONTRACT_REQUEST_COUNTER_PARTY_ADDRESS,
+                    createArrayBuilder().add(createObjectBuilder().add(VALUE, counterPartyAddress)));
             return this;
         }
 
@@ -84,8 +84,8 @@ public class ContractRequest extends JsonLdObject {
             return this;
         }
 
-        public ContractRequest.Builder offer(ContractOfferDescription offer) {
-            builder.add(CONTRACT_REQUEST_OFFER, Json.createObjectBuilder(offer.raw()));
+        public ContractRequest.Builder policy(Policy policy) {
+            builder.add(CONTRACT_REQUEST_POLICY, Json.createObjectBuilder(policy.raw()));
             return this;
         }
 
