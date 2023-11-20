@@ -3,6 +3,7 @@ package io.thinkit.edc.client.connector;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.http.HttpClient;
+import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
@@ -43,7 +44,38 @@ class DataplanesTest {
     }
 
     @Test
-    void should_select_s_dataplane() {
+    void should_create_a_dataplane() {
+
+        var dataplane = DataPlaneInstance.Builder.newInstance()
+                .id("your-dataplane-id")
+                .allowedDestTypes(Arrays.asList("your-dest-type", "your-dest-type2"))
+                .allowedSourceTypes(Arrays.asList("source-type1", "source-type2"))
+                .url("http://somewhere.com:1234/api/v1")
+                .build();
+
+        var created = dataplanes.create(dataplane);
+
+        assertThat(created.isSucceeded()).isTrue();
+        assertThat(created.getContent()).isNotNull();
+    }
+
+    @Test
+    void should_not_create_a_dataplane() {
+
+        var dataplane = DataPlaneInstance.Builder.newInstance()
+                .id("your-dataplane-id")
+                .allowedSourceTypes(Arrays.asList("source-type1", "source-type2"))
+                .url("http://somewhere.com:1234/api/v1")
+                .build();
+
+        var created = dataplanes.create(dataplane);
+
+        assertThat(created.isSucceeded()).isFalse();
+        assertThat(created.getError()).isNotNull();
+    }
+
+    @Test
+    void should_select_a_dataplane() {
         var source = DataAddress.Builder.newInstance().type("test-src1").build();
         var destination = DataAddress.Builder.newInstance().type("test-dst2").build();
         var selectionRequest = SelectionRequest.Builder.newInstance()
