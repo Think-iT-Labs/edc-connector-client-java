@@ -55,6 +55,11 @@ public class DataPlaneInstance extends JsonLdObject {
             return new DataPlaneInstance.Builder();
         }
 
+        public DataPlaneInstance.Builder id(String id) {
+            builder.add(ID, id);
+            return this;
+        }
+
         public DataPlaneInstance build() {
             return new DataPlaneInstance(builder.build());
         }
