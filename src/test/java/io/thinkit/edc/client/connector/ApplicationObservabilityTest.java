@@ -27,7 +27,7 @@ class ApplicationObservabilityTest {
     }
 
     @Test
-    void should_get_dataplanes() {
+    void should_check_health() {
         var result = applicationObservability.checkHealth();
 
         assertThat(result.isSucceeded()).isTrue();
