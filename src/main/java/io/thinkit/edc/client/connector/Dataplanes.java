@@ -5,7 +5,6 @@ import static io.thinkit.edc.client.connector.JsonLdUtil.compact;
 import static io.thinkit.edc.client.connector.JsonLdUtil.expand;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
-
 import com.apicatalog.jsonld.JsonLdError;
 import java.io.IOException;
 import java.net.URI;
@@ -75,6 +74,34 @@ public class Dataplanes {
             } else {
                 var error = (statusCode == 400) ? "Request body was malformed" : "Could not add dataplane";
                 return new Result<>(null, error);
+            }
+
+        } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Result<DataPlaneInstance> select(SelectionRequest selectionRequest) {
+        try {
+            var requestBody = compact(selectionRequest);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/dataplanes/select".formatted(url)))
+                    .header("content-type", "application/json")
+                    .POST(ofString(requestBody.toString()));
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                var jsonArray = expand(response.body());
+                var dataplane = DataPlaneInstance.Builder.newInstance()
+                        .raw(jsonArray.getJsonObject(0))
+                        .build();
+                return new Result<>(dataplane, null);
+            } else {
+                return new Result<>("Request body was malformed");
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {
