@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.http.HttpClient;
 import java.util.Arrays;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
@@ -74,5 +73,4 @@ class DataplanesTest {
         assertThat(created.isSucceeded()).isFalse();
         assertThat(created.getError()).isNotNull();
     }
-
 }
