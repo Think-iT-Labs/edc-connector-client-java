@@ -36,10 +36,7 @@ public class ApplicationObservability {
                 var healthStatus = new HealthStatus(content.asJsonObject());
                 return new Result<>(healthStatus, null);
             } else {
-                var error = (statusCode == 400)
-                        ? "Request body was malformed"
-                        : "An asset with the given ID does not exist";
-                return new Result<>(error);
+                return new Result<>("Request body was malformed");
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
