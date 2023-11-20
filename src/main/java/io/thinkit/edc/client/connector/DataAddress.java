@@ -25,7 +25,6 @@ public class DataAddress extends JsonLdObject {
     public static class Builder {
 
         private final JsonObjectBuilder builder = createObjectBuilder().add(TYPE, TYPE_DATA_ADDRESS);
-        ;
 
         public static DataAddress.Builder newInstance() {
             return new DataAddress.Builder();
