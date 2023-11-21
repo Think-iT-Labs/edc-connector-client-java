@@ -2,7 +2,7 @@
 format.version = "1.1"
 
 [versions]
-edc = "0.4.0"
+edc = "0.4.1"
 
 [libraries]
 assertj = { module = "org.assertj:assertj-core", version = "3.24.2" }
