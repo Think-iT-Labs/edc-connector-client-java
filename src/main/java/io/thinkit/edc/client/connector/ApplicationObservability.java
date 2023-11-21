@@ -43,6 +43,52 @@ public class ApplicationObservability {
         }
     }
 
+    public Result<HealthStatus> checkReadiness() {
+        try {
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/check/readiness".formatted(url)))
+                    .GET();
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                var jsonDocument = JsonDocument.of(response.body());
+                var content = jsonDocument.getJsonContent().get();
+                var healthStatus = new HealthStatus(content.asJsonObject());
+                return new Result<>(healthStatus, null);
+            } else {
+                return new Result<>("Request body was malformed");
+            }
+        } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Result<HealthStatus> checkStartup() {
+        try {
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/check/startup".formatted(url)))
+                    .GET();
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                var jsonDocument = JsonDocument.of(response.body());
+                var content = jsonDocument.getJsonContent().get();
+                var healthStatus = new HealthStatus(content.asJsonObject());
+                return new Result<>(healthStatus, null);
+            } else {
+                return new Result<>("Request body was malformed");
+            }
+        } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public Result<HealthStatus> checkLiveness() {
         try {
             var requestBuilder = HttpRequest.newBuilder()
