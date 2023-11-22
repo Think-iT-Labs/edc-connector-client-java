@@ -82,6 +82,14 @@ public class EdcConnectorClient {
         return new ApplicationObservability(managementUrl, httpClient, interceptor);
     }
 
+    public Catalogs catalogs() {
+        if (managementUrl == null) {
+            throw new IllegalArgumentException(
+                    "Cannot instantiate ApplicationObservability client without the management url");
+        }
+        return new Catalogs(managementUrl, httpClient, interceptor);
+    }
+
     public static class Builder {
 
         private final EdcConnectorClient client = new EdcConnectorClient();

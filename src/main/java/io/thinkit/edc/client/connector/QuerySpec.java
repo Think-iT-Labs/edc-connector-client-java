@@ -9,6 +9,7 @@ import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
 import static jakarta.json.stream.JsonCollectors.toJsonArray;
 
+import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import java.util.List;
@@ -50,7 +51,7 @@ public class QuerySpec extends JsonLdObject {
 
     public static final class Builder {
 
-        private final JsonObjectBuilder raw = createObjectBuilder()
+        private final JsonObjectBuilder builder = createObjectBuilder()
                 .add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
                 .add(TYPE, TYPE_QUERY_SPEC);
 
@@ -59,33 +60,41 @@ public class QuerySpec extends JsonLdObject {
         }
 
         public QuerySpec build() {
-            return new QuerySpec(raw.build());
+            return new QuerySpec(builder.build());
         }
 
         public Builder offset(int offset) {
-            raw.add(
+            builder.add(
                     QUERY_SPEC_OFFSET,
                     createArrayBuilder().add(createObjectBuilder().add(VALUE, offset)));
             return this;
         }
 
         public Builder limit(int limit) {
-            raw.add("limit", createArrayBuilder().add(createObjectBuilder().add(VALUE, limit)));
+            builder.add("limit", createArrayBuilder().add(createObjectBuilder().add(VALUE, limit)));
             return this;
         }
 
         public Builder sortOrder(String sortOrder) {
-            raw.add("sortOrder", createArrayBuilder().add(createObjectBuilder().add(VALUE, sortOrder)));
+            builder.add(
+                    "sortOrder", createArrayBuilder().add(createObjectBuilder().add(VALUE, sortOrder)));
             return this;
         }
 
         public Builder sortField(String sortField) {
-            raw.add("sortField", createArrayBuilder().add(createObjectBuilder().add(VALUE, sortField)));
+            builder.add(
+                    "sortField", createArrayBuilder().add(createObjectBuilder().add(VALUE, sortField)));
             return this;
         }
 
         public Builder filterExpression(List<Criterion> criteria) {
-            raw.add("filterExpression", criteria.stream().map(Criterion::raw).collect(toJsonArray()));
+            builder.add(
+                    "filterExpression", criteria.stream().map(Criterion::raw).collect(toJsonArray()));
+            return this;
+        }
+
+        public Builder raw(JsonObject raw) {
+            builder.addAll(Json.createObjectBuilder(raw));
             return this;
         }
     }
