@@ -6,8 +6,8 @@ plugins {
     alias(libs.plugins.spotless)
 }
 
-group = "io.thinkit"
-version = "1.0-SNAPSHOT"
+group = "io.think-it"
+version = "0.0.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
