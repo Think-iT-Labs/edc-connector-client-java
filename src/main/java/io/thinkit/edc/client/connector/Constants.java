@@ -13,7 +13,7 @@ public interface Constants {
     String CONTEXT = "@context";
     String VOCAB = "@vocab";
     String DCAT_PREFIX = "dcat";
-    String DCT_PREFIX  = "dct";
-    String ODRL_PREFIX  = "odrl";
-    String DSCPACE = "dspace";
+    String DCT_PREFIX = "dct";
+    String ODRL_PREFIX = "odrl";
+    String DSCPACE_PREFIX = "dspace";
 }
