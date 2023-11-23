@@ -37,9 +37,10 @@ public class Catalog extends JsonLdObject {
                         CONTEXT,
                         createObjectBuilder()
                                 .add(VOCAB, EDC_NAMESPACE)
-                                .add(DCT, DCT_NAMESPACE)
-                                .add(DCAT, DCAT_NAMESPACE)
-                                .add(ODRL, ODRL_NAMESPACE))
+                                .add(DCT_PREFIX, DCT_NAMESPACE)
+                                .add(DCAT_PREFIX, DCAT_NAMESPACE)
+                                .add(ODRL_PREFIX, ODRL_NAMESPACE)
+                                .add(DSCPACE,DSCPACE_NAMESPACE))
                 .add(TYPE, TYPE_CATALOG);
 
         public static Catalog.Builder newInstance() {
