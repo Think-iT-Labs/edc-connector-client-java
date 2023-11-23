@@ -49,4 +49,31 @@ public class Catalogs {
             throw new RuntimeException(e);
         }
     }
+
+    public Result<Dataset> requestDataset(DatasetRequest input) {
+        try {
+            var requestBody = compact(input);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/catalog/dataset/request".formatted(url)))
+                    .header("content-type", "application/json")
+                    .POST(ofString(requestBody.toString()));
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                var jsonArray = expand(response.body());
+                var dataset = Dataset.Builder.newInstance()
+                        .raw(jsonArray.getJsonObject(0))
+                        .build();
+                return new Result<>(dataset, null);
+            } else {
+                return new Result<>("Request body was malformed");
+            }
+        } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
