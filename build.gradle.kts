@@ -1,15 +1,19 @@
+import org.gradle.nativeplatform.internal.configure.NativeBinaryRules
 import java.net.URL
 
 plugins {
-    id("java")
+    java
     `java-library`
     alias(libs.plugins.spotless)
+   `maven-publish`
+   signing
 }
 
 group = "io.think-it"
 version = "0.0.1-SNAPSHOT"
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -63,3 +67,25 @@ val downloadOpenapiSpec by tasks.register("downloadOpenapiSpec") {
 }
 
 fun download(url: String): String = URL(url).openConnection().getInputStream().bufferedReader().use { it.readText() }
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            groupId = project.group.toString()
+            version = project.version.toString()
+            artifactId = project.name
+            description = "SDK client library for interacting with EDC connector"
+            from(components["java"])
+        }
+    }
+}
+
+signing {
+    useGpgCmd()
+    sign(publishing.publications)
+}
