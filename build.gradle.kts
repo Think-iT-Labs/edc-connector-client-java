@@ -1,4 +1,3 @@
-import org.gradle.nativeplatform.internal.configure.NativeBinaryRules
 import java.net.URL
 
 plugins {
@@ -7,6 +6,7 @@ plugins {
     alias(libs.plugins.spotless)
    `maven-publish`
    signing
+    alias(libs.plugins.nexus)
 }
 
 group = "io.think-it"
@@ -76,11 +76,23 @@ java {
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {
-            groupId = project.group.toString()
-            version = project.version.toString()
-            artifactId = project.name
-            description = "SDK client library for interacting with EDC connector"
             from(components["java"])
+
+            pom {
+                name.set(project.name)
+                description.set("SDK client library for interacting with EDC connector")
+                url.set("https://github.com/Think-iT-Labs/edc-connector-client-java")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                scm {
+                    url.set("https://github.com/Think-iT-Labs/edc-connector-client-java")
+                    connection.set("scm:git:git@github.com:Think-iT-Labs/edc-connector-client-java.git")
+                }
+            }
         }
     }
 }
@@ -88,4 +100,11 @@ publishing {
 signing {
     useGpgCmd()
     sign(publishing.publications)
+}
+
+nexusPublishing {
+    repositories.create("myNexus") {
+        nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+        snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+    }
 }
