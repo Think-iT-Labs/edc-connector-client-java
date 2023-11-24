@@ -1,7 +1,6 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.JsonLdUtil.compact;
-import static io.thinkit.edc.client.connector.JsonLdUtil.expand;
+import static io.thinkit.edc.client.connector.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import com.apicatalog.jsonld.JsonLdError;
@@ -41,9 +40,7 @@ public class ContractAgreements {
                         .build();
                 return new Result<>(contractAgreement, null);
             } else {
-                var error = (statusCode == 400)
-                        ? "Request body was malformed"
-                        : "A contract agreement with the given ID does not exist";
+                var error = getError(response.body());
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -68,9 +65,7 @@ public class ContractAgreements {
                         .build();
                 return new Result<>(contractNegotiation, null);
             } else {
-                var error = (statusCode == 400)
-                        ? "Request body was malformed"
-                        : "A contract agreement with the given ID does not exist";
+                var error = getError(response.body());
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -100,7 +95,8 @@ public class ContractAgreements {
                         .toList();
                 return new Result<>(contractAgreements, null);
             } else {
-                return new Result<>("Request body was malformed");
+                var error = getError(response.body());
+                return new Result<>(error);
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {

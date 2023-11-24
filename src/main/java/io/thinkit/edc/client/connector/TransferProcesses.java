@@ -1,8 +1,7 @@
 package io.thinkit.edc.client.connector;
 
 import static io.thinkit.edc.client.connector.Constants.ID;
-import static io.thinkit.edc.client.connector.JsonLdUtil.compact;
-import static io.thinkit.edc.client.connector.JsonLdUtil.expand;
+import static io.thinkit.edc.client.connector.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import com.apicatalog.jsonld.JsonLdError;
@@ -41,9 +40,7 @@ public class TransferProcesses {
                         .build();
                 return new Result<>(transferProcess, null);
             } else {
-                var error = (statusCode == 400)
-                        ? "Request body was malformed"
-                        : "A transfer process with the given ID does not exist";
+                var error = getError(response.body());
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -69,8 +66,8 @@ public class TransferProcesses {
                 var id = content.getJsonObject(0).getString(ID);
                 return new Result<>(id, null);
             } else {
-                var error = (statusCode == 400) ? "Request body was malformed" : "Could not create transfer request";
-                return new Result<>(null, error);
+                var error = getError(response.body());
+                return new Result<>(error);
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -95,9 +92,7 @@ public class TransferProcesses {
                         .build();
                 return new Result<>(state, null);
             } else {
-                var error = (statusCode == 400)
-                        ? "Request body was malformed"
-                        : "An transfer process with the given ID does not exist";
+                var error = getError(response.body());
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -121,7 +116,8 @@ public class TransferProcesses {
             if (statusCode == 200) {
                 return new Result<>(input.id(), null);
             } else {
-                return new Result<>(null, "The transfer process cannot be terminated");
+                var error = getError(response.body());
+                return new Result<>(error);
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -139,15 +135,16 @@ public class TransferProcesses {
 
             var request = interceptor.apply(requestBuilder).build();
 
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var statusCode = response.statusCode();
             if (statusCode == 200) {
                 return new Result<>(id, null);
             } else {
-                return new Result<>(null, "Request body was malformed");
+                var error = getError(response.body());
+                return new Result<>(error);
             }
 
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
     }

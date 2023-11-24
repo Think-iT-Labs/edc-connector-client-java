@@ -2,13 +2,13 @@ package io.thinkit.edc.client.connector;
 
 public class Result<T> {
     private T content;
-    private final String error;
+    private final ApiErrorDetail error;
 
-    public Result(String error) {
+    public Result(ApiErrorDetail error) {
         this.error = error;
     }
 
-    public Result(T content, String error) {
+    public Result(T content, ApiErrorDetail error) {
         this.content = content;
         this.error = error;
     }
@@ -17,7 +17,7 @@ public class Result<T> {
         return this.error == null;
     }
 
-    public String getError() {
+    public ApiErrorDetail getError() {
         return error;
     }
 

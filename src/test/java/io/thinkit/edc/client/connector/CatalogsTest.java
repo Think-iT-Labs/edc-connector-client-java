@@ -54,7 +54,9 @@ class CatalogsTest {
         });
         assertThat(result.getContent().dataset()).isNotNull().satisfies(dataset -> {
             assertThat(dataset.description()).isEqualTo("description");
-            assertThat(dataset.hasPolicy()).isNotNull().satisfies(policy -> assertThat(policy.getList(ODRL_NAMESPACE + "permission").size()).isGreaterThan(0));
+            assertThat(dataset.hasPolicy()).isNotNull().satisfies(policy -> assertThat(
+                            policy.getList(ODRL_NAMESPACE + "permission").size())
+                    .isGreaterThan(0));
             assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {
                 assertThat(distribution.accessService()).isNotBlank();
                 assertThat(distribution.format().getString(ID)).isEqualTo("HttpData");

@@ -1,8 +1,7 @@
 package io.thinkit.edc.client.connector;
 
 import static io.thinkit.edc.client.connector.Constants.ID;
-import static io.thinkit.edc.client.connector.JsonLdUtil.compact;
-import static io.thinkit.edc.client.connector.JsonLdUtil.expand;
+import static io.thinkit.edc.client.connector.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import com.apicatalog.jsonld.JsonLdError;
@@ -44,9 +43,7 @@ public class Dataplanes {
                         .toList();
                 return new Result<>(dataplanes, null);
             } else {
-                var error = (statusCode == 400)
-                        ? "Request body was malformed"
-                        : "A DataPlane  with the given ID does not exist";
+                var error = getError(response.body());
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -72,8 +69,8 @@ public class Dataplanes {
                 var id = content.getJsonObject(0).getString(ID);
                 return new Result<>(id, null);
             } else {
-                var error = (statusCode == 400) ? "Request body was malformed" : "Could not add dataplane";
-                return new Result<>(null, error);
+                var error = getError(response.body());
+                return new Result<>(error);
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -101,7 +98,8 @@ public class Dataplanes {
                         .build();
                 return new Result<>(dataplane, null);
             } else {
-                return new Result<>("Request body was malformed");
+                var error = getError(response.body());
+                return new Result<>(error);
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {

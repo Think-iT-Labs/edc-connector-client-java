@@ -1,5 +1,7 @@
 package io.thinkit.edc.client.connector;
 
+import static io.thinkit.edc.client.connector.JsonLdUtil.getError;
+
 import com.apicatalog.jsonld.JsonLdError;
 import com.apicatalog.jsonld.document.JsonDocument;
 import java.io.IOException;
@@ -36,7 +38,8 @@ public class ApplicationObservability {
                 var healthStatus = new HealthStatus(content.asJsonObject());
                 return new Result<>(healthStatus, null);
             } else {
-                return new Result<>("Request body was malformed");
+                var error = getError(response.body());
+                return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
@@ -59,7 +62,8 @@ public class ApplicationObservability {
                 var healthStatus = new HealthStatus(content.asJsonObject());
                 return new Result<>(healthStatus, null);
             } else {
-                return new Result<>("Request body was malformed");
+                var error = getError(response.body());
+                return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
@@ -82,7 +86,8 @@ public class ApplicationObservability {
                 var healthStatus = new HealthStatus(content.asJsonObject());
                 return new Result<>(healthStatus, null);
             } else {
-                return new Result<>("Request body was malformed");
+                var error = getError(response.body());
+                return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
@@ -105,7 +110,8 @@ public class ApplicationObservability {
                 var healthStatus = new HealthStatus(content.asJsonObject());
                 return new Result<>(healthStatus, null);
             } else {
-                return new Result<>("Request body was malformed");
+                var error = getError(response.body());
+                return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);

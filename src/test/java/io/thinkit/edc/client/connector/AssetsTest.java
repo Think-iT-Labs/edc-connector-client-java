@@ -86,7 +86,12 @@ class AssetsTest {
         var created = assets.create(asset);
 
         assertThat(created.isSucceeded()).isFalse();
-        assertThat(created.getError()).isNotNull();
+        assertThat(created.getError()).isNotNull().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.message()).isEqualTo("error message");
+            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+        });
     }
 
     @Test
@@ -119,7 +124,12 @@ class AssetsTest {
         var created = assets.update(asset);
 
         assertThat(created.isSucceeded()).isFalse();
-        assertThat(created.getError()).isNotNull();
+        assertThat(created.getError()).isNotNull().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.message()).isEqualTo("error message");
+            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+        });
     }
 
     @Test
@@ -134,7 +144,12 @@ class AssetsTest {
         var deleted = assets.delete("");
 
         assertThat(deleted.isSucceeded()).isFalse();
-        assertThat(deleted.getError()).isNotNull();
+        assertThat(deleted.getError()).isNotNull().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.message()).isEqualTo("error message");
+            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+        });
     }
 
     @Test
@@ -180,6 +195,11 @@ class AssetsTest {
         var assetsList = assets.request(input);
 
         assertThat(assetsList.isSucceeded()).isFalse();
-        assertThat(assetsList.getError()).isNotNull();
+        assertThat(assetsList.getError()).isNotNull().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.message()).isEqualTo("error message");
+            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+        });
     }
 }

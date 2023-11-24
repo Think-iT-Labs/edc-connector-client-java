@@ -26,4 +26,10 @@ public class JsonLdUtil {
                 .build());
         return JsonLd.compact(expanded, context).get();
     }
+
+    public static ApiErrorDetail getError(InputStream body) throws JsonLdError {
+        var jsonDocument = JsonDocument.of(body);
+        var content = jsonDocument.getJsonContent().get();
+        return new ApiErrorDetail(content.asJsonArray().getJsonObject(0));
+    }
 }
