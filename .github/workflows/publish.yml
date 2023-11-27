@@ -1,0 +1,44 @@
+name: publish
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: run tests
+        run: ./gradlew test
+
+      - name: list gpg keys
+        shell: bash
+        run: |
+          gpg -K --keyid-format=long
+
+      - name: import GPG private key
+        shell: bash
+        run: |
+          echo "use-agent" >> ~/.gnupg/gpg.conf
+          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
+          echo -e "${{ secrets.ORG_GPG_PRIVATE_KEY }}" | gpg --import --batch
+          for fpr in $(gpg --list-keys --with-colons | awk -F: '/fpr:/ {print $10}' | sort -u);
+          do
+            echo -e "5\\ny\\n" |  gpg --batch --command-fd 0 --expert --edit-key $fpr trust;
+          done
+
+      - name: publish
+        env:
+          ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.ORG_OSSRH_USERNAME }}
+          ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.ORG_OSSRH_PASSWORD }}
+        run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository -Psigning.gnupg.passphrase="${{ secrets.ORG_GPG_PASSPHRASE }}"

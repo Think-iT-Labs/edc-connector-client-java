@@ -1,15 +1,19 @@
 import java.net.URL
 
 plugins {
-    id("java")
+    java
     `java-library`
     alias(libs.plugins.spotless)
+   `maven-publish`
+   signing
+    alias(libs.plugins.nexus)
 }
 
-group = "io.thinkit"
-version = "1.0-SNAPSHOT"
+group = "io.think-it"
+version = "0.0.1-SNAPSHOT"
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -63,3 +67,44 @@ val downloadOpenapiSpec by tasks.register("downloadOpenapiSpec") {
 }
 
 fun download(url: String): String = URL(url).openConnection().getInputStream().bufferedReader().use { it.readText() }
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+
+            pom {
+                name.set(project.name)
+                description.set("SDK client library for interacting with EDC connector")
+                url.set("https://github.com/Think-iT-Labs/edc-connector-client-java")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                scm {
+                    url.set("https://github.com/Think-iT-Labs/edc-connector-client-java")
+                    connection.set("scm:git:git@github.com:Think-iT-Labs/edc-connector-client-java.git")
+                }
+            }
+        }
+    }
+}
+
+signing {
+    useGpgCmd()
+    sign(publishing.publications)
+}
+
+nexusPublishing {
+    repositories.create("sonatype") {
+        nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+        snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+    }
+}
