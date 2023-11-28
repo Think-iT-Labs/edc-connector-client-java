@@ -63,4 +63,27 @@ class CatalogsTest {
             });
         });
     }
+
+    @Test
+    void should_get_dataset() {
+        DatasetRequest input = DatasetRequest.Builder.newInstance()
+                .id("dataset-id")
+                .protocol("dataspace-protocol-http")
+                .counterPartyAddress("http://provider-address")
+                .build();
+
+        var result = catalogs.requestDataset(input);
+
+        assertThat(result.isSucceeded()).isTrue();
+        assertThat(result.getContent()).isNotNull().satisfies(dataset -> {
+            assertThat(dataset.description()).isEqualTo("description");
+            assertThat(dataset.hasPolicy()).isNotNull().satisfies(policy -> assertThat(
+                            policy.getList(ODRL_NAMESPACE + "permission").size())
+                    .isGreaterThan(0));
+            assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {
+                assertThat(distribution.accessService()).isNotBlank();
+                assertThat(distribution.format().getString(ID)).isEqualTo("HttpData");
+            });
+        });
+    }
 }
