@@ -72,7 +72,7 @@ class TransferProcessesTest {
         var transferProcess = transferProcesses.get("");
 
         assertThat(transferProcess.isSucceeded()).isFalse();
-        assertThat(transferProcess.getError()).isNotNull().satisfies(apiErrorDetail -> {
+        assertThat(transferProcess.getError()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
             assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
@@ -123,7 +123,7 @@ class TransferProcessesTest {
         var created = transferProcesses.create(transferRequest);
 
         assertThat(created.isSucceeded()).isFalse();
-        assertThat(created.getError()).isNotNull().satisfies(apiErrorDetail -> {
+        assertThat(created.getError()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
             assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
@@ -146,7 +146,7 @@ class TransferProcessesTest {
         var state = transferProcesses.getState("");
 
         assertThat(state.isSucceeded()).isFalse();
-        assertThat(state.getError()).isNotNull().satisfies(apiErrorDetail -> {
+        assertThat(state.getError()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
             assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
@@ -175,7 +175,7 @@ class TransferProcessesTest {
         var terminated = transferProcesses.terminate(input);
 
         assertThat(terminated.isSucceeded()).isFalse();
-        assertThat(terminated.getError()).isNotNull().satisfies(apiErrorDetail -> {
+        assertThat(terminated.getError()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
             assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
@@ -196,7 +196,7 @@ class TransferProcessesTest {
         var result = transferProcesses.deprovision("");
 
         assertThat(result.isSucceeded()).isFalse();
-        assertThat(result.getError()).isNotNull().satisfies(apiErrorDetail -> {
+        assertThat(result.getError()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
             assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");

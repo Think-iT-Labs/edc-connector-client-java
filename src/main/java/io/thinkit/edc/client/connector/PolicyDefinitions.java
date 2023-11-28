@@ -41,7 +41,9 @@ public class PolicyDefinitions {
                         .build();
                 return new Result<>(policyDefinition, null);
             } else {
-                var error = getError(response.body());
+                var error = getError(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -67,7 +69,9 @@ public class PolicyDefinitions {
                 var id = content.getJsonObject(0).getString(ID);
                 return new Result<>(id, null);
             } else {
-                var error = getError(response.body());
+                var error = getError(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
 
@@ -92,7 +96,9 @@ public class PolicyDefinitions {
             if (statusCode == 204) {
                 return new Result<>(input.id(), null);
             } else {
-                var error = getError(response.body());
+                var error = getError(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
 
@@ -114,7 +120,9 @@ public class PolicyDefinitions {
             if (statusCode == 200) {
                 return new Result<>(id, null);
             } else {
-                var error = getError(response.body());
+                var error = getError(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -144,7 +152,9 @@ public class PolicyDefinitions {
                         .toList();
                 return new Result<>(policyDefinitions, null);
             } else {
-                var error = getError(response.body());
+                var error = getError(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
 

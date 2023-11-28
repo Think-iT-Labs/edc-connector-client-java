@@ -38,7 +38,9 @@ public class ApplicationObservability {
                 var healthStatus = new HealthStatus(content.asJsonObject());
                 return new Result<>(healthStatus, null);
             } else {
-                var error = getError(response.body());
+                var error = getError(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -62,7 +64,9 @@ public class ApplicationObservability {
                 var healthStatus = new HealthStatus(content.asJsonObject());
                 return new Result<>(healthStatus, null);
             } else {
-                var error = getError(response.body());
+                var error = getError(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -86,7 +90,9 @@ public class ApplicationObservability {
                 var healthStatus = new HealthStatus(content.asJsonObject());
                 return new Result<>(healthStatus, null);
             } else {
-                var error = getError(response.body());
+                var error = getError(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -110,7 +116,9 @@ public class ApplicationObservability {
                 var healthStatus = new HealthStatus(content.asJsonObject());
                 return new Result<>(healthStatus, null);
             } else {
-                var error = getError(response.body());
+                var error = getError(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {

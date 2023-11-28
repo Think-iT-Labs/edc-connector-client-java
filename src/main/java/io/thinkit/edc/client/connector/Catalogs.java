@@ -42,7 +42,9 @@ public class Catalogs {
                         .build();
                 return new Result<>(catalog, null);
             } else {
-                var error = getError(response.body());
+                var error = getError(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {

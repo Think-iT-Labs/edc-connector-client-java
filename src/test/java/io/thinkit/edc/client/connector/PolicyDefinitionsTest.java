@@ -45,7 +45,7 @@ public class PolicyDefinitionsTest {
         Result<PolicyDefinition> policyDefinition = policyDefinitions.get("");
 
         assertThat(policyDefinition.isSucceeded()).isFalse();
-        assertThat(policyDefinition.getError()).isNotNull().satisfies(apiErrorDetail -> {
+        assertThat(policyDefinition.getError()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
             assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
@@ -94,7 +94,7 @@ public class PolicyDefinitionsTest {
         var created = policyDefinitions.create(policyDefinition);
 
         assertThat(created.isSucceeded()).isFalse();
-        assertThat(created.getError()).isNotNull().satisfies(apiErrorDetail -> {
+        assertThat(created.getError()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
             assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
@@ -141,7 +141,7 @@ public class PolicyDefinitionsTest {
         var updated = policyDefinitions.update(policyDefinition);
 
         assertThat(updated.isSucceeded()).isFalse();
-        assertThat(updated.getError()).isNotNull().satisfies(apiErrorDetail -> {
+        assertThat(updated.getError()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
             assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
@@ -161,7 +161,7 @@ public class PolicyDefinitionsTest {
         var deleted = policyDefinitions.delete("");
 
         assertThat(deleted.isSucceeded()).isFalse();
-        assertThat(deleted.getError()).isNotNull().satisfies(apiErrorDetail -> {
+        assertThat(deleted.getError()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
             assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
@@ -197,7 +197,7 @@ public class PolicyDefinitionsTest {
         var result = policyDefinitions.request(input);
 
         assertThat(result.isSucceeded()).isFalse();
-        assertThat(result.getError()).isNotNull().satisfies(apiErrorDetail -> {
+        assertThat(result.getError()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
             assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");

@@ -40,7 +40,9 @@ public class ContractAgreements {
                         .build();
                 return new Result<>(contractAgreement, null);
             } else {
-                var error = getError(response.body());
+                var error = getError(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -65,7 +67,9 @@ public class ContractAgreements {
                         .build();
                 return new Result<>(contractNegotiation, null);
             } else {
-                var error = getError(response.body());
+                var error = getError(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -95,7 +99,9 @@ public class ContractAgreements {
                         .toList();
                 return new Result<>(contractAgreements, null);
             } else {
-                var error = getError(response.body());
+                var error = getError(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
 

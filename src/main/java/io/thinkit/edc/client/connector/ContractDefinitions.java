@@ -41,7 +41,9 @@ public class ContractDefinitions {
                         .build();
                 return new Result<>(contractDefinition, null);
             } else {
-                var error = getError(response.body());
+                var error = getError(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -67,7 +69,9 @@ public class ContractDefinitions {
                 var id = content.getJsonObject(0).getString(ID);
                 return new Result<>(id, null);
             } else {
-                var error = getError(response.body());
+                var error = getError(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
 
@@ -89,7 +93,9 @@ public class ContractDefinitions {
             if (statusCode == 200) {
                 return new Result<>(id, null);
             } else {
-                var error = getError(response.body());
+                var error = getError(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -119,7 +125,9 @@ public class ContractDefinitions {
                         .toList();
                 return new Result<>(contractDefinitions, null);
             } else {
-                var error = getError(response.body());
+                var error = getError(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
 
@@ -144,7 +152,9 @@ public class ContractDefinitions {
             if (statusCode == 204) {
                 return new Result<>(input.id(), null);
             } else {
-                var error = getError(response.body());
+                var error = getError(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
 

@@ -1,14 +1,16 @@
 package io.thinkit.edc.client.connector;
 
+import java.util.List;
+
 public class Result<T> {
     private T content;
-    private final ApiErrorDetail error;
+    private final List<ApiErrorDetail> error;
 
-    public Result(ApiErrorDetail error) {
+    public Result(List<ApiErrorDetail> error) {
         this.error = error;
     }
 
-    public Result(T content, ApiErrorDetail error) {
+    public Result(T content, List<ApiErrorDetail> error) {
         this.content = content;
         this.error = error;
     }
@@ -17,7 +19,7 @@ public class Result<T> {
         return this.error == null;
     }
 
-    public ApiErrorDetail getError() {
+    public List<ApiErrorDetail> getError() {
         return error;
     }
 

@@ -83,7 +83,7 @@ class ContractNegotiationsTest {
         var contractNegotiation = contractNegotiations.get("");
 
         assertThat(contractNegotiation.isSucceeded()).isFalse();
-        assertThat(contractNegotiation.getError()).isNotNull().satisfies(apiErrorDetail -> {
+        assertThat(contractNegotiation.getError()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
             assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
@@ -133,7 +133,7 @@ class ContractNegotiationsTest {
         var created = contractNegotiations.create(contractNegotiation);
 
         assertThat(created.isSucceeded()).isFalse();
-        assertThat(created.getError()).isNotNull().satisfies(apiErrorDetail -> {
+        assertThat(created.getError()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
             assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
@@ -161,7 +161,7 @@ class ContractNegotiationsTest {
         var contractAgreement = contractNegotiations.getAgreement("");
 
         assertThat(contractAgreement.isSucceeded()).isFalse();
-        assertThat(contractAgreement.getError()).isNotNull().satisfies(apiErrorDetail -> {
+        assertThat(contractAgreement.getError()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
             assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
@@ -190,7 +190,7 @@ class ContractNegotiationsTest {
         var terminated = contractNegotiations.terminate(input);
 
         assertThat(terminated.isSucceeded()).isFalse();
-        assertThat(terminated.getError()).isNotNull().satisfies(apiErrorDetail -> {
+        assertThat(terminated.getError()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
             assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
@@ -261,7 +261,7 @@ class ContractNegotiationsTest {
         var result = contractNegotiations.request(input);
 
         assertThat(result.isSucceeded()).isFalse();
-        assertThat(result.getError()).isNotNull().satisfies(apiErrorDetail -> {
+        assertThat(result.getError()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
             assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
@@ -284,7 +284,7 @@ class ContractNegotiationsTest {
         var state = contractNegotiations.getState("");
 
         assertThat(state.isSucceeded()).isFalse();
-        assertThat(state.getError()).isNotNull().satisfies(apiErrorDetail -> {
+        assertThat(state.getError()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
             assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
