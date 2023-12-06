@@ -26,4 +26,10 @@ public class JsonLdUtil {
                 .build());
         return JsonLd.compact(expanded, context).get();
     }
+
+    public static JsonArray deserializeToArray(InputStream body) throws JsonLdError {
+        var jsonDocument = JsonDocument.of(body);
+        var content = jsonDocument.getJsonContent().get();
+        return content.asJsonArray();
+    }
 }

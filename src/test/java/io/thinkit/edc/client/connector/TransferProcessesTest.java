@@ -72,7 +72,12 @@ class TransferProcessesTest {
         var transferProcess = transferProcesses.get("");
 
         assertThat(transferProcess.isSucceeded()).isFalse();
-        assertThat(transferProcess.getError()).isNotNull();
+        assertThat(transferProcess.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.message()).isEqualTo("error message");
+            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+        });
     }
 
     @Test
@@ -118,7 +123,12 @@ class TransferProcessesTest {
         var created = transferProcesses.create(transferRequest);
 
         assertThat(created.isSucceeded()).isFalse();
-        assertThat(created.getError()).isNotNull();
+        assertThat(created.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.message()).isEqualTo("error message");
+            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+        });
     }
 
     @Test
@@ -136,7 +146,12 @@ class TransferProcessesTest {
         var state = transferProcesses.getState("");
 
         assertThat(state.isSucceeded()).isFalse();
-        assertThat(state.getError()).isNotNull();
+        assertThat(state.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.message()).isEqualTo("error message");
+            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+        });
     }
 
     @Test
@@ -160,7 +175,12 @@ class TransferProcessesTest {
         var terminated = transferProcesses.terminate(input);
 
         assertThat(terminated.isSucceeded()).isFalse();
-        assertThat(terminated.getError()).isNotNull();
+        assertThat(terminated.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.message()).isEqualTo("error message");
+            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+        });
     }
 
     @Test
@@ -176,6 +196,11 @@ class TransferProcessesTest {
         var result = transferProcesses.deprovision("");
 
         assertThat(result.isSucceeded()).isFalse();
-        assertThat(result.getError()).isNotNull();
+        assertThat(result.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.message()).isEqualTo("error message");
+            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+        });
     }
 }

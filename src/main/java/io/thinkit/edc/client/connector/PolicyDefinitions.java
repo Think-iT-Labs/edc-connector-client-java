@@ -1,8 +1,7 @@
 package io.thinkit.edc.client.connector;
 
 import static io.thinkit.edc.client.connector.Constants.ID;
-import static io.thinkit.edc.client.connector.JsonLdUtil.compact;
-import static io.thinkit.edc.client.connector.JsonLdUtil.expand;
+import static io.thinkit.edc.client.connector.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import com.apicatalog.jsonld.JsonLdError;
@@ -42,9 +41,9 @@ public class PolicyDefinitions {
                         .build();
                 return new Result<>(policyDefinition, null);
             } else {
-                var error = (statusCode == 400)
-                        ? "Request body was malformed"
-                        : "A policy definition with the given ID does not exist";
+                var error = deserializeToArray(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -70,8 +69,10 @@ public class PolicyDefinitions {
                 var id = content.getJsonObject(0).getString(ID);
                 return new Result<>(id, null);
             } else {
-                var error = (statusCode == 400) ? "Request body was malformed" : "Could not create policy definition";
-                return new Result<>(null, error);
+                var error = deserializeToArray(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
+                return new Result<>(error);
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -90,12 +91,15 @@ public class PolicyDefinitions {
 
             var request = interceptor.apply(requestBuilder).build();
 
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var statusCode = response.statusCode();
             if (statusCode == 204) {
                 return new Result<>(input.id(), null);
             } else {
-                return new Result<>(null, "Policy Definition could not be updated");
+                var error = deserializeToArray(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
+                return new Result<>(error);
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -116,9 +120,12 @@ public class PolicyDefinitions {
             if (statusCode == 200) {
                 return new Result<>(id, null);
             } else {
-                return new Result<>(null, "The policy definition cannot be deleted");
+                var error = deserializeToArray(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
+                return new Result<>(error);
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -145,7 +152,10 @@ public class PolicyDefinitions {
                         .toList();
                 return new Result<>(policyDefinitions, null);
             } else {
-                return new Result<>("Request body was malformed");
+                var error = deserializeToArray(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
+                return new Result<>(error);
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {

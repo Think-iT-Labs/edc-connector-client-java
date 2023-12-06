@@ -1,8 +1,7 @@
 package io.thinkit.edc.client.connector;
 
 import static io.thinkit.edc.client.connector.Constants.ID;
-import static io.thinkit.edc.client.connector.JsonLdUtil.compact;
-import static io.thinkit.edc.client.connector.JsonLdUtil.expand;
+import static io.thinkit.edc.client.connector.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import com.apicatalog.jsonld.JsonLdError;
@@ -43,9 +42,9 @@ public class ContractNegotiations {
                         .build();
                 return new Result<>(contractNegotiation, null);
             } else {
-                var error = (statusCode == 400)
-                        ? "Request body was malformed"
-                        : "A contract negotiation with the given ID does not exist";
+                var error = deserializeToArray(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -71,8 +70,10 @@ public class ContractNegotiations {
                 var id = content.getJsonObject(0).getString(ID);
                 return new Result<>(id, null);
             } else {
-                var error = (statusCode == 400) ? "Request body was malformed" : "Could not create contract request";
-                return new Result<>(null, error);
+                var error = deserializeToArray(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
+                return new Result<>(error);
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -97,9 +98,9 @@ public class ContractNegotiations {
                         .build();
                 return new Result<>(contractAgreement, null);
             } else {
-                var error = (statusCode == 400)
-                        ? "Request body was malformed"
-                        : "An contract negotiation with the given ID does not exist";
+                var error = deserializeToArray(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -123,7 +124,10 @@ public class ContractNegotiations {
             if (statusCode == 200) {
                 return new Result<>(input.id(), null);
             } else {
-                return new Result<>(null, "The contract negotiation cannot be terminated");
+                var error = deserializeToArray(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
+                return new Result<>(error);
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -153,7 +157,10 @@ public class ContractNegotiations {
                         .toList();
                 return new Result<>(contractNegotiations, null);
             } else {
-                return new Result<>("Request body was malformed");
+                var error = deserializeToArray(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
+                return new Result<>(error);
             }
 
         } catch (IOException | InterruptedException | JsonLdError e) {
@@ -177,9 +184,9 @@ public class ContractNegotiations {
                 var state = content.asJsonObject().getString("state");
                 return new Result<>(state, null);
             } else {
-                var error = (statusCode == 400)
-                        ? "Request body was malformed"
-                        : "A contract negotiation with the given ID does not exist";
+                var error = deserializeToArray(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
                 return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {

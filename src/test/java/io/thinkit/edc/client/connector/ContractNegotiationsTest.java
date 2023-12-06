@@ -83,7 +83,12 @@ class ContractNegotiationsTest {
         var contractNegotiation = contractNegotiations.get("");
 
         assertThat(contractNegotiation.isSucceeded()).isFalse();
-        assertThat(contractNegotiation.getError()).isNotNull();
+        assertThat(contractNegotiation.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.message()).isEqualTo("error message");
+            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+        });
     }
 
     @Test
@@ -128,7 +133,12 @@ class ContractNegotiationsTest {
         var created = contractNegotiations.create(contractNegotiation);
 
         assertThat(created.isSucceeded()).isFalse();
-        assertThat(created.getError()).isNotNull();
+        assertThat(created.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.message()).isEqualTo("error message");
+            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+        });
     }
 
     @Test
@@ -151,7 +161,12 @@ class ContractNegotiationsTest {
         var contractAgreement = contractNegotiations.getAgreement("");
 
         assertThat(contractAgreement.isSucceeded()).isFalse();
-        assertThat(contractAgreement.getError()).isNotNull();
+        assertThat(contractAgreement.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.message()).isEqualTo("error message");
+            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+        });
     }
 
     @Test
@@ -175,7 +190,12 @@ class ContractNegotiationsTest {
         var terminated = contractNegotiations.terminate(input);
 
         assertThat(terminated.isSucceeded()).isFalse();
-        assertThat(terminated.getError()).isNotNull();
+        assertThat(terminated.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.message()).isEqualTo("error message");
+            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+        });
     }
 
     @Test
@@ -241,7 +261,12 @@ class ContractNegotiationsTest {
         var result = contractNegotiations.request(input);
 
         assertThat(result.isSucceeded()).isFalse();
-        assertThat(result.getError()).isNotNull();
+        assertThat(result.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.message()).isEqualTo("error message");
+            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+        });
     }
 
     @Test
@@ -259,6 +284,11 @@ class ContractNegotiationsTest {
         var state = contractNegotiations.getState("");
 
         assertThat(state.isSucceeded()).isFalse();
-        assertThat(state.getError()).isNotNull();
+        assertThat(state.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.message()).isEqualTo("error message");
+            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+        });
     }
 }

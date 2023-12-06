@@ -1,7 +1,6 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.JsonLdUtil.compact;
-import static io.thinkit.edc.client.connector.JsonLdUtil.expand;
+import static io.thinkit.edc.client.connector.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import com.apicatalog.jsonld.JsonLdError;
@@ -43,7 +42,10 @@ public class Catalogs {
                         .build();
                 return new Result<>(catalog, null);
             } else {
-                return new Result<>("Request body was malformed");
+                var error = deserializeToArray(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
+                return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
@@ -70,7 +72,10 @@ public class Catalogs {
                         .build();
                 return new Result<>(dataset, null);
             } else {
-                return new Result<>("Request body was malformed");
+                var error = deserializeToArray(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
+                return new Result<>(error);
             }
         } catch (IOException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
