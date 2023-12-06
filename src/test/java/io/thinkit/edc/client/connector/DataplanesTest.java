@@ -71,7 +71,7 @@ class DataplanesTest {
         var created = dataplanes.create(dataplane);
 
         assertThat(created.isSucceeded()).isFalse();
-        assertThat(created.getError()).isNotNull().first().satisfies(apiErrorDetail -> {
+        assertThat(created.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
             assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");

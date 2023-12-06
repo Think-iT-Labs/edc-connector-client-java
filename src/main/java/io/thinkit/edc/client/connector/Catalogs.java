@@ -42,7 +42,7 @@ public class Catalogs {
                         .build();
                 return new Result<>(catalog, null);
             } else {
-                var error = getError(response.body()).stream()
+                var error = deserializeToArray(response.body()).stream()
                         .map(s -> new ApiErrorDetail(s.asJsonObject()))
                         .toList();
                 return new Result<>(error);
@@ -72,7 +72,7 @@ public class Catalogs {
                         .build();
                 return new Result<>(dataset, null);
             } else {
-                var error = getError(response.body()).stream()
+                var error = deserializeToArray(response.body()).stream()
                         .map(s -> new ApiErrorDetail(s.asJsonObject()))
                         .toList();
                 return new Result<>(error);

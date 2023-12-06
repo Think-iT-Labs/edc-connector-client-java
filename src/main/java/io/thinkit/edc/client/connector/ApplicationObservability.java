@@ -1,6 +1,6 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.JsonLdUtil.getError;
+import static io.thinkit.edc.client.connector.JsonLdUtil.deserializeToArray;
 
 import com.apicatalog.jsonld.JsonLdError;
 import com.apicatalog.jsonld.document.JsonDocument;
@@ -38,7 +38,7 @@ public class ApplicationObservability {
                 var healthStatus = new HealthStatus(content.asJsonObject());
                 return new Result<>(healthStatus, null);
             } else {
-                var error = getError(response.body()).stream()
+                var error = deserializeToArray(response.body()).stream()
                         .map(s -> new ApiErrorDetail(s.asJsonObject()))
                         .toList();
                 return new Result<>(error);
@@ -64,7 +64,7 @@ public class ApplicationObservability {
                 var healthStatus = new HealthStatus(content.asJsonObject());
                 return new Result<>(healthStatus, null);
             } else {
-                var error = getError(response.body()).stream()
+                var error = deserializeToArray(response.body()).stream()
                         .map(s -> new ApiErrorDetail(s.asJsonObject()))
                         .toList();
                 return new Result<>(error);
@@ -90,7 +90,7 @@ public class ApplicationObservability {
                 var healthStatus = new HealthStatus(content.asJsonObject());
                 return new Result<>(healthStatus, null);
             } else {
-                var error = getError(response.body()).stream()
+                var error = deserializeToArray(response.body()).stream()
                         .map(s -> new ApiErrorDetail(s.asJsonObject()))
                         .toList();
                 return new Result<>(error);
@@ -116,7 +116,7 @@ public class ApplicationObservability {
                 var healthStatus = new HealthStatus(content.asJsonObject());
                 return new Result<>(healthStatus, null);
             } else {
-                var error = getError(response.body()).stream()
+                var error = deserializeToArray(response.body()).stream()
                         .map(s -> new ApiErrorDetail(s.asJsonObject()))
                         .toList();
                 return new Result<>(error);

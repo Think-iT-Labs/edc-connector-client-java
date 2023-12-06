@@ -40,7 +40,7 @@ public class ContractAgreements {
                         .build();
                 return new Result<>(contractAgreement, null);
             } else {
-                var error = getError(response.body()).stream()
+                var error = deserializeToArray(response.body()).stream()
                         .map(s -> new ApiErrorDetail(s.asJsonObject()))
                         .toList();
                 return new Result<>(error);
@@ -67,7 +67,7 @@ public class ContractAgreements {
                         .build();
                 return new Result<>(contractNegotiation, null);
             } else {
-                var error = getError(response.body()).stream()
+                var error = deserializeToArray(response.body()).stream()
                         .map(s -> new ApiErrorDetail(s.asJsonObject()))
                         .toList();
                 return new Result<>(error);
@@ -99,7 +99,7 @@ public class ContractAgreements {
                         .toList();
                 return new Result<>(contractAgreements, null);
             } else {
-                var error = getError(response.body()).stream()
+                var error = deserializeToArray(response.body()).stream()
                         .map(s -> new ApiErrorDetail(s.asJsonObject()))
                         .toList();
                 return new Result<>(error);

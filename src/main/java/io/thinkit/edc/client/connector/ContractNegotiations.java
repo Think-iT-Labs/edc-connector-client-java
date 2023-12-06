@@ -42,7 +42,7 @@ public class ContractNegotiations {
                         .build();
                 return new Result<>(contractNegotiation, null);
             } else {
-                var error = getError(response.body()).stream()
+                var error = deserializeToArray(response.body()).stream()
                         .map(s -> new ApiErrorDetail(s.asJsonObject()))
                         .toList();
                 return new Result<>(error);
@@ -70,7 +70,7 @@ public class ContractNegotiations {
                 var id = content.getJsonObject(0).getString(ID);
                 return new Result<>(id, null);
             } else {
-                var error = getError(response.body()).stream()
+                var error = deserializeToArray(response.body()).stream()
                         .map(s -> new ApiErrorDetail(s.asJsonObject()))
                         .toList();
                 return new Result<>(error);
@@ -98,7 +98,7 @@ public class ContractNegotiations {
                         .build();
                 return new Result<>(contractAgreement, null);
             } else {
-                var error = getError(response.body()).stream()
+                var error = deserializeToArray(response.body()).stream()
                         .map(s -> new ApiErrorDetail(s.asJsonObject()))
                         .toList();
                 return new Result<>(error);
@@ -124,7 +124,7 @@ public class ContractNegotiations {
             if (statusCode == 200) {
                 return new Result<>(input.id(), null);
             } else {
-                var error = getError(response.body()).stream()
+                var error = deserializeToArray(response.body()).stream()
                         .map(s -> new ApiErrorDetail(s.asJsonObject()))
                         .toList();
                 return new Result<>(error);
@@ -157,7 +157,7 @@ public class ContractNegotiations {
                         .toList();
                 return new Result<>(contractNegotiations, null);
             } else {
-                var error = getError(response.body()).stream()
+                var error = deserializeToArray(response.body()).stream()
                         .map(s -> new ApiErrorDetail(s.asJsonObject()))
                         .toList();
                 return new Result<>(error);
@@ -184,7 +184,7 @@ public class ContractNegotiations {
                 var state = content.asJsonObject().getString("state");
                 return new Result<>(state, null);
             } else {
-                var error = getError(response.body()).stream()
+                var error = deserializeToArray(response.body()).stream()
                         .map(s -> new ApiErrorDetail(s.asJsonObject()))
                         .toList();
                 return new Result<>(error);

@@ -43,7 +43,7 @@ public class Dataplanes {
                         .toList();
                 return new Result<>(dataplanes, null);
             } else {
-                var error = getError(response.body()).stream()
+                var error = deserializeToArray(response.body()).stream()
                         .map(s -> new ApiErrorDetail(s.asJsonObject()))
                         .toList();
                 return new Result<>(error);
@@ -71,7 +71,7 @@ public class Dataplanes {
                 var id = content.getJsonObject(0).getString(ID);
                 return new Result<>(id, null);
             } else {
-                var error = getError(response.body()).stream()
+                var error = deserializeToArray(response.body()).stream()
                         .map(s -> new ApiErrorDetail(s.asJsonObject()))
                         .toList();
                 return new Result<>(error);
@@ -102,7 +102,7 @@ public class Dataplanes {
                         .build();
                 return new Result<>(dataplane, null);
             } else {
-                var error = getError(response.body()).stream()
+                var error = deserializeToArray(response.body()).stream()
                         .map(s -> new ApiErrorDetail(s.asJsonObject()))
                         .toList();
                 return new Result<>(error);
