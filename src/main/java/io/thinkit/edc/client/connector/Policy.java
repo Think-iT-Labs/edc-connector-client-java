@@ -7,6 +7,8 @@ import jakarta.json.*;
 import java.util.List;
 
 public class Policy extends JsonLdObject {
+    private static final String TYPE_POLICY = EDC_NAMESPACE + "Policy";
+
 
     public Policy(JsonObject raw) {
         super(raw);
@@ -27,7 +29,7 @@ public class Policy extends JsonLdObject {
         }
 
         public Policy build() {
-            return new Policy(builder.add(TYPE, EDC_NAMESPACE + "Policy").build());
+            return new Policy(builder.add(TYPE, TYPE_POLICY).build());
         }
     }
 }

@@ -53,8 +53,6 @@ public class JsonLdObject {
 
         public final JsonObjectBuilder builder =
                 createObjectBuilder().add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE));
-        public Class<T> c;
-
         public abstract T build();
 
         public B id(String id) {
