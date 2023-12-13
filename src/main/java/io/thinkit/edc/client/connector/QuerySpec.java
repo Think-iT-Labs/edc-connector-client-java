@@ -1,17 +1,13 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.Constants.CONTEXT;
 import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
 import static io.thinkit.edc.client.connector.Constants.TYPE;
 import static io.thinkit.edc.client.connector.Constants.VALUE;
-import static io.thinkit.edc.client.connector.Constants.VOCAB;
 import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
 import static jakarta.json.stream.JsonCollectors.toJsonArray;
 
-import jakarta.json.Json;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
 import java.util.List;
 
 public class QuerySpec extends JsonLdObject {
@@ -49,18 +45,13 @@ public class QuerySpec extends JsonLdObject {
                 .toList();
     }
 
-    public static final class Builder {
-
-        private final JsonObjectBuilder builder = createObjectBuilder()
-                .add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
-                .add(TYPE, TYPE_QUERY_SPEC);
-
+    public static final class Builder extends AbstractBuilder<QuerySpec, QuerySpec.Builder> {
         public static Builder newInstance() {
             return new Builder();
         }
 
         public QuerySpec build() {
-            return new QuerySpec(builder.build());
+            return new QuerySpec(builder.add(TYPE, TYPE_QUERY_SPEC).build());
         }
 
         public Builder offset(int offset) {
@@ -90,11 +81,6 @@ public class QuerySpec extends JsonLdObject {
         public Builder filterExpression(List<Criterion> criteria) {
             builder.add(
                     "filterExpression", criteria.stream().map(Criterion::raw).collect(toJsonArray()));
-            return this;
-        }
-
-        public Builder raw(JsonObject raw) {
-            builder.addAll(Json.createObjectBuilder(raw));
             return this;
         }
     }

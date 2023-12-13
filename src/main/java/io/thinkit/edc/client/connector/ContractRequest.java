@@ -7,7 +7,6 @@ import static jakarta.json.stream.JsonCollectors.toJsonArray;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
 import java.util.List;
 
 public class ContractRequest extends JsonLdObject {
@@ -44,23 +43,14 @@ public class ContractRequest extends JsonLdObject {
                 .toList();
     }
 
-    public static class Builder {
-
-        private final JsonObjectBuilder builder = createObjectBuilder()
-                .add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
-                .add(TYPE, TYPE_CONTRACT_REQUEST);
-
+    public static class Builder extends AbstractBuilder<ContractRequest, ContractRequest.Builder> {
         public static ContractRequest.Builder newInstance() {
             return new ContractRequest.Builder();
         }
+        ;
 
         public ContractRequest build() {
-            return new ContractRequest(builder.build());
-        }
-
-        public ContractRequest.Builder id(String id) {
-            builder.add(ID, id);
-            return this;
+            return new ContractRequest(builder.add(TYPE, TYPE_CONTRACT_REQUEST).build());
         }
 
         public ContractRequest.Builder counterPartyAddress(String counterPartyAddress) {
@@ -94,11 +84,6 @@ public class ContractRequest extends JsonLdObject {
                     CONTRACT_REQUEST_CALLBACK_ADDRESSES,
                     callbackAddresses.stream().map(CallbackAddress::raw).collect(toJsonArray()));
 
-            return this;
-        }
-
-        public ContractRequest.Builder raw(JsonObject raw) {
-            builder.addAll(Json.createObjectBuilder(raw));
             return this;
         }
     }

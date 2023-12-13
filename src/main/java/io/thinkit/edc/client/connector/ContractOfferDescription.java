@@ -6,7 +6,6 @@ import static jakarta.json.Json.createObjectBuilder;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
 
 public class ContractOfferDescription extends JsonLdObject {
     private static final String TYPE_CONTRACT_OFFER = EDC_NAMESPACE + "ContractOfferDescription";
@@ -31,18 +30,15 @@ public class ContractOfferDescription extends JsonLdObject {
         return new Policy(object(CONTRACT_OFFER_POLICY));
     }
 
-    public static class Builder {
-
-        private final JsonObjectBuilder builder = createObjectBuilder()
-                .add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
-                .add(TYPE, TYPE_CONTRACT_OFFER);
+    public static class Builder extends AbstractBuilder<ContractOfferDescription, ContractOfferDescription.Builder> {
 
         public static ContractOfferDescription.Builder newInstance() {
             return new ContractOfferDescription.Builder();
         }
 
         public ContractOfferDescription build() {
-            return new ContractOfferDescription(builder.build());
+            return new ContractOfferDescription(
+                    builder.add(TYPE, TYPE_CONTRACT_OFFER).build());
         }
 
         public ContractOfferDescription.Builder id(String id) {

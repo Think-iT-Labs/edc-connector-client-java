@@ -6,7 +6,6 @@ import static jakarta.json.Json.createObjectBuilder;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
 
 public class CatalogRequest extends JsonLdObject {
     private static final String TYPE_CATALOG_REQUEST = EDC_NAMESPACE + "CatalogRequest";
@@ -32,18 +31,14 @@ public class CatalogRequest extends JsonLdObject {
                 .build();
     }
 
-    public static class Builder {
-
-        private final JsonObjectBuilder builder = createObjectBuilder()
-                .add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
-                .add(TYPE, TYPE_CATALOG_REQUEST);
+    public static class Builder extends AbstractBuilder<CatalogRequest, CatalogRequest.Builder> {
 
         public static CatalogRequest.Builder newInstance() {
             return new CatalogRequest.Builder();
         }
 
         public CatalogRequest build() {
-            return new CatalogRequest(builder.build());
+            return new CatalogRequest(builder.add(TYPE, TYPE_CATALOG_REQUEST).build());
         }
 
         public CatalogRequest.Builder protocol(String protocol) {
@@ -62,11 +57,6 @@ public class CatalogRequest extends JsonLdObject {
 
         public CatalogRequest.Builder querySpec(QuerySpec querySpec) {
             builder.add(CATALOG_REQUEST_QUERY_SPEC, Json.createObjectBuilder(querySpec.raw()));
-            return this;
-        }
-
-        public CatalogRequest.Builder raw(JsonObject raw) {
-            builder.addAll(Json.createObjectBuilder(raw));
             return this;
         }
     }

@@ -6,7 +6,6 @@ import static jakarta.json.Json.createObjectBuilder;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
 
 public class ContractAgreement extends JsonLdObject {
     private static final String TYPE_CONTRACT_AGREEMENT = EDC_NAMESPACE + "ContractAgreement";
@@ -40,23 +39,15 @@ public class ContractAgreement extends JsonLdObject {
         return new Policy(object(CONTRACT_AGREEMENT_POLICY));
     }
 
-    public static class Builder {
-
-        private final JsonObjectBuilder builder = createObjectBuilder()
-                .add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
-                .add(TYPE, TYPE_CONTRACT_AGREEMENT);
+    public static class Builder extends AbstractBuilder<ContractAgreement, ContractAgreement.Builder> {
 
         public static ContractAgreement.Builder newInstance() {
             return new ContractAgreement.Builder();
         }
 
         public ContractAgreement build() {
-            return new ContractAgreement(builder.build());
-        }
-
-        public ContractAgreement.Builder id(String id) {
-            builder.add(ID, id);
-            return this;
+            return new ContractAgreement(
+                    builder.add(TYPE, TYPE_CONTRACT_AGREEMENT).build());
         }
 
         public ContractAgreement.Builder providerId(String providerId) {
@@ -89,11 +80,6 @@ public class ContractAgreement extends JsonLdObject {
 
         public ContractAgreement.Builder policy(Policy policy) {
             builder.add(CONTRACT_AGREEMENT_POLICY, Json.createObjectBuilder(policy.raw()));
-            return this;
-        }
-
-        public ContractAgreement.Builder raw(JsonObject raw) {
-            builder.addAll(Json.createObjectBuilder(raw));
             return this;
         }
     }

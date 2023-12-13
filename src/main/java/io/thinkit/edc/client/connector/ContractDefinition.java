@@ -5,9 +5,7 @@ import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
 import static jakarta.json.stream.JsonCollectors.toJsonArray;
 
-import jakarta.json.Json;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
 import java.util.List;
 
 public class ContractDefinition extends JsonLdObject {
@@ -39,23 +37,15 @@ public class ContractDefinition extends JsonLdObject {
         return longValue(CONTRACT_DEFINITION__CREATED_AT);
     }
 
-    public static class Builder {
-
-        private final JsonObjectBuilder builder = createObjectBuilder()
-                .add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
-                .add(TYPE, TYPE_CONTRACT_DEFINITION);
+    public static class Builder extends AbstractBuilder<ContractDefinition, ContractDefinition.Builder> {
 
         public static ContractDefinition.Builder newInstance() {
             return new ContractDefinition.Builder();
         }
 
         public ContractDefinition build() {
-            return new ContractDefinition(builder.build());
-        }
-
-        public ContractDefinition.Builder id(String id) {
-            builder.add(ID, id);
-            return this;
+            return new ContractDefinition(
+                    builder.add(TYPE, TYPE_CONTRACT_DEFINITION).build());
         }
 
         public ContractDefinition.Builder accessPolicyId(String accessPolicyId) {
@@ -76,11 +66,6 @@ public class ContractDefinition extends JsonLdObject {
             builder.add(
                     CONTRACT_DEFINITION_ASSETS_SELECTOR,
                     criteria.stream().map(Criterion::raw).collect(toJsonArray()));
-            return this;
-        }
-
-        public ContractDefinition.Builder raw(JsonObject raw) {
-            builder.addAll(Json.createObjectBuilder(raw));
             return this;
         }
     }

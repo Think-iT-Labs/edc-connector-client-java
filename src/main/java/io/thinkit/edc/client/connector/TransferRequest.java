@@ -5,9 +5,7 @@ import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
 import static jakarta.json.stream.JsonCollectors.toJsonArray;
 
-import jakarta.json.Json;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
 import java.util.List;
 import java.util.Map;
 
@@ -60,23 +58,14 @@ public class TransferRequest extends JsonLdObject {
                 .toList();
     }
 
-    public static class Builder {
-
-        private final JsonObjectBuilder builder = createObjectBuilder()
-                .add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
-                .add(TYPE, TYPE_TRANSFER_REQUEST);
+    public static class Builder extends AbstractBuilder<TransferRequest, TransferRequest.Builder> {
 
         public static TransferRequest.Builder newInstance() {
             return new TransferRequest.Builder();
         }
 
         public TransferRequest build() {
-            return new TransferRequest(builder.build());
-        }
-
-        public TransferRequest.Builder id(String id) {
-            builder.add(ID, id);
-            return this;
+            return new TransferRequest(builder.add(TYPE, TYPE_TRANSFER_REQUEST).build());
         }
 
         public TransferRequest.Builder protocol(String protocol) {
@@ -135,11 +124,6 @@ public class TransferRequest extends JsonLdObject {
             builder.add(
                     TRANSFER_REQUEST_CALLBACK_ADDRESSES,
                     callbackAddresses.stream().map(CallbackAddress::raw).collect(toJsonArray()));
-            return this;
-        }
-
-        public TransferRequest.Builder raw(JsonObject raw) {
-            builder.addAll(Json.createObjectBuilder(raw));
             return this;
         }
     }

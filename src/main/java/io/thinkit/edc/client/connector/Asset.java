@@ -1,15 +1,9 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.Constants.CONTEXT;
 import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
-import static io.thinkit.edc.client.connector.Constants.ID;
 import static io.thinkit.edc.client.connector.Constants.TYPE;
-import static io.thinkit.edc.client.connector.Constants.VOCAB;
-import static jakarta.json.Json.createObjectBuilder;
 
-import jakarta.json.Json;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
 import java.util.Map;
 
 public class Asset extends JsonLdObject {
@@ -40,23 +34,14 @@ public class Asset extends JsonLdObject {
         return longValue(ASSET_CREATED_AT);
     }
 
-    public static class Builder {
-
-        private final JsonObjectBuilder builder = createObjectBuilder()
-                .add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
-                .add(TYPE, TYPE_ASSET);
+    public static class Builder extends AbstractBuilder<Asset, Builder> {
 
         public static Builder newInstance() {
             return new Builder();
         }
 
         public Asset build() {
-            return new Asset(builder.build());
-        }
-
-        public Builder id(String id) {
-            builder.add(ID, id);
-            return this;
+            return new Asset(builder.add(TYPE, TYPE_ASSET).build());
         }
 
         public Builder properties(Map<String, ?> properties) {
@@ -77,11 +62,6 @@ public class Asset extends JsonLdObject {
             var propertiesBuilder = Properties.Builder.newInstance();
             properties.forEach(propertiesBuilder::property);
             builder.add(ASSET_DATA_ADDRESS, propertiesBuilder.build().raw());
-            return this;
-        }
-
-        public Builder raw(JsonObject raw) {
-            builder.addAll(Json.createObjectBuilder(raw));
             return this;
         }
     }

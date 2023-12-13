@@ -5,9 +5,7 @@ import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
 import static jakarta.json.stream.JsonCollectors.toJsonArray;
 
-import jakarta.json.Json;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
 import java.util.List;
 
 public class ContractNegotiation extends JsonLdObject {
@@ -64,23 +62,15 @@ public class ContractNegotiation extends JsonLdObject {
         return longValue(CONTRACT_NEGOTIATION_CREATED_AT);
     }
 
-    public static class Builder {
-
-        private final JsonObjectBuilder builder = createObjectBuilder()
-                .add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
-                .add(TYPE, TYPE_CONTRACT_NEGOTIATION);
+    public static class Builder extends AbstractBuilder<ContractNegotiation, ContractNegotiation.Builder> {
 
         public static ContractNegotiation.Builder newInstance() {
             return new ContractNegotiation.Builder();
         }
 
         public ContractNegotiation build() {
-            return new ContractNegotiation(builder.build());
-        }
-
-        public ContractNegotiation.Builder id(String id) {
-            builder.add(ID, id);
-            return this;
+            return new ContractNegotiation(
+                    builder.add(TYPE, TYPE_CONTRACT_NEGOTIATION).build());
         }
 
         public ContractNegotiation.Builder type(String type) {
@@ -136,11 +126,6 @@ public class ContractNegotiation extends JsonLdObject {
             builder.add(
                     CONTRACT_NEGOTIATION_CALLBACK_ADDRESSES,
                     callbackAddresses.stream().map(CallbackAddress::raw).collect(toJsonArray()));
-            return this;
-        }
-
-        public ContractNegotiation.Builder raw(JsonObject raw) {
-            builder.addAll(Json.createObjectBuilder(raw));
             return this;
         }
     }

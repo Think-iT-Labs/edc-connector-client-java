@@ -7,7 +7,6 @@ import static jakarta.json.stream.JsonCollectors.toJsonArray;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
 import java.util.List;
 
 public class Dataset extends JsonLdObject {
@@ -32,21 +31,14 @@ public class Dataset extends JsonLdObject {
         return objects(DATASET_DISTRIBUTION).map(Distribution::new).toList();
     }
 
-    public static class Builder {
-
-        private final JsonObjectBuilder builder = createObjectBuilder().add(TYPE, TYPE_DATASET);
+    public static class Builder extends AbstractBuilder<Dataset, Dataset.Builder> {
 
         public static Dataset.Builder newInstance() {
             return new Dataset.Builder();
         }
 
         public Dataset build() {
-            return new Dataset(builder.build());
-        }
-
-        public Dataset.Builder id(String id) {
-            builder.add(ID, id);
-            return this;
+            return new Dataset(builder.add(TYPE, TYPE_DATASET).build());
         }
 
         public Dataset.Builder description(String description) {
@@ -65,11 +57,6 @@ public class Dataset extends JsonLdObject {
             builder.add(
                     DATASET_DISTRIBUTION,
                     distribution.stream().map(Distribution::raw).collect(toJsonArray()));
-            return this;
-        }
-
-        public Dataset.Builder raw(JsonObject raw) {
-            builder.addAll(Json.createObjectBuilder(raw));
             return this;
         }
     }

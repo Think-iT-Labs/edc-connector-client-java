@@ -1,9 +1,11 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.Constants.ID;
-import static io.thinkit.edc.client.connector.Constants.VALUE;
+import static io.thinkit.edc.client.connector.Constants.*;
+import static jakarta.json.Json.createObjectBuilder;
 
+import jakarta.json.Json;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
 import java.util.stream.Stream;
 
@@ -45,5 +47,24 @@ public class JsonLdObject {
 
     protected Boolean booleanValue(String key) {
         return raw.getJsonArray(key).getJsonObject(0).getBoolean(VALUE);
+    }
+
+    public abstract static class AbstractBuilder<T extends JsonLdObject, B extends AbstractBuilder<T, B>> {
+
+        public final JsonObjectBuilder builder =
+                createObjectBuilder().add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE));
+        public Class<T> c;
+
+        public abstract T build();
+
+        public B id(String id) {
+            builder.add(ID, id);
+            return (B) this;
+        }
+
+        public B raw(JsonObject raw) {
+            builder.addAll(Json.createObjectBuilder(raw));
+            return (B) this;
+        }
     }
 }
