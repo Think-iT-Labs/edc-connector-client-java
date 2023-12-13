@@ -4,9 +4,7 @@ import static io.thinkit.edc.client.connector.Constants.*;
 import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
 
-import jakarta.json.Json;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
 
 public class Service extends JsonLdObject {
     private static final String TYPE_SERVICE = DCAT_NAMESPACE + "DataService";
@@ -25,21 +23,14 @@ public class Service extends JsonLdObject {
         return stringValue(SERVICE_ENDPOINT_URL);
     }
 
-    public static class Builder {
-
-        private final JsonObjectBuilder builder = createObjectBuilder().add(TYPE, TYPE_SERVICE);
+    public static class Builder extends AbstractBuilder<Service, Service.Builder> {
 
         public static Service.Builder newInstance() {
             return new Service.Builder();
         }
 
         public Service build() {
-            return new Service(builder.build());
-        }
-
-        public Service.Builder id(String id) {
-            builder.add(ID, id);
-            return this;
+            return new Service(builder.add(TYPE, TYPE_SERVICE).build());
         }
 
         public Service.Builder terms(String terms) {
@@ -53,11 +44,6 @@ public class Service extends JsonLdObject {
             builder.add(
                     SERVICE_ENDPOINT_URL,
                     createArrayBuilder().add(createObjectBuilder().add(VALUE, endpointUrl)));
-            return this;
-        }
-
-        public Service.Builder raw(JsonObject raw) {
-            builder.addAll(Json.createObjectBuilder(raw));
             return this;
         }
     }

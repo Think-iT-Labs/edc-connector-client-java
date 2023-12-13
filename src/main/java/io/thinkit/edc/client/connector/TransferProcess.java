@@ -5,9 +5,7 @@ import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
 import static jakarta.json.stream.JsonCollectors.toJsonArray;
 
-import jakarta.json.Json;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
 import java.util.List;
 import java.util.Map;
 
@@ -80,23 +78,14 @@ public class TransferProcess extends JsonLdObject {
         return longValue(TRANSFER_PROCESS_CREATED_AT);
     }
 
-    public static class Builder {
-
-        private final JsonObjectBuilder builder = createObjectBuilder()
-                .add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
-                .add(TYPE, TYPE_TRANSFER_PROCESS);
+    public static class Builder extends AbstractBuilder<TransferProcess, TransferProcess.Builder> {
 
         public static TransferProcess.Builder newInstance() {
             return new TransferProcess.Builder();
         }
 
         public TransferProcess build() {
-            return new TransferProcess(builder.build());
-        }
-
-        public TransferProcess.Builder id(String id) {
-            builder.add(ID, id);
-            return this;
+            return new TransferProcess(builder.add(TYPE, TYPE_TRANSFER_PROCESS).build());
         }
 
         public TransferProcess.Builder correlationId(String correlationId) {
@@ -176,11 +165,6 @@ public class TransferProcess extends JsonLdObject {
             builder.add(
                     TRANSFER_PROCESS_CALLBACK_ADDRESSES,
                     callbackAddresses.stream().map(CallbackAddress::raw).collect(toJsonArray()));
-            return this;
-        }
-
-        public TransferProcess.Builder raw(JsonObject raw) {
-            builder.addAll(Json.createObjectBuilder(raw));
             return this;
         }
     }

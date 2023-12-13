@@ -6,7 +6,6 @@ import static jakarta.json.Json.createObjectBuilder;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
 import java.util.List;
 
 public class CallbackAddress extends JsonLdObject {
@@ -41,18 +40,14 @@ public class CallbackAddress extends JsonLdObject {
         return objects(CALLBACK_ADDRESS_EVENTS).map(it -> it.getString(VALUE)).toList();
     }
 
-    public static class Builder {
-
-        private final JsonObjectBuilder builder = createObjectBuilder()
-                .add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
-                .add(TYPE, TYPE_CALLBACK_ADDRESS);
+    public static class Builder extends AbstractBuilder<CallbackAddress, Builder> {
 
         public static CallbackAddress.Builder newInstance() {
             return new CallbackAddress.Builder();
         }
 
         public CallbackAddress build() {
-            return new CallbackAddress(builder.build());
+            return new CallbackAddress(builder.add(TYPE, TYPE_CALLBACK_ADDRESS).build());
         }
 
         public CallbackAddress.Builder authCodeId(String authCodeId) {
@@ -85,11 +80,6 @@ public class CallbackAddress extends JsonLdObject {
 
         public CallbackAddress.Builder events(List<String> events) {
             builder.add(CALLBACK_ADDRESS_EVENTS, Json.createArrayBuilder(events));
-            return this;
-        }
-
-        public CallbackAddress.Builder raw(JsonObject raw) {
-            builder.addAll(Json.createObjectBuilder(raw));
             return this;
         }
     }

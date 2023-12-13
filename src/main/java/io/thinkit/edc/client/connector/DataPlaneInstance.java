@@ -6,7 +6,6 @@ import static jakarta.json.Json.createObjectBuilder;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
 import java.util.List;
 
 public class DataPlaneInstance extends JsonLdObject {
@@ -45,23 +44,15 @@ public class DataPlaneInstance extends JsonLdObject {
         return stringValue(DATAPLANE_INSTANCE_URL);
     }
 
-    public static class Builder {
-
-        private final JsonObjectBuilder builder = createObjectBuilder()
-                .add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
-                .add(TYPE, TYPE_DATAPLANE_INSTANCE);
+    public static class Builder extends AbstractBuilder<DataPlaneInstance, DataPlaneInstance.Builder> {
 
         public static DataPlaneInstance.Builder newInstance() {
             return new DataPlaneInstance.Builder();
         }
 
-        public DataPlaneInstance.Builder id(String id) {
-            builder.add(ID, id);
-            return this;
-        }
-
         public DataPlaneInstance build() {
-            return new DataPlaneInstance(builder.build());
+            return new DataPlaneInstance(
+                    builder.add(TYPE, TYPE_DATAPLANE_INSTANCE).build());
         }
 
         public DataPlaneInstance.Builder allowedDestTypes(List<String> allowedDestTypes) {
@@ -92,11 +83,6 @@ public class DataPlaneInstance extends JsonLdObject {
             builder.add(
                     DATAPLANE_INSTANCE_URL,
                     createArrayBuilder().add(createObjectBuilder().add(VALUE, url)));
-            return this;
-        }
-
-        public DataPlaneInstance.Builder raw(JsonObject raw) {
-            builder.addAll(Json.createObjectBuilder(raw));
             return this;
         }
     }

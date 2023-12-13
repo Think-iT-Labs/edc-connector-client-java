@@ -4,9 +4,7 @@ import static io.thinkit.edc.client.connector.Constants.*;
 import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
 
-import jakarta.json.Json;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
 
 public class DatasetRequest extends JsonLdObject {
     private static final String TYPE_DATASET_REQUEST = EDC_NAMESPACE + "DatasetRequest";
@@ -25,23 +23,14 @@ public class DatasetRequest extends JsonLdObject {
         return stringValue(DATASET_REQUEST_COUNTER_PARTY_ADDRESS);
     }
 
-    public static class Builder {
-
-        private final JsonObjectBuilder builder = createObjectBuilder()
-                .add(CONTEXT, createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
-                .add(TYPE, TYPE_DATASET_REQUEST);
+    public static class Builder extends AbstractBuilder<DatasetRequest, DatasetRequest.Builder> {
 
         public static DatasetRequest.Builder newInstance() {
             return new DatasetRequest.Builder();
         }
 
         public DatasetRequest build() {
-            return new DatasetRequest(builder.build());
-        }
-
-        public DatasetRequest.Builder id(String id) {
-            builder.add(ID, id);
-            return this;
+            return new DatasetRequest(builder.add(TYPE, TYPE_DATASET_REQUEST).build());
         }
 
         public DatasetRequest.Builder protocol(String protocol) {
@@ -55,11 +44,6 @@ public class DatasetRequest extends JsonLdObject {
             builder.add(
                     DATASET_REQUEST_COUNTER_PARTY_ADDRESS,
                     createArrayBuilder().add(createObjectBuilder().add(VALUE, counterPartyAddress)));
-            return this;
-        }
-
-        public DatasetRequest.Builder raw(JsonObject raw) {
-            builder.addAll(Json.createObjectBuilder(raw));
             return this;
         }
     }
