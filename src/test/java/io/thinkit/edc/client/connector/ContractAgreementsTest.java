@@ -1,8 +1,10 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.Constants.ODRL_NAMESPACE;
+import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.thinkit.edc.client.connector.model.QuerySpec;
+import io.thinkit.edc.client.connector.services.ContractAgreements;
 import java.net.http.HttpClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

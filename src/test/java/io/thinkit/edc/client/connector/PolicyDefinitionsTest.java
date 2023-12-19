@@ -1,9 +1,14 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.Constants.*;
+import static io.thinkit.edc.client.connector.utils.Constants.*;
 import static jakarta.json.Json.createObjectBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.thinkit.edc.client.connector.model.Policy;
+import io.thinkit.edc.client.connector.model.PolicyDefinition;
+import io.thinkit.edc.client.connector.model.QuerySpec;
+import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.services.PolicyDefinitions;
 import jakarta.json.Json;
 import java.net.http.HttpClient;
 import org.junit.jupiter.api.BeforeEach;
