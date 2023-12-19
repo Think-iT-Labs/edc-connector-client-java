@@ -1,9 +1,11 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.Constants.ODRL_NAMESPACE;
+import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
 import static jakarta.json.Json.createObjectBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.thinkit.edc.client.connector.model.*;
+import io.thinkit.edc.client.connector.services.ContractNegotiations;
 import jakarta.json.Json;
 import java.net.http.HttpClient;
 import java.util.Arrays;

@@ -2,6 +2,7 @@ package io.thinkit.edc.client.connector;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.thinkit.edc.client.connector.services.ApplicationObservability;
 import java.net.http.HttpClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

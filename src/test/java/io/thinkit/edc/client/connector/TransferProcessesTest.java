@@ -2,6 +2,10 @@ package io.thinkit.edc.client.connector;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.thinkit.edc.client.connector.model.CallbackAddress;
+import io.thinkit.edc.client.connector.model.TerminateTransfer;
+import io.thinkit.edc.client.connector.model.TransferRequest;
+import io.thinkit.edc.client.connector.services.TransferProcesses;
 import java.net.http.HttpClient;
 import java.util.Arrays;
 import java.util.List;

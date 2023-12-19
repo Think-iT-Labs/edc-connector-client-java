@@ -1,9 +1,12 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.Constants.EDC_NAMESPACE;
+import static io.thinkit.edc.client.connector.utils.Constants.EDC_NAMESPACE;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.thinkit.edc.client.connector.model.Asset;
+import io.thinkit.edc.client.connector.model.QuerySpec;
+import io.thinkit.edc.client.connector.services.Assets;
 import java.net.http.HttpClient;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;

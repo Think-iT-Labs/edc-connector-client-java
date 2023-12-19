@@ -2,6 +2,10 @@ package io.thinkit.edc.client.connector;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.thinkit.edc.client.connector.model.DataAddress;
+import io.thinkit.edc.client.connector.model.DataPlaneInstance;
+import io.thinkit.edc.client.connector.model.SelectionRequest;
+import io.thinkit.edc.client.connector.services.Dataplanes;
 import java.net.http.HttpClient;
 import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
