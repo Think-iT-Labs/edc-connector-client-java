@@ -8,10 +8,8 @@ import io.thinkit.edc.client.connector.services.ContractAgreements;
 import java.net.http.HttpClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
-public class ContractAgreementsTest extends ContainerBaseTest {
+public class ContractAgreementsTest extends ContainerTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();
     private ContractAgreements contractAgreements;

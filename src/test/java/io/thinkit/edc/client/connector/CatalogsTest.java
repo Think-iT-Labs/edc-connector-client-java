@@ -11,10 +11,8 @@ import io.thinkit.edc.client.connector.services.Catalogs;
 import java.net.http.HttpClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
-class CatalogsTest extends ContainerBaseTest {
+class CatalogsTest extends ContainerTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();
     private Catalogs catalogs;

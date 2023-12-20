@@ -1,8 +1,10 @@
 package io.thinkit.edc.client.connector;
 
 import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-public abstract class ContainerBaseTest {
+@Testcontainers
+public abstract class ContainerTestBase {
     @Container
     static final ManagementApiContainer prism;
 

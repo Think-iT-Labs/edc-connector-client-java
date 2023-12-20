@@ -13,10 +13,8 @@ import jakarta.json.Json;
 import java.net.http.HttpClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
-public class PolicyDefinitionsTest extends ContainerBaseTest {
+public class PolicyDefinitionsTest extends ContainerTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();
     private PolicyDefinitions policyDefinitions;

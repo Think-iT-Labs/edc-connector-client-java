@@ -12,10 +12,8 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
-class TransferProcessesTest extends ContainerBaseTest {
+class TransferProcessesTest extends ContainerTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();
     private TransferProcesses transferProcesses;
