@@ -9,14 +9,10 @@ import io.thinkit.edc.client.connector.services.ContractDefinitions;
 import java.net.http.HttpClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
-class ContractDefinitionsTest {
-
-    @Container
-    private final ManagementApiContainer prism = new ManagementApiContainer();
+class ContractDefinitionsTest extends ContainerBaseTest {
 
     private final HttpClient http = HttpClient.newBuilder().build();
     private ContractDefinitions contractDefinitions;
