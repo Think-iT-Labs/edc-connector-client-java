@@ -12,14 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
-class ContractNegotiationsTest {
-
-    @Container
-    private final ManagementApiContainer prism = new ManagementApiContainer();
+class ContractNegotiationsTest extends ContainerTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();
     private ContractNegotiations contractNegotiations;
