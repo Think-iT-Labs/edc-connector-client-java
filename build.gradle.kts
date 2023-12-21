@@ -85,6 +85,13 @@ publishing {
                         url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
                     }
                 }
+                developers {
+                    developer {
+                        id = "think-it"
+                        name = "Think-it"
+                        email = "sonatype@think-it.io"
+                    }
+                }
                 scm {
                     url.set("https://github.com/Think-iT-Labs/edc-connector-client-java")
                     connection.set("scm:git:git@github.com:Think-iT-Labs/edc-connector-client-java.git")
