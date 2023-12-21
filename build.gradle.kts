@@ -9,9 +9,6 @@ plugins {
     alias(libs.plugins.nexus)
 }
 
-group = "io.think-it"
-version = "0.0.1-SNAPSHOT"
-
 repositories {
     mavenLocal()
     mavenCentral()
