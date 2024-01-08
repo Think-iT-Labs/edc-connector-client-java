@@ -6,11 +6,13 @@ import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import com.apicatalog.jsonld.JsonLdError;
 import io.thinkit.edc.client.connector.model.*;
-import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.UnaryOperator;
 
 public class TransferProcesses {
@@ -32,7 +34,9 @@ public class TransferProcesses {
 
             var request = interceptor.apply(requestBuilder).build();
 
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            CompletableFuture<HttpResponse<InputStream>> future =
+                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+            var response = future.get();
             var statusCode = response.statusCode();
             if (statusCode == 200) {
                 var jsonArray = expand(response.body());
@@ -46,7 +50,7 @@ public class TransferProcesses {
                         .toList();
                 return new Result<>(error);
             }
-        } catch (IOException | InterruptedException | JsonLdError e) {
+        } catch (ExecutionException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -62,7 +66,9 @@ public class TransferProcesses {
 
             var request = interceptor.apply(requestBuilder).build();
 
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            CompletableFuture<HttpResponse<InputStream>> future =
+                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+            var response = future.get();
             var statusCode = response.statusCode();
             if (statusCode == 200) {
                 var content = expand(response.body());
@@ -75,7 +81,7 @@ public class TransferProcesses {
                 return new Result<>(error);
             }
 
-        } catch (IOException | InterruptedException | JsonLdError e) {
+        } catch (ExecutionException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -88,7 +94,9 @@ public class TransferProcesses {
 
             var request = interceptor.apply(requestBuilder).build();
 
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            CompletableFuture<HttpResponse<InputStream>> future =
+                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+            var response = future.get();
             var statusCode = response.statusCode();
             if (statusCode == 200) {
                 var jsonArray = expand(response.body());
@@ -102,7 +110,7 @@ public class TransferProcesses {
                         .toList();
                 return new Result<>(error);
             }
-        } catch (IOException | InterruptedException | JsonLdError e) {
+        } catch (ExecutionException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -118,7 +126,9 @@ public class TransferProcesses {
 
             var request = interceptor.apply(requestBuilder).build();
 
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            CompletableFuture<HttpResponse<InputStream>> future =
+                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+            var response = future.get();
             var statusCode = response.statusCode();
             if (statusCode == 200) {
                 return new Result<>(input.id(), null);
@@ -129,7 +139,7 @@ public class TransferProcesses {
                 return new Result<>(error);
             }
 
-        } catch (IOException | InterruptedException | JsonLdError e) {
+        } catch (ExecutionException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -144,7 +154,9 @@ public class TransferProcesses {
 
             var request = interceptor.apply(requestBuilder).build();
 
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            CompletableFuture<HttpResponse<InputStream>> future =
+                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+            var response = future.get();
             var statusCode = response.statusCode();
             if (statusCode == 200) {
                 return new Result<>(id, null);
@@ -155,7 +167,7 @@ public class TransferProcesses {
                 return new Result<>(error);
             }
 
-        } catch (IOException | InterruptedException | JsonLdError e) {
+        } catch (ExecutionException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
     }

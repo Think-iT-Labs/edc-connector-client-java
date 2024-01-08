@@ -7,11 +7,13 @@ import com.apicatalog.jsonld.document.JsonDocument;
 import io.thinkit.edc.client.connector.model.ApiErrorDetail;
 import io.thinkit.edc.client.connector.model.HealthStatus;
 import io.thinkit.edc.client.connector.model.Result;
-import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.UnaryOperator;
 
 public class ApplicationObservability {
@@ -33,7 +35,9 @@ public class ApplicationObservability {
 
             var request = interceptor.apply(requestBuilder).build();
 
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            CompletableFuture<HttpResponse<InputStream>> future =
+                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+            var response = future.get();
             var statusCode = response.statusCode();
             if (statusCode == 200) {
                 var jsonDocument = JsonDocument.of(response.body());
@@ -46,7 +50,7 @@ public class ApplicationObservability {
                         .toList();
                 return new Result<>(error);
             }
-        } catch (IOException | InterruptedException | JsonLdError e) {
+        } catch (ExecutionException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -59,7 +63,9 @@ public class ApplicationObservability {
 
             var request = interceptor.apply(requestBuilder).build();
 
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            CompletableFuture<HttpResponse<InputStream>> future =
+                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+            var response = future.get();
             var statusCode = response.statusCode();
             if (statusCode == 200) {
                 var jsonDocument = JsonDocument.of(response.body());
@@ -72,7 +78,7 @@ public class ApplicationObservability {
                         .toList();
                 return new Result<>(error);
             }
-        } catch (IOException | InterruptedException | JsonLdError e) {
+        } catch (ExecutionException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -85,7 +91,9 @@ public class ApplicationObservability {
 
             var request = interceptor.apply(requestBuilder).build();
 
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            CompletableFuture<HttpResponse<InputStream>> future =
+                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+            var response = future.get();
             var statusCode = response.statusCode();
             if (statusCode == 200) {
                 var jsonDocument = JsonDocument.of(response.body());
@@ -98,7 +106,7 @@ public class ApplicationObservability {
                         .toList();
                 return new Result<>(error);
             }
-        } catch (IOException | InterruptedException | JsonLdError e) {
+        } catch (ExecutionException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -111,7 +119,9 @@ public class ApplicationObservability {
 
             var request = interceptor.apply(requestBuilder).build();
 
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            CompletableFuture<HttpResponse<InputStream>> future =
+                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+            var response = future.get();
             var statusCode = response.statusCode();
             if (statusCode == 200) {
                 var jsonDocument = JsonDocument.of(response.body());
@@ -124,7 +134,7 @@ public class ApplicationObservability {
                         .toList();
                 return new Result<>(error);
             }
-        } catch (IOException | InterruptedException | JsonLdError e) {
+        } catch (ExecutionException | InterruptedException | JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
