@@ -16,5 +16,5 @@ testcontainers = { module = "org.testcontainers:junit-jupiter", version = "1.19.
 titanium-json-ld = { module = "com.apicatalog:titanium-json-ld", version = "1.3.3" }
 
 [plugins]
-spotless = { id = "com.diffplug.spotless", version = "6.23.3" }
+spotless = { id = "com.diffplug.spotless", version = "6.24.0" }
 nexus = { id = "io.github.gradle-nexus.publish-plugin", version = "1.3.0" }
