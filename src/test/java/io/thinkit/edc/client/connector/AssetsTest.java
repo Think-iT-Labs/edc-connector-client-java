@@ -11,14 +11,8 @@ import java.net.http.HttpClient;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
-class AssetsTest {
-
-    @Container
-    private final ManagementApiContainer prism = new ManagementApiContainer();
+class AssetsTest extends ContainerTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();
     private Assets assets;

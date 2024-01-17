@@ -10,14 +10,8 @@ import java.net.http.HttpClient;
 import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
-class DataplanesTest {
-
-    @Container
-    private final ManagementApiContainer prism = new ManagementApiContainer();
+class DataplanesTest extends ContainerTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();
     private Dataplanes dataplanes;

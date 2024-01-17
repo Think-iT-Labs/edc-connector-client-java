@@ -9,9 +9,6 @@ plugins {
     alias(libs.plugins.nexus)
 }
 
-group = "io.think-it"
-version = "0.0.1-SNAPSHOT"
-
 repositories {
     mavenLocal()
     mavenCentral()
@@ -86,6 +83,13 @@ publishing {
                     license {
                         name.set("The Apache License, Version 2.0")
                         url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id = "think-it"
+                        name = "Think-it"
+                        email = "sonatype@think-it.io"
                     }
                 }
                 scm {
