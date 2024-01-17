@@ -121,7 +121,7 @@ public class Assets {
 
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (statusCode == 204) {
                 return new Result<>(id, null);
             } else {
                 var error = deserializeToArray(response.body()).stream()
