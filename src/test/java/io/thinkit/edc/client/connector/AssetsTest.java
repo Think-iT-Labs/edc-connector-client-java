@@ -6,9 +6,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.thinkit.edc.client.connector.model.Asset;
 import io.thinkit.edc.client.connector.model.QuerySpec;
+import io.thinkit.edc.client.connector.model.Result;
 import io.thinkit.edc.client.connector.services.Assets;
 import java.net.http.HttpClient;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,27 +30,30 @@ class AssetsTest extends ContainerTestBase {
 
     @Test
     void should_get_an_asset() {
-        var asset = assets.get("123");
-
-        assertThat(asset.getContent().id()).isNotBlank();
-        assertThat(asset.getContent().properties()).isNotNull().satisfies(properties -> {
-            assertThat(properties.size()).isGreaterThan(0);
-            assertThat(properties.getString(EDC_NAMESPACE + "key")).isEqualTo("value");
-            assertThat(properties.getString("key")).isEqualTo("value");
-            assertThat(properties.getString("not-existent")).isEqualTo(null);
-        });
-        assertThat(asset.getContent().privateProperties()).isNotNull().satisfies(privateProperties -> {
-            assertThat(privateProperties.size()).isGreaterThan(0);
-            assertThat(privateProperties.getString(EDC_NAMESPACE + "privateKey"))
-                    .isEqualTo("privateValue");
-            assertThat(privateProperties.getString("privateKey")).isEqualTo("privateValue");
-            assertThat(privateProperties.getString("not-existent")).isEqualTo(null);
-        });
-        assertThat(asset.getContent().dataAddress()).isNotNull().satisfies(dataAddress -> {
-            assertThat(dataAddress.type()).isNotBlank();
-            assertThat(dataAddress.properties().size()).isGreaterThan(0);
-        });
-        assertThat(asset.getContent().createdAt()).isGreaterThan(0);
+        try {
+            Result<Asset> asset = assets.get("123").get();
+            assertThat(asset.getContent().id()).isNotBlank();
+            assertThat(asset.getContent().properties()).isNotNull().satisfies(properties -> {
+                assertThat(properties.size()).isGreaterThan(0);
+                assertThat(properties.getString(EDC_NAMESPACE + "key")).isEqualTo("value");
+                assertThat(properties.getString("key")).isEqualTo("value");
+                assertThat(properties.getString("not-existent")).isEqualTo(null);
+            });
+            assertThat(asset.getContent().privateProperties()).isNotNull().satisfies(privateProperties -> {
+                assertThat(privateProperties.size()).isGreaterThan(0);
+                assertThat(privateProperties.getString(EDC_NAMESPACE + "privateKey"))
+                        .isEqualTo("privateValue");
+                assertThat(privateProperties.getString("privateKey")).isEqualTo("privateValue");
+                assertThat(privateProperties.getString("not-existent")).isEqualTo(null);
+            });
+            assertThat(asset.getContent().dataAddress()).isNotNull().satisfies(dataAddress -> {
+                assertThat(dataAddress.type()).isNotBlank();
+                assertThat(dataAddress.properties().size()).isGreaterThan(0);
+            });
+            assertThat(asset.getContent().createdAt()).isGreaterThan(0);
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -64,10 +69,13 @@ class AssetsTest extends ContainerTestBase {
                 .dataAddress(dataAddress)
                 .build();
 
-        var created = assets.create(asset);
-
-        assertThat(created.isSucceeded()).isTrue();
-        assertThat(created.getContent()).isNotNull();
+        try {
+            Result<String> created = assets.create(asset).get();
+            assertThat(created.isSucceeded()).isTrue();
+            assertThat(created.getContent()).isNotNull();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -79,16 +87,18 @@ class AssetsTest extends ContainerTestBase {
                 .properties(properties)
                 .privateProperties(privateProperties)
                 .build();
-
-        var created = assets.create(asset);
-
-        assertThat(created.isSucceeded()).isFalse();
-        assertThat(created.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-            assertThat(apiErrorDetail.message()).isEqualTo("error message");
-            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
-            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
-            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
-        });
+        try {
+            Result<String> created = assets.create(asset).get();
+            assertThat(created.isSucceeded()).isFalse();
+            assertThat(created.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+                assertThat(apiErrorDetail.message()).isEqualTo("error message");
+                assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+                assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+                assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+            });
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -102,10 +112,12 @@ class AssetsTest extends ContainerTestBase {
                 .privateProperties(privateProperties)
                 .dataAddress(dataAddress)
                 .build();
-
-        var created = assets.update(asset);
-
-        assertThat(created.isSucceeded()).isTrue();
+        try {
+            var created = assets.update(asset).get();
+            assertThat(created.isSucceeded()).isTrue();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -117,36 +129,47 @@ class AssetsTest extends ContainerTestBase {
                 .properties(properties)
                 .privateProperties(privateProperties)
                 .build();
+        try {
+            var created = assets.update(asset).get();
 
-        var created = assets.update(asset);
-
-        assertThat(created.isSucceeded()).isFalse();
-        assertThat(created.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-            assertThat(apiErrorDetail.message()).isEqualTo("error message");
-            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
-            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
-            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
-        });
+            assertThat(created.isSucceeded()).isFalse();
+            assertThat(created.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+                assertThat(apiErrorDetail.message()).isEqualTo("error message");
+                assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+                assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+                assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+            });
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
     void should_delete_an_asset() {
-        var deleted = assets.delete("assetId");
 
-        assertThat(deleted.isSucceeded()).isTrue();
+        try {
+            var deleted = assets.delete("assetId").get();
+            assertThat(deleted.isSucceeded()).isTrue();
+
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
     void should_not_delete_an_asset_when_id_is_empty() {
-        var deleted = assets.delete("");
-
-        assertThat(deleted.isSucceeded()).isFalse();
-        assertThat(deleted.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-            assertThat(apiErrorDetail.message()).isEqualTo("error message");
-            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
-            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
-            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
-        });
+        try {
+            var deleted = assets.delete("").get();
+            assertThat(deleted.isSucceeded()).isFalse();
+            assertThat(deleted.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+                assertThat(apiErrorDetail.message()).isEqualTo("error message");
+                assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+                assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+                assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+            });
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -158,45 +181,53 @@ class AssetsTest extends ContainerTestBase {
                 .sortField("fieldName")
                 .filterExpression(emptyList())
                 .build();
+        try {
 
-        var assetsList = assets.request(query);
+            var assetsList = assets.request(query).get();
 
-        assertThat(assetsList.isSucceeded()).isTrue();
-        assertThat(assetsList.getContent()).isNotNull().first().satisfies(asset -> {
-            assertThat(asset.id()).isNotBlank();
-            assertThat(asset.properties()).isNotNull().satisfies(properties -> {
-                assertThat(properties.size()).isGreaterThan(0);
-                assertThat(properties.getString(EDC_NAMESPACE + "key")).isEqualTo("value");
-                assertThat(properties.getString("key")).isEqualTo("value");
-                assertThat(properties.getString("not-existent")).isEqualTo(null);
+            assertThat(assetsList.isSucceeded()).isTrue();
+            assertThat(assetsList.getContent()).isNotNull().first().satisfies(asset -> {
+                assertThat(asset.id()).isNotBlank();
+                assertThat(asset.properties()).isNotNull().satisfies(properties -> {
+                    assertThat(properties.size()).isGreaterThan(0);
+                    assertThat(properties.getString(EDC_NAMESPACE + "key")).isEqualTo("value");
+                    assertThat(properties.getString("key")).isEqualTo("value");
+                    assertThat(properties.getString("not-existent")).isEqualTo(null);
+                });
+                assertThat(asset.privateProperties()).isNotNull().satisfies(privateProperties -> {
+                    assertThat(privateProperties.size()).isGreaterThan(0);
+                    assertThat(privateProperties.getString(EDC_NAMESPACE + "privateKey"))
+                            .isEqualTo("privateValue");
+                    assertThat(privateProperties.getString("privateKey")).isEqualTo("privateValue");
+                    assertThat(privateProperties.getString("not-existent")).isEqualTo(null);
+                });
+                assertThat(asset.dataAddress()).isNotNull().satisfies(dataAddress -> {
+                    assertThat(dataAddress.type()).isNotBlank();
+                    assertThat(dataAddress.properties().size()).isGreaterThan(0);
+                });
+                assertThat(asset.createdAt()).isGreaterThan(0);
             });
-            assertThat(asset.privateProperties()).isNotNull().satisfies(privateProperties -> {
-                assertThat(privateProperties.size()).isGreaterThan(0);
-                assertThat(privateProperties.getString(EDC_NAMESPACE + "privateKey"))
-                        .isEqualTo("privateValue");
-                assertThat(privateProperties.getString("privateKey")).isEqualTo("privateValue");
-                assertThat(privateProperties.getString("not-existent")).isEqualTo(null);
-            });
-            assertThat(asset.dataAddress()).isNotNull().satisfies(dataAddress -> {
-                assertThat(dataAddress.type()).isNotBlank();
-                assertThat(dataAddress.properties().size()).isGreaterThan(0);
-            });
-            assertThat(asset.createdAt()).isGreaterThan(0);
-        });
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
     void should_not_get_assets_when_sort_schema_is_not_as_expected() {
         var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+        try {
+            var assetsList = assets.request(input).get();
 
-        var assetsList = assets.request(input);
+            assertThat(assetsList.isSucceeded()).isFalse();
+            assertThat(assetsList.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+                assertThat(apiErrorDetail.message()).isEqualTo("error message");
+                assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+                assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+                assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+            });
 
-        assertThat(assetsList.isSucceeded()).isFalse();
-        assertThat(assetsList.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-            assertThat(apiErrorDetail.message()).isEqualTo("error message");
-            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
-            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
-            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
-        });
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
