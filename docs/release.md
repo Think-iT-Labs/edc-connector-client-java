@@ -1,24 +1,17 @@
 # Release
 
-Currently the release process is not fully automated, here's the current process described step by step used to release 
-version `0.0.1`
+Currently, the release process is not fully automated, here's the current process described.
 
 ## Preparation
 
-Creation of the release branch and update version to `0.0.1`
+Launch the [`draft-release`](https://github.com/Think-iT-Labs/edc-connector-client-java/actions/workflows/draft-release.yml)
+workflow, setting the version to be released.
+At the end of the workflow there will be an open PR that wants to merge the specific version release branch into the 
+`releases` one.
 
-```shell
-git checkout -b release/0.0.1
-sed -i 's/version=.*/version=0.0.1/g' gradle.properties
-git add .
-git commit -m "Prepare release 0.0.1"
-git push origin release/0.0.1
-```
+## Merge PR
 
-## Pull request
-
-After push, a pull request was manually created, from `release/0.0.1` to `releases`.
-After merge, a new `publish` flow has been automatically triggered and the artifact has been uploaded to maven central.
+After merging the PR, a new `publish` flow will be automatically triggered and the artifact will be uploaded to maven central.
 
 ## Tag publication
 
