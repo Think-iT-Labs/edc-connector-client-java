@@ -10,6 +10,7 @@ import io.thinkit.edc.client.connector.model.Asset;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
 import jakarta.json.JsonArray;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -30,7 +31,116 @@ public class Assets {
         this.interceptor = interceptor;
     }
 
-    public CompletableFuture<Result<Asset>> get(String id) {
+    Result<Asset> getResponse(HttpResponse<InputStream> response) {
+        try {
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                JsonArray jsonArray = expand(response.body());
+
+                var asset = Asset.Builder.newInstance()
+                        .raw(jsonArray.getJsonObject(0))
+                        .build();
+                return new Result<>(asset, null);
+            } else {
+                var error = deserializeToArray(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
+                return new Result<>(error);
+            }
+        } catch (JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    Result<String> createResponse(HttpResponse<InputStream> response) {
+        try {
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                var content = expand(response.body());
+                var id = content.getJsonObject(0).getString(ID);
+                return new Result<>(id, null);
+            } else {
+                var error = deserializeToArray(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
+                return new Result<>(null, error);
+            }
+        } catch (JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    Result<String> updateResponse(HttpResponse<InputStream> response, String id) {
+        try {
+            var statusCode = response.statusCode();
+            if (statusCode == 204) {
+                return new Result<>(id, null);
+            } else {
+                var error = deserializeToArray(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
+                return new Result<>(null, error);
+            }
+        } catch (JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    Result<String> deleteResponse(HttpResponse<InputStream> response, String id) {
+        try {
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                return new Result<>(id, null);
+            } else {
+                var error = deserializeToArray(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
+                return new Result<>(null, error);
+            }
+        } catch (JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    Result<List<Asset>> requestResponse(HttpResponse<InputStream> response) {
+        try {
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                var jsonArray = expand(response.body());
+                var assets = jsonArray.stream()
+                        .map(s -> Asset.Builder.newInstance()
+                                .raw(s.asJsonObject())
+                                .build())
+                        .toList();
+                return new Result<>(assets, null);
+            } else {
+                var error = deserializeToArray(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
+                return new Result<>(error);
+            }
+        } catch (JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Result<Asset> get(String id) {
+        try {
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v3/assets/%s".formatted(url, id)))
+                    .GET();
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            return getResponse(response);
+
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public CompletableFuture<Result<Asset>> getAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create("%s/v3/assets/%s".formatted(url, id)))
                 .GET();
@@ -39,30 +149,29 @@ public class Assets {
 
         CompletableFuture<HttpResponse<InputStream>> future =
                 httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-        return future.thenApply(response -> {
-            try {
-                var statusCode2 = response.statusCode();
-                if (statusCode2 == 200) {
-                    JsonArray jsonArray = null;
-                    jsonArray = expand(response.body());
-
-                    var asset = Asset.Builder.newInstance()
-                            .raw(jsonArray.getJsonObject(0))
-                            .build();
-                    return new Result<>(asset, null);
-                } else {
-                    var error = deserializeToArray(response.body()).stream()
-                            .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                            .toList();
-                    return new Result<>(error);
-                }
-            } catch (JsonLdError e) {
-                throw new RuntimeException(e);
-            }
-        });
+        return future.thenApply(this::getResponse);
     }
 
-    public CompletableFuture<Result<String>> create(Asset input) {
+    public Result<String> create(Asset input) {
+        try {
+            var requestBody = compact(input);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v3/assets".formatted(url)))
+                    .header("content-type", "application/json")
+                    .POST(ofString(requestBody.toString()));
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            return createResponse(response);
+
+        } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public CompletableFuture<Result<String>> createAsync(Asset input) {
         try {
             var requestBody = compact(input);
 
@@ -75,30 +184,33 @@ public class Assets {
 
             CompletableFuture<HttpResponse<InputStream>> future =
                     httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-            return future.thenApply(response -> {
-                try {
-                    var statusCode = response.statusCode();
-                    if (statusCode == 200) {
-                        var content = expand(response.body());
-                        var id = content.getJsonObject(0).getString(ID);
-                        return new Result<>(id, null);
-                    } else {
-                        var error = deserializeToArray(response.body()).stream()
-                                .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                                .toList();
-                        return new Result<>(null, error);
-                    }
-                } catch (JsonLdError e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            return future.thenApply(this::createResponse);
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
 
-    public CompletableFuture<Result<String>> update(Asset input) {
+    public Result<String> update(Asset input) {
+        try {
+            var requestBody = compact(input);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v3/assets".formatted(url)))
+                    .header("content-type", "application/json")
+                    .PUT(ofString(requestBody.toString()));
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            return updateResponse(response, input.id());
+
+        } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public CompletableFuture<Result<String>> updateAsync(Asset input) {
         try {
             var requestBody = compact(input);
 
@@ -111,28 +223,30 @@ public class Assets {
 
             CompletableFuture<HttpResponse<InputStream>> future =
                     httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-            return future.thenApply(response -> {
-                try {
-                    var statusCode = response.statusCode();
-                    if (statusCode == 204) {
-                        return new Result<>(input.id(), null);
-                    } else {
-                        var error = deserializeToArray(response.body()).stream()
-                                .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                                .toList();
-                        return new Result<>(null, error);
-                    }
-                } catch (JsonLdError e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            return future.thenApply(response -> updateResponse(response, input.id()));
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
 
-    public CompletableFuture<Result<String>> delete(String id) {
+    public Result<String> delete(String id) {
+        try {
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v3/assets/%s".formatted(url, id)))
+                    .DELETE();
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            return deleteResponse(response, id);
+
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public CompletableFuture<Result<String>> deleteAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create("%s/v3/assets/%s".formatted(url, id)))
                 .DELETE();
@@ -141,24 +255,29 @@ public class Assets {
 
         CompletableFuture<HttpResponse<InputStream>> future =
                 httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-        return future.thenApply(response -> {
-            try {
-                var statusCode = response.statusCode();
-                if (statusCode == 200) {
-                    return new Result<>(id, null);
-                } else {
-                    var error = deserializeToArray(response.body()).stream()
-                            .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                            .toList();
-                    return new Result<>(null, error);
-                }
-            } catch (JsonLdError e) {
-                throw new RuntimeException(e);
-            }
-        });
+        return future.thenApply(response -> deleteResponse(response, id));
     }
 
-    public CompletableFuture<Result<List<Asset>>> request(QuerySpec input) {
+    public Result<List<Asset>> request(QuerySpec input) {
+        try {
+            var requestBody = compact(input);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v3/assets/request".formatted(url)))
+                    .header("content-type", "application/json")
+                    .POST(ofString(requestBody.toString()));
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            return requestResponse(response);
+
+        } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public CompletableFuture<Result<List<Asset>>> requestAsync(QuerySpec input) {
         try {
             var requestBody = compact(input);
 
@@ -171,27 +290,7 @@ public class Assets {
 
             CompletableFuture<HttpResponse<InputStream>> future =
                     httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-            return future.thenApply(response -> {
-                try {
-                    var statusCode = response.statusCode();
-                    if (statusCode == 200) {
-                        var jsonArray = expand(response.body());
-                        var assets = jsonArray.stream()
-                                .map(s -> Asset.Builder.newInstance()
-                                        .raw(s.asJsonObject())
-                                        .build())
-                                .toList();
-                        return new Result<>(assets, null);
-                    } else {
-                        var error = deserializeToArray(response.body()).stream()
-                                .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                                .toList();
-                        return new Result<>(error);
-                    }
-                } catch (JsonLdError e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            return future.thenApply(this::requestResponse);
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
