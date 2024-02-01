@@ -6,10 +6,12 @@ import static java.net.http.HttpRequest.BodyPublishers.ofString;
 import com.apicatalog.jsonld.JsonLdError;
 import io.thinkit.edc.client.connector.model.*;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.UnaryOperator;
 
 public class Catalogs {
@@ -23,18 +25,8 @@ public class Catalogs {
         this.interceptor = interceptor;
     }
 
-    public Result<Catalog> request(CatalogRequest input) {
+    Result<Catalog> requestResponse(HttpResponse<InputStream> response) {
         try {
-            var requestBody = compact(input);
-
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/catalog/request".formatted(url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
-
-            var request = interceptor.apply(requestBuilder).build();
-
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             var statusCode = response.statusCode();
             if (statusCode == 200) {
                 var jsonArray = expand(response.body());
@@ -48,7 +40,64 @@ public class Catalogs {
                         .toList();
                 return new Result<>(error);
             }
+        } catch (JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    Result<Dataset> requestDatasetResponse(HttpResponse<InputStream> response) {
+        try {
+            var statusCode = response.statusCode();
+            if (statusCode == 200) {
+                var jsonArray = expand(response.body());
+                var dataset = Dataset.Builder.newInstance()
+                        .raw(jsonArray.getJsonObject(0))
+                        .build();
+                return new Result<>(dataset, null);
+            } else {
+                var error = deserializeToArray(response.body()).stream()
+                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
+                        .toList();
+                return new Result<>(error);
+            }
+        } catch (JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Result<Catalog> request(CatalogRequest input) {
+        try {
+            var requestBody = compact(input);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/catalog/request".formatted(url)))
+                    .header("content-type", "application/json")
+                    .POST(ofString(requestBody.toString()));
+
+            var request = interceptor.apply(requestBuilder).build();
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            return requestResponse(response);
         } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public CompletableFuture<Result<Catalog>> requestAsync(CatalogRequest input) {
+        try {
+            var requestBody = compact(input);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/catalog/request".formatted(url)))
+                    .header("content-type", "application/json")
+                    .POST(ofString(requestBody.toString()));
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            CompletableFuture<HttpResponse<InputStream>> future =
+                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+            return future.thenApply(this::requestResponse);
+
+        } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -65,20 +114,28 @@ public class Catalogs {
             var request = interceptor.apply(requestBuilder).build();
 
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            var statusCode = response.statusCode();
-            if (statusCode == 200) {
-                var jsonArray = expand(response.body());
-                var dataset = Dataset.Builder.newInstance()
-                        .raw(jsonArray.getJsonObject(0))
-                        .build();
-                return new Result<>(dataset, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(error);
-            }
+            return requestDatasetResponse(response);
         } catch (IOException | InterruptedException | JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public CompletableFuture<Result<Dataset>> requestDatasetAsync(DatasetRequest input) {
+        try {
+            var requestBody = compact(input);
+
+            var requestBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create("%s/v2/catalog/dataset/request".formatted(url)))
+                    .header("content-type", "application/json")
+                    .POST(ofString(requestBody.toString()));
+
+            var request = interceptor.apply(requestBuilder).build();
+
+            CompletableFuture<HttpResponse<InputStream>> future =
+                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+            return future.thenApply(this::requestDatasetResponse);
+
+        } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
