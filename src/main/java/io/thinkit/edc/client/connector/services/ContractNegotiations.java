@@ -31,7 +31,7 @@ public class ContractNegotiations {
     Result<ContractNegotiation> getResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var jsonArray = expand(response.body());
                 var contractNegotiation = ContractNegotiation.Builder.newInstance()
                         .raw(jsonArray.getJsonObject(0))
@@ -51,7 +51,7 @@ public class ContractNegotiations {
     Result<String> createResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var content = expand(response.body());
                 var id = content.getJsonObject(0).getString(ID);
                 return new Result<>(id, null);
@@ -69,7 +69,7 @@ public class ContractNegotiations {
     Result<ContractAgreement> getAgreementResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var jsonArray = expand(response.body());
                 var contractAgreement = ContractAgreement.Builder.newInstance()
                         .raw(jsonArray.getJsonObject(0))
@@ -89,7 +89,7 @@ public class ContractNegotiations {
     Result<String> terminateResponse(HttpResponse<InputStream> response, String id) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 return new Result<>(id, null);
             } else {
                 var error = deserializeToArray(response.body()).stream()
@@ -105,7 +105,7 @@ public class ContractNegotiations {
     Result<List<ContractNegotiation>> requestResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var jsonArray = expand(response.body());
                 var contractNegotiations = jsonArray.stream()
                         .map(s -> ContractNegotiation.Builder.newInstance()
@@ -127,7 +127,7 @@ public class ContractNegotiations {
     Result<String> getStateResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var jsonDocument = JsonDocument.of(response.body());
                 var content = jsonDocument.getJsonContent().get();
                 var state = content.asJsonObject().getString("state");

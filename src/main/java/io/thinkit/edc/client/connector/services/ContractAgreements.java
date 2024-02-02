@@ -29,7 +29,7 @@ public class ContractAgreements {
     Result<ContractAgreement> getResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var jsonArray = expand(response.body());
                 var contractAgreement = ContractAgreement.Builder.newInstance()
                         .raw(jsonArray.getJsonObject(0))
@@ -49,7 +49,7 @@ public class ContractAgreements {
     Result<ContractNegotiation> getNegotiationResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var jsonArray = expand(response.body());
                 var contractNegotiation = ContractNegotiation.Builder.newInstance()
                         .raw(jsonArray.getJsonObject(0))
@@ -69,7 +69,7 @@ public class ContractAgreements {
     Result<List<ContractAgreement>> requestResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var jsonArray = expand(response.body());
                 var contractAgreements = jsonArray.stream()
                         .map(s -> ContractAgreement.Builder.newInstance()

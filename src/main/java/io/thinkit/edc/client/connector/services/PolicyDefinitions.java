@@ -30,7 +30,7 @@ public class PolicyDefinitions {
     Result<PolicyDefinition> getResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var jsonArray = expand(response.body());
                 var policyDefinition = PolicyDefinition.Builder.newInstance()
                         .raw(jsonArray.getJsonObject(0))
@@ -50,7 +50,7 @@ public class PolicyDefinitions {
     Result<String> createResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var content = expand(response.body());
                 var id = content.getJsonObject(0).getString(ID);
                 return new Result<>(id, null);
@@ -68,7 +68,7 @@ public class PolicyDefinitions {
     Result<String> updateResponse(HttpResponse<InputStream> response, String id) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 204) {
+            if (isSuccessful(statusCode)) {
                 return new Result<>(id, null);
             } else {
                 var error = deserializeToArray(response.body()).stream()
@@ -84,7 +84,7 @@ public class PolicyDefinitions {
     Result<String> deleteResponse(HttpResponse<InputStream> response, String id) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 return new Result<>(id, null);
             } else {
                 var error = deserializeToArray(response.body()).stream()
@@ -100,7 +100,7 @@ public class PolicyDefinitions {
     Result<List<PolicyDefinition>> requestResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var jsonArray = expand(response.body());
                 var policyDefinitions = jsonArray.stream()
                         .map(s -> PolicyDefinition.Builder.newInstance()

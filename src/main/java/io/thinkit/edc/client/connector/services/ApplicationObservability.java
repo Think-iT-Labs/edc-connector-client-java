@@ -1,6 +1,7 @@
 package io.thinkit.edc.client.connector.services;
 
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.deserializeToArray;
+import static io.thinkit.edc.client.connector.utils.JsonLdUtil.isSuccessful;
 
 import com.apicatalog.jsonld.JsonLdError;
 import com.apicatalog.jsonld.document.JsonDocument;
@@ -30,7 +31,7 @@ public class ApplicationObservability {
     Result<HealthStatus> getResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var jsonDocument = JsonDocument.of(response.body());
                 var content = jsonDocument.getJsonContent().get();
                 var healthStatus = new HealthStatus(content.asJsonObject());
