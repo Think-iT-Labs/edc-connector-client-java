@@ -1,6 +1,7 @@
 package io.thinkit.edc.client.connector.services;
 
 import static io.thinkit.edc.client.connector.utils.Constants.ID;
+import static io.thinkit.edc.client.connector.utils.HttpClientUtil.isSuccessful;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 

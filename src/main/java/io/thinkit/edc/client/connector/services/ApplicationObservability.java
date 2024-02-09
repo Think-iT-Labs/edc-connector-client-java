@@ -1,7 +1,7 @@
 package io.thinkit.edc.client.connector.services;
 
+import static io.thinkit.edc.client.connector.utils.HttpClientUtil.isSuccessful;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.deserializeToArray;
-import static io.thinkit.edc.client.connector.utils.JsonLdUtil.isSuccessful;
 
 import com.apicatalog.jsonld.JsonLdError;
 import com.apicatalog.jsonld.document.JsonDocument;

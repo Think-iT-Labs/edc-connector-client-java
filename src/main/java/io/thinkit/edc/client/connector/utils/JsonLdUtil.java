@@ -32,8 +32,4 @@ public class JsonLdUtil {
         var content = jsonDocument.getJsonContent().get();
         return content.asJsonArray();
     }
-
-    public static boolean isSuccessful(Integer value) {
-        return value >= 200 && value <= 299;
-    }
 }
