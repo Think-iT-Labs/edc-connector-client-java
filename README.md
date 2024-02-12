@@ -6,8 +6,8 @@
     </b>
   </p>
   <p>
-      <a href="https://github.com/Think-iT-Labs/edc-connector-client-java/actions/workflows/publish.yml?query=branch%3Amain">
-        <img src="https://img.shields.io/github/actions/workflow/status/Think-iT-Labs/edc-connector-client-java/publish.yml?branch=main&logo=GitHub&style=flat-square"
+      <a href="https://github.com/Think-iT-Labs/edc-connector-client-java/actions/workflows/publish-artifact.yml?query=branch%3Amain">
+        <img src="https://img.shields.io/github/actions/workflow/status/Think-iT-Labs/edc-connector-client-java/publish-artifact.yml?branch=main&logo=GitHub&style=flat-square"
         alt="Tests status" />
       </a>
   </p>

@@ -1,6 +1,7 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.utils.Constants.*;
+import static io.thinkit.edc.client.connector.utils.Constants.ID;
+import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -2,16 +2,15 @@ name: publish
 
 on:
   workflow_dispatch:
+  workflow_call:
   push:
     branches:
       - main
-      - releases
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-
       - uses: actions/checkout@v4
 
       - uses: actions/setup-java@v4
@@ -20,6 +19,7 @@ jobs:
           java-version: '17'
 
       - name: run tests
+        shell: bash
         run: ./gradlew test
 
       - name: list gpg keys
@@ -39,6 +39,7 @@ jobs:
           done
 
       - name: publish
+        shell: bash
         env:
           ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.ORG_OSSRH_USERNAME }}
           ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.ORG_OSSRH_PASSWORD }}

@@ -1,0 +1,61 @@
+name: release
+
+on:
+  push:
+    branches:
+      - releases
+
+jobs:
+  publish:
+    uses: ./.github/workflows/publish-artifact.yml
+    secrets: inherit
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [ publish ]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # 0 to fetch the full history due to upcoming merge of releases into main branch
+          fetch-depth: 0
+      - name: Export VERSION env
+        run: |
+          echo "VERSION=$(grep version= gradle.properties | cut -c 9-)" >> $GITHUB_ENV
+      - run: |
+          git config user.name "think-it-account"
+          git config user.email "technical@think-it.io"
+
+          git tag --force ${{ env.VERSION }}
+          git push --force origin ${{ env.VERSION }}
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          generateReleaseNotes: true
+          tag: ${{ env.RELEASE_VERSION }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          makeLatest: true
+          removeArtifacts: true
+
+      - name: Prepare next version
+        run: |
+          git config user.name "think-it-account"
+          git config user.email "technical@think-it.io"
+          
+          # Merge releases into main
+          git checkout main && git merge -X theirs releases --no-commit --no-ff
+          
+          IFS=.- read -r RELEASE_VERSION_MAJOR RELEASE_VERSION_MINOR RELEASE_VERSION_PATCH SNAPSHOT<<<"${{ env.VERSION }}"
+          SNAPSHOT_VERSION="$RELEASE_VERSION_MAJOR.$RELEASE_VERSION_MINOR.$((RELEASE_VERSION_PATCH+1))-SNAPSHOT"
+          
+          # Persist the "version" in the gradle.properties
+          sed -i "s/version=.*/version=$SNAPSHOT_VERSION/g" gradle.properties
+          
+          git add gradle.properties
+          
+          # Commit and push to origin main
+          git commit --message "Introduce new snapshot version $SNAPSHOT_VERSION"
+
+          git push origin main
