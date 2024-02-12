@@ -34,7 +34,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           generateReleaseNotes: true
-          tag: ${{ env.RELEASE_VERSION }}
+          tag: ${{ env.VERSION }}
           token: ${{ secrets.GITHUB_TOKEN }}
           makeLatest: true
           removeArtifacts: true
@@ -47,8 +47,8 @@ jobs:
           # Merge releases into main
           git checkout main && git merge -X theirs releases --no-commit --no-ff
           
-          IFS=.- read -r RELEASE_VERSION_MAJOR RELEASE_VERSION_MINOR RELEASE_VERSION_PATCH SNAPSHOT<<<"${{ env.VERSION }}"
-          SNAPSHOT_VERSION="$RELEASE_VERSION_MAJOR.$RELEASE_VERSION_MINOR.$((RELEASE_VERSION_PATCH+1))-SNAPSHOT"
+          IFS=.- read -r VERSION_MAJOR VERSION_MINOR VERSION_PATCH SNAPSHOT<<<"${{ env.VERSION }}"
+          SNAPSHOT_VERSION="$VERSION_MAJOR.$VERSION_MINOR.$((VERSION_PATCH+1))-SNAPSHOT"
           
           # Persist the "version" in the gradle.properties
           sed -i "s/version=.*/version=$SNAPSHOT_VERSION/g" gradle.properties
