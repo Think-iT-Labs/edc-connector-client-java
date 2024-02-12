@@ -2,7 +2,7 @@ package io.thinkit.edc.client.connector.utils;
 
 public interface Constants {
     String EDC_NAMESPACE = "https://w3id.org/edc/v0.0.1/ns/";
-    String DCAT_NAMESPACE = "https://www.w3.org/ns/dcat/";
+    String DCAT_NAMESPACE = "http://www.w3.org/ns/dcat#";
     String DCT_NAMESPACE = "https://purl.org/dc/terms/";
     String ODRL_NAMESPACE = "http://www.w3.org/ns/odrl/2/";
     String DSCPACE_NAMESPACE = "https://w3id.org/dspace/v0.8/";
