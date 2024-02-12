@@ -11,6 +11,7 @@ import io.thinkit.edc.client.connector.model.Result;
 import io.thinkit.edc.client.connector.services.PolicyDefinitions;
 import jakarta.json.Json;
 import java.net.http.HttpClient;
+import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -41,6 +42,22 @@ public class PolicyDefinitionsTest extends ContainerTestBase {
     }
 
     @Test
+    void should_get_a_policy_definition_async() {
+        try {
+            var policyDefinition = policyDefinitions.getAsync("definition-id").get();
+
+            assertThat(policyDefinition.isSucceeded()).isTrue();
+            assertThat(policyDefinition.getContent().id()).isNotBlank();
+            assertThat(policyDefinition.getContent().policy()).isNotNull().satisfies(policy -> assertThat(
+                            policy.getList(ODRL_NAMESPACE + "permission").size())
+                    .isGreaterThan(0));
+            assertThat(policyDefinition.getContent().createdAt()).isGreaterThan(0);
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
     void should_not_get_a_policy_definition_when_id_is_empty() {
         Result<PolicyDefinition> policyDefinition = policyDefinitions.get("");
 
@@ -51,6 +68,24 @@ public class PolicyDefinitionsTest extends ContainerTestBase {
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
             assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
         });
+    }
+
+    @Test
+    void should_not_get_a_policy_definition_when_id_is_empty_async() {
+        try {
+            Result<PolicyDefinition> policyDefinition =
+                    policyDefinitions.getAsync("").get();
+
+            assertThat(policyDefinition.isSucceeded()).isFalse();
+            assertThat(policyDefinition.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+                assertThat(apiErrorDetail.message()).isEqualTo("error message");
+                assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+                assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+                assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+            });
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -86,6 +121,41 @@ public class PolicyDefinitionsTest extends ContainerTestBase {
     }
 
     @Test
+    void should_create_a_policy_definition_async() {
+        try {
+            var constraints = Json.createArrayBuilder()
+                    .add(createObjectBuilder()
+                            .add("leftOperand", "spatial")
+                            .add("operator", "eq")
+                            .add("rightOperand", "https://www.wikidata.org/wiki/Q183")
+                            .add("comment", "i.e Germany"))
+                    .build();
+            var permissions = Json.createArrayBuilder()
+                    .add(createObjectBuilder()
+                            .add("target", "http://example.com/asset:9898.movie")
+                            .add("action", "display")
+                            .add("constraints", constraints))
+                    .build();
+
+            var policy = Policy.Builder.newInstance()
+                    .raw(createObjectBuilder().add("permission", permissions).build())
+                    .build();
+
+            var policyDefinition = PolicyDefinition.Builder.newInstance()
+                    .id("definition-id")
+                    .policy(policy)
+                    .build();
+
+            var created = policyDefinitions.createAsync(policyDefinition).get();
+
+            assertThat(created.isSucceeded()).isTrue();
+            assertThat(created.getContent()).isNotNull();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
     void should_not_create_a_policy_definition() {
 
         var policyDefinition =
@@ -100,6 +170,26 @@ public class PolicyDefinitionsTest extends ContainerTestBase {
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
             assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
         });
+    }
+
+    @Test
+    void should_not_create_a_policy_definition_async() {
+        try {
+            var policyDefinition =
+                    PolicyDefinition.Builder.newInstance().id("definition-id").build();
+
+            var created = policyDefinitions.createAsync(policyDefinition).get();
+
+            assertThat(created.isSucceeded()).isFalse();
+            assertThat(created.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+                assertThat(apiErrorDetail.message()).isEqualTo("error message");
+                assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+                assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+                assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+            });
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -133,6 +223,40 @@ public class PolicyDefinitionsTest extends ContainerTestBase {
     }
 
     @Test
+    void should_update_a_policy_definition_async() {
+        try {
+            var constraints = Json.createArrayBuilder()
+                    .add(createObjectBuilder()
+                            .add("leftOperand", "spatial")
+                            .add("operator", "eq")
+                            .add("rightOperand", "https://www.wikidata.org/wiki/Q183")
+                            .add("comment", "i.e Germany"))
+                    .build();
+            var permissions = Json.createArrayBuilder()
+                    .add(createObjectBuilder()
+                            .add("target", "http://example.com/asset:9898.movie")
+                            .add("action", "display")
+                            .add("constraints", constraints))
+                    .build();
+
+            var policy = Policy.Builder.newInstance()
+                    .raw(createObjectBuilder().add("permission", permissions).build())
+                    .build();
+
+            var policyDefinition = PolicyDefinition.Builder.newInstance()
+                    .id("definition-id")
+                    .policy(policy)
+                    .build();
+
+            var updated = policyDefinitions.updateAsync(policyDefinition).get();
+
+            assertThat(updated.isSucceeded()).isTrue();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
     void should_not_update_a_policy_definition() {
 
         var policyDefinition =
@@ -150,10 +274,41 @@ public class PolicyDefinitionsTest extends ContainerTestBase {
     }
 
     @Test
+    void should_not_update_a_policy_definition_async() {
+        try {
+            var policyDefinition =
+                    PolicyDefinition.Builder.newInstance().id("definition-id").build();
+
+            var updated = policyDefinitions.updateAsync(policyDefinition).get();
+
+            assertThat(updated.isSucceeded()).isFalse();
+            assertThat(updated.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+                assertThat(apiErrorDetail.message()).isEqualTo("error message");
+                assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+                assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+                assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+            });
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
     void should_delete_a_policy_definition() {
         var deleted = policyDefinitions.delete("definition-id");
 
         assertThat(deleted.isSucceeded()).isTrue();
+    }
+
+    @Test
+    void should_delete_a_policy_definition_async() {
+        try {
+            var deleted = policyDefinitions.deleteAsync("definition-id").get();
+
+            assertThat(deleted.isSucceeded()).isTrue();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -167,6 +322,23 @@ public class PolicyDefinitionsTest extends ContainerTestBase {
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
             assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
         });
+    }
+
+    @Test
+    void should_not_delete_a_policy_definition_when_id_is_empty_async() {
+        try {
+            var deleted = policyDefinitions.deleteAsync("").get();
+
+            assertThat(deleted.isSucceeded()).isFalse();
+            assertThat(deleted.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+                assertThat(apiErrorDetail.message()).isEqualTo("error message");
+                assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+                assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+                assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+            });
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -191,6 +363,31 @@ public class PolicyDefinitionsTest extends ContainerTestBase {
     }
 
     @Test
+    void should_get_policy_definitions_async() {
+        try {
+            var input = QuerySpec.Builder.newInstance()
+                    .offset(0)
+                    .limit(10)
+                    .sortOrder("DESC")
+                    .sortField("fieldName")
+                    .build();
+
+            var PolicyDefinitionList = policyDefinitions.requestAsync(input).get();
+
+            assertThat(PolicyDefinitionList.isSucceeded()).isTrue();
+            assertThat(PolicyDefinitionList.getContent()).isNotNull().first().satisfies(policyDefinition -> {
+                assertThat(policyDefinition.id()).isNotBlank();
+                assertThat(policyDefinition.policy()).isNotNull().satisfies(policy -> assertThat(
+                                policy.getList(ODRL_NAMESPACE + "permission").size())
+                        .isGreaterThan(0));
+                assertThat(policyDefinition.createdAt()).isGreaterThan(0);
+            });
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
     void should_not_get_policy_definitions() {
         var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
 
@@ -203,5 +400,24 @@ public class PolicyDefinitionsTest extends ContainerTestBase {
             assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
             assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
         });
+    }
+
+    @Test
+    void should_not_get_policy_definitions_async() {
+        try {
+            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+
+            var result = policyDefinitions.requestAsync(input).get();
+
+            assertThat(result.isSucceeded()).isFalse();
+            assertThat(result.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+                assertThat(apiErrorDetail.message()).isEqualTo("error message");
+                assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+                assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+                assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+            });
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
