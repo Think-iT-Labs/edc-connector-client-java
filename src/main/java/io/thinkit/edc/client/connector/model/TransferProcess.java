@@ -1,14 +1,17 @@
 package io.thinkit.edc.client.connector.model;
 
-import static io.thinkit.edc.client.connector.utils.Constants.*;
+import io.thinkit.edc.client.connector.utils.JsonLdObject;
+import jakarta.json.JsonObject;
+
+import java.util.List;
+import java.util.Map;
+
+import static io.thinkit.edc.client.connector.utils.Constants.EDC_NAMESPACE;
+import static io.thinkit.edc.client.connector.utils.Constants.TYPE;
+import static io.thinkit.edc.client.connector.utils.Constants.VALUE;
 import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
 import static jakarta.json.stream.JsonCollectors.toJsonArray;
-
-import io.thinkit.edc.client.connector.utils.JsonLdObject;
-import jakarta.json.JsonObject;
-import java.util.List;
-import java.util.Map;
 
 public class TransferProcess extends JsonLdObject {
     private static final String TYPE_TRANSFER_PROCESS = EDC_NAMESPACE + "TransferProcess";
@@ -17,7 +20,6 @@ public class TransferProcess extends JsonLdObject {
     private static final String TRANSFER_PROCESS_STATE = EDC_NAMESPACE + "state";
     private static final String TRANSFER_PROCESS_STATE_TIMESTAMP = EDC_NAMESPACE + "stateTimestamp";
     private static final String TRANSFER_PROCESS_ASSET_ID = EDC_NAMESPACE + "assetId";
-    private static final String TRANSFER_PROCESS_CONNECTOR_ID = EDC_NAMESPACE + "connectorId";
     private static final String TRANSFER_PROCESS_CONTRACT_ID = EDC_NAMESPACE + "contractId";
     private static final String TRANSFER_PROCESS_DATA_DESTINATION = EDC_NAMESPACE + "dataDestination";
     private static final String TRANSFER_PROCESS_PRIVATE_PROPERTIES = EDC_NAMESPACE + "privateProperties";
@@ -47,10 +49,6 @@ public class TransferProcess extends JsonLdObject {
 
     public String assetId() {
         return stringValue(TRANSFER_PROCESS_ASSET_ID);
-    }
-
-    public String connectorId() {
-        return stringValue(TRANSFER_PROCESS_CONNECTOR_ID);
     }
 
     public String contractId() {
@@ -121,13 +119,6 @@ public class TransferProcess extends JsonLdObject {
             builder.add(
                     TRANSFER_PROCESS_ASSET_ID,
                     createArrayBuilder().add(createObjectBuilder().add(VALUE, assetId)));
-            return this;
-        }
-
-        public TransferProcess.Builder connectorId(String connectorId) {
-            builder.add(
-                    TRANSFER_PROCESS_CONNECTOR_ID,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, connectorId)));
             return this;
         }
 

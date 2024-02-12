@@ -39,7 +39,6 @@ class TransferProcessesTest extends ContainerTestBase {
         assertThat(transferProcess.getContent().state()).isNotNull().isEqualTo("STARTED");
         assertThat(transferProcess.getContent().stateTimestamp()).isGreaterThan(0);
         assertThat(transferProcess.getContent().assetId()).isNotNull().isEqualTo("asset-id");
-        assertThat(transferProcess.getContent().connectorId()).isNotNull().isEqualTo("connectorId");
         assertThat(transferProcess.getContent().contractId()).isNotNull().isEqualTo("contractId");
         assertThat(transferProcess.getContent().dataDestination()).isNotNull().satisfies(dataDestination -> {
             assertThat(dataDestination.size()).isGreaterThan(0);
@@ -78,7 +77,6 @@ class TransferProcessesTest extends ContainerTestBase {
             assertThat(transferProcess.getContent().state()).isNotNull().isEqualTo("STARTED");
             assertThat(transferProcess.getContent().stateTimestamp()).isGreaterThan(0);
             assertThat(transferProcess.getContent().assetId()).isNotNull().isEqualTo("asset-id");
-            assertThat(transferProcess.getContent().connectorId()).isNotNull().isEqualTo("connectorId");
             assertThat(transferProcess.getContent().contractId()).isNotNull().isEqualTo("contractId");
             assertThat(transferProcess.getContent().dataDestination())
                     .isNotNull()
