@@ -31,7 +31,7 @@ Features:
 
 ## Installation
 
-The library is published on [maven central](https://mvnrepository.com/artifact/io.think-it/edc-connector-client)
+The library is published on [maven central](https://central.sonatype.com/artifact/io.think-it/edc-connector-client)
 Choose the latest version and add it as a dependency in your favorite build automation tool.
 
 ## Usage

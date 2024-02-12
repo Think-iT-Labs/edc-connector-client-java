@@ -1,0 +1,42 @@
+name: draft-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'SemVer that will be used for publishing (e.g. "0.0.1")'
+        required: true
+        type: string
+
+jobs:
+  Prepare-Release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create release/${{ github.event.inputs.version }} branch
+        run: |
+          git config user.name "think-it-account"
+          git config user.email "technical@think-it.io"
+          
+          git checkout -b release/${{ inputs.version }}
+          sed -i 's/version=.*/version=${{ github.event.inputs.version }}/g' gradle.properties
+          git add .
+          git commit -m "Prepare release ${{ github.event.inputs.version }}"
+          git push origin release/${{ github.event.inputs.version }}
+      - name: Create pull request
+        uses: thomaseizinger/create-pull-request@1.3.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          head: release/${{ github.event.inputs.version }}
+          base: releases
+          title: Release version ${{ github.event.inputs.version }}
+          reviewers: ${{ github.actor }}
+          body: |-
+            This PR was created in response to a manual trigger of the [release workflow](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+            Versions have been bumped in [commit ${{ steps.make-commit.outputs.commit }}](${{ steps.make-commit.outputs.commit }}).
+
+            Merging this PR will create a GitHub release and upload any assets that are created as part of the release build.
