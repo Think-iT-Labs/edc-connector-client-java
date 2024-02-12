@@ -1,6 +1,7 @@
 package io.thinkit.edc.client.connector.services;
 
 import static io.thinkit.edc.client.connector.utils.Constants.ID;
+import static io.thinkit.edc.client.connector.utils.HttpClientUtil.isSuccessful;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
@@ -34,7 +35,7 @@ public class Assets {
     Result<Asset> getResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 JsonArray jsonArray = expand(response.body());
 
                 var asset = Asset.Builder.newInstance()
@@ -55,7 +56,7 @@ public class Assets {
     Result<String> createResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var content = expand(response.body());
                 var id = content.getJsonObject(0).getString(ID);
                 return new Result<>(id, null);
@@ -73,7 +74,7 @@ public class Assets {
     Result<String> updateResponse(HttpResponse<InputStream> response, String id) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 204) {
+            if (isSuccessful(statusCode)) {
                 return new Result<>(id, null);
             } else {
                 var error = deserializeToArray(response.body()).stream()
@@ -89,7 +90,7 @@ public class Assets {
     Result<String> deleteResponse(HttpResponse<InputStream> response, String id) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 return new Result<>(id, null);
             } else {
                 var error = deserializeToArray(response.body()).stream()
@@ -105,7 +106,7 @@ public class Assets {
     Result<List<Asset>> requestResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var jsonArray = expand(response.body());
                 var assets = jsonArray.stream()
                         .map(s -> Asset.Builder.newInstance()

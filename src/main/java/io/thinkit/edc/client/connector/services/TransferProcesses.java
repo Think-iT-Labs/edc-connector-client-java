@@ -1,6 +1,7 @@
 package io.thinkit.edc.client.connector.services;
 
 import static io.thinkit.edc.client.connector.utils.Constants.ID;
+import static io.thinkit.edc.client.connector.utils.HttpClientUtil.isSuccessful;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
@@ -29,7 +30,7 @@ public class TransferProcesses {
     Result<TransferProcess> getResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var jsonArray = expand(response.body());
                 var transferProcess = TransferProcess.Builder.newInstance()
                         .raw(jsonArray.getJsonObject(0))
@@ -49,7 +50,7 @@ public class TransferProcesses {
     Result<String> createResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var content = expand(response.body());
                 var id = content.getJsonObject(0).getString(ID);
                 return new Result<>(id, null);
@@ -67,7 +68,7 @@ public class TransferProcesses {
     Result<TransferState> getStateResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var jsonArray = expand(response.body());
                 var state = TransferState.Builder.newInstance()
                         .raw(jsonArray.getJsonObject(0))
@@ -87,7 +88,7 @@ public class TransferProcesses {
     Result<String> terminateResponse(HttpResponse<InputStream> response, String id) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 return new Result<>(id, null);
             } else {
                 var error = deserializeToArray(response.body()).stream()
@@ -103,7 +104,7 @@ public class TransferProcesses {
     Result<String> deprovisionResponse(HttpResponse<InputStream> response, String id) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 return new Result<>(id, null);
             } else {
                 var error = deserializeToArray(response.body()).stream()

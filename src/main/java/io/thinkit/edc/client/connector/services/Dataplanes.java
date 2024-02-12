@@ -1,6 +1,7 @@
 package io.thinkit.edc.client.connector.services;
 
 import static io.thinkit.edc.client.connector.utils.Constants.ID;
+import static io.thinkit.edc.client.connector.utils.HttpClientUtil.isSuccessful;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
@@ -30,7 +31,7 @@ public class Dataplanes {
     Result<List<DataPlaneInstance>> getResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var jsonArray = expand(response.body());
                 var dataplanes = jsonArray.stream()
                         .map(s -> DataPlaneInstance.Builder.newInstance()
@@ -52,7 +53,7 @@ public class Dataplanes {
     Result<String> createResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var content = expand(response.body());
                 var id = content.getJsonObject(0).getString(ID);
                 return new Result<>(id, null);
@@ -70,7 +71,7 @@ public class Dataplanes {
     Result<DataPlaneInstance> selectResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var jsonArray = expand(response.body());
                 var dataplane = DataPlaneInstance.Builder.newInstance()
                         .raw(jsonArray.getJsonObject(0))

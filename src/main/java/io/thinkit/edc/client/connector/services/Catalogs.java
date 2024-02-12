@@ -1,5 +1,6 @@
 package io.thinkit.edc.client.connector.services;
 
+import static io.thinkit.edc.client.connector.utils.HttpClientUtil.isSuccessful;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
@@ -28,7 +29,7 @@ public class Catalogs {
     Result<Catalog> requestResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var jsonArray = expand(response.body());
                 var catalog = Catalog.Builder.newInstance()
                         .raw(jsonArray.getJsonObject(0))
@@ -48,7 +49,7 @@ public class Catalogs {
     Result<Dataset> requestDatasetResponse(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
-            if (statusCode == 200) {
+            if (isSuccessful(statusCode)) {
                 var jsonArray = expand(response.body());
                 var dataset = Dataset.Builder.newInstance()
                         .raw(jsonArray.getJsonObject(0))
