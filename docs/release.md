@@ -11,22 +11,23 @@ At the end of the workflow there will be an open PR that wants to merge the spec
 
 ## Merge PR
 
+Please ensure that you're merging the PR using the `Create merge request` and avoiding squashing or rebase.
 After merging the PR, a new `publish` flow will be automatically triggered and the artifact will be uploaded to maven central.
 
 ## Tag publication
 
-From the `releases` branch the tag has been created and pushed:
+From the `releases` branch create the tag
 ```shell
-git tag --force 0.0.1
-git push --force origin 0.0.1
+git tag --force <version>
+git push --force origin <version>
 ```
-(note the `--force` flag has been used because the tag could have been already created by mistake
+(note the `--force` flag is used because the tag could have been already created by mistake.
 
 ## GitHub Release
 
-The GitHub Release has been manually drafted from the [draft release page](https://github.com/Think-iT-Labs/edc-connector-client-java/releases/new).
-Here the tag must be chosen and the release notes generated with the `Generate release notes` button.
-The release has been created after clicking on the `Publish release` button.
+The GitHub Release can be manually drafted from the [draft release page](https://github.com/Think-iT-Labs/edc-connector-client-java/releases/new).
+Here the tag `<version>` must be chosen and the release notes generated with the `Generate release notes` button.
+The release will be created after clicking on the `Publish release` button.
 
 ## Prepare next SNAPSHOT version
 
