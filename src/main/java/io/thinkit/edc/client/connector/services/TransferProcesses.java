@@ -1,147 +1,38 @@
 package io.thinkit.edc.client.connector.services;
 
-import static io.thinkit.edc.client.connector.utils.Constants.ID;
-import static io.thinkit.edc.client.connector.utils.HttpClientUtil.isSuccessful;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import com.apicatalog.jsonld.JsonLdError;
 import io.thinkit.edc.client.connector.model.*;
-import java.io.IOException;
-import java.io.InputStream;
+import jakarta.json.JsonObject;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-public class TransferProcesses {
-    private final String url;
-    private final HttpClient httpClient;
-    private final UnaryOperator<HttpRequest.Builder> interceptor;
+public class TransferProcesses extends Service {
 
     public TransferProcesses(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
-        this.url = url;
-        this.httpClient = httpClient;
-        this.interceptor = interceptor;
-    }
-
-    Result<TransferProcess> getResponse(HttpResponse<InputStream> response) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                var jsonArray = expand(response.body());
-                var transferProcess = TransferProcess.Builder.newInstance()
-                        .raw(jsonArray.getJsonObject(0))
-                        .build();
-                return new Result<>(transferProcess, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    Result<String> createResponse(HttpResponse<InputStream> response) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                var content = expand(response.body());
-                var id = content.getJsonObject(0).getString(ID);
-                return new Result<>(id, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    Result<TransferState> getStateResponse(HttpResponse<InputStream> response) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                var jsonArray = expand(response.body());
-                var state = TransferState.Builder.newInstance()
-                        .raw(jsonArray.getJsonObject(0))
-                        .build();
-                return new Result<>(state, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    Result<String> terminateResponse(HttpResponse<InputStream> response, String id) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                return new Result<>(id, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    Result<String> deprovisionResponse(HttpResponse<InputStream> response, String id) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                return new Result<>(id, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        super(url, httpClient, interceptor);
     }
 
     public Result<TransferProcess> get(String id) {
-        try {
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/transferprocesses/%s".formatted(url, id)))
-                    .GET();
-
-            var request = interceptor.apply(requestBuilder).build();
-
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return getResponse(response);
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/transferprocesses/%s".formatted(getUrl(), id)))
+                .GET();
+        return this.send(
+                requestBuilder, (Function<JsonObject, TransferProcess>) this::getTransferProcess, this::getResponse);
     }
 
     public CompletableFuture<Result<TransferProcess>> getAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/transferprocesses/%s".formatted(url, id)))
+                .uri(URI.create("%s/v2/transferprocesses/%s".formatted(getUrl(), id)))
                 .GET();
-
-        var request = interceptor.apply(requestBuilder).build();
-
-        CompletableFuture<HttpResponse<InputStream>> future =
-                httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-        return future.thenApply(this::getResponse);
+        return this.sendAsync(
+                requestBuilder, (Function<JsonObject, TransferProcess>) this::getTransferProcess, this::getResponse);
     }
 
     public Result<String> create(TransferRequest input) {
@@ -149,15 +40,11 @@ public class TransferProcesses {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/transferprocesses".formatted(url)))
+                    .uri(URI.create("%s/v2/transferprocesses".formatted(getUrl())))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
-
-            var request = interceptor.apply(requestBuilder).build();
-
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return createResponse(response);
-        } catch (IOException | InterruptedException | JsonLdError e) {
+            return this.send(requestBuilder, this::createResponse);
+        } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -167,46 +54,30 @@ public class TransferProcesses {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/transferprocesses".formatted(url)))
+                    .uri(URI.create("%s/v2/transferprocesses".formatted(getUrl())))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
-
-            var request = interceptor.apply(requestBuilder).build();
-
-            CompletableFuture<HttpResponse<InputStream>> future =
-                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-            return future.thenApply(this::createResponse);
+            return this.sendAsync(requestBuilder, this::createResponse);
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
 
     public Result<TransferState> getState(String id) {
-        try {
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/transferprocesses/%s/state".formatted(url, id)))
-                    .GET();
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/transferprocesses/%s/state".formatted(getUrl(), id)))
+                .GET();
 
-            var request = interceptor.apply(requestBuilder).build();
-
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return getStateResponse(response);
-
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        return this.send(
+                requestBuilder, (Function<JsonObject, TransferState>) this::getTransferState, this::getResponse);
     }
 
     public CompletableFuture<Result<TransferState>> getStateAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/transferprocesses/%s/state".formatted(url, id)))
+                .uri(URI.create("%s/v2/transferprocesses/%s/state".formatted(getUrl(), id)))
                 .GET();
-
-        var request = interceptor.apply(requestBuilder).build();
-
-        CompletableFuture<HttpResponse<InputStream>> future =
-                httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-        return future.thenApply(this::getStateResponse);
+        return this.sendAsync(
+                requestBuilder, (Function<JsonObject, TransferState>) this::getTransferState, this::getResponse);
     }
 
     public Result<String> terminate(TerminateTransfer input) {
@@ -214,16 +85,13 @@ public class TransferProcesses {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/transferprocesses/%s/terminate".formatted(url, input.id())))
+                    .uri(URI.create("%s/v2/transferprocesses/%s/terminate".formatted(getUrl(), input.id())))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
 
-            var request = interceptor.apply(requestBuilder).build();
+            return this.send(requestBuilder, input.id(), this::deleteAndUpdateResponse);
 
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return terminateResponse(response, input.id());
-
-        } catch (IOException | InterruptedException | JsonLdError e) {
+        } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -233,48 +101,39 @@ public class TransferProcesses {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/transferprocesses/%s/terminate".formatted(url, input.id())))
+                    .uri(URI.create("%s/v2/transferprocesses/%s/terminate".formatted(getUrl(), input.id())))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
 
-            var request = interceptor.apply(requestBuilder).build();
+            return this.sendAsync(requestBuilder, input.id(), this::deleteAndUpdateResponse);
 
-            CompletableFuture<HttpResponse<InputStream>> future =
-                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-            return future.thenApply(response -> terminateResponse(response, input.id()));
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
 
     public Result<String> deprovision(String id) {
-        try {
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/transferprocesses/%s/deprovision".formatted(getUrl(), id)))
+                .header("content-type", "application/json")
+                .POST(HttpRequest.BodyPublishers.noBody());
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/transferprocesses/%s/deprovision".formatted(url, id)))
-                    .header("content-type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.noBody());
-
-            var request = interceptor.apply(requestBuilder).build();
-
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return deprovisionResponse(response, id);
-
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        return this.send(requestBuilder, id, this::deleteAndUpdateResponse);
     }
 
     public CompletableFuture<Result<String>> deprovisionAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/transferprocesses/%s/deprovision".formatted(url, id)))
+                .uri(URI.create("%s/v2/transferprocesses/%s/deprovision".formatted(getUrl(), id)))
                 .header("content-type", "application/json")
                 .POST(HttpRequest.BodyPublishers.noBody());
+        return this.sendAsync(requestBuilder, id, this::deleteAndUpdateResponse);
+    }
 
-        var request = interceptor.apply(requestBuilder).build();
+    private TransferProcess getTransferProcess(JsonObject object) {
+        return TransferProcess.Builder.newInstance().raw(object).build();
+    }
 
-        CompletableFuture<HttpResponse<InputStream>> future =
-                httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-        return future.thenApply(response -> deprovisionResponse(response, id));
+    private TransferState getTransferState(JsonObject object) {
+        return TransferState.Builder.newInstance().raw(object).build();
     }
 }

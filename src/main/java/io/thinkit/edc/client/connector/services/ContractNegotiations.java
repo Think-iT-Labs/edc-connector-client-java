@@ -1,174 +1,52 @@
 package io.thinkit.edc.client.connector.services;
 
-import static io.thinkit.edc.client.connector.utils.Constants.ID;
-import static io.thinkit.edc.client.connector.utils.HttpClientUtil.isSuccessful;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import com.apicatalog.jsonld.JsonLdError;
-import com.apicatalog.jsonld.document.JsonDocument;
 import io.thinkit.edc.client.connector.model.*;
-import java.io.IOException;
-import java.io.InputStream;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-public class ContractNegotiations {
-    private final String url;
-    private final HttpClient httpClient;
-    private final UnaryOperator<HttpRequest.Builder> interceptor;
+public class ContractNegotiations extends Service {
 
     public ContractNegotiations(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
-        this.url = url;
-        this.httpClient = httpClient;
-        this.interceptor = interceptor;
+        super(url, httpClient, interceptor);
     }
 
-    Result<ContractNegotiation> getResponse(HttpResponse<InputStream> response) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                var jsonArray = expand(response.body());
-                var contractNegotiation = ContractNegotiation.Builder.newInstance()
-                        .raw(jsonArray.getJsonObject(0))
-                        .build();
-                return new Result<>(contractNegotiation, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+    private ContractAgreement getContractAgreement(JsonObject object) {
+        return ContractAgreement.Builder.newInstance().raw(object).build();
     }
 
-    Result<String> createResponse(HttpResponse<InputStream> response) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                var content = expand(response.body());
-                var id = content.getJsonObject(0).getString(ID);
-                return new Result<>(id, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    Result<ContractAgreement> getAgreementResponse(HttpResponse<InputStream> response) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                var jsonArray = expand(response.body());
-                var contractAgreement = ContractAgreement.Builder.newInstance()
-                        .raw(jsonArray.getJsonObject(0))
-                        .build();
-                return new Result<>(contractAgreement, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    Result<String> terminateResponse(HttpResponse<InputStream> response, String id) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                return new Result<>(id, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    Result<List<ContractNegotiation>> requestResponse(HttpResponse<InputStream> response) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                var jsonArray = expand(response.body());
-                var contractNegotiations = jsonArray.stream()
-                        .map(s -> ContractNegotiation.Builder.newInstance()
-                                .raw(s.asJsonObject())
-                                .build())
-                        .toList();
-                return new Result<>(contractNegotiations, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    Result<String> getStateResponse(HttpResponse<InputStream> response) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                var jsonDocument = JsonDocument.of(response.body());
-                var content = jsonDocument.getJsonContent().get();
-                var state = content.asJsonObject().getString("state");
-                return new Result<>(state, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+    private String getContractNegotiationState(JsonObject content) {
+        return content.asJsonObject().getString("state");
     }
 
     public Result<ContractNegotiation> get(String id) {
-        try {
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractnegotiations/%s".formatted(url, id)))
-                    .GET();
-
-            var request = interceptor.apply(requestBuilder).build();
-
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return getResponse(response);
-        } catch (InterruptedException | IOException e) {
-            throw new RuntimeException(e);
-        }
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/contractnegotiations/%s".formatted(getUrl(), id)))
+                .GET();
+        return this.send(
+                requestBuilder,
+                (Function<JsonObject, ContractNegotiation>) this::getContractNegotiation,
+                this::getResponse);
     }
 
     public CompletableFuture<Result<ContractNegotiation>> getAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations/%s".formatted(url, id)))
+                .uri(URI.create("%s/v2/contractnegotiations/%s".formatted(getUrl(), id)))
                 .GET();
-
-        var request = interceptor.apply(requestBuilder).build();
-
-        CompletableFuture<HttpResponse<InputStream>> future =
-                httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-        return future.thenApply(this::getResponse);
+        return this.sendAsync(
+                requestBuilder,
+                (Function<JsonObject, ContractNegotiation>) this::getContractNegotiation,
+                this::getResponse);
     }
 
     public Result<String> create(ContractRequest input) {
@@ -176,16 +54,12 @@ public class ContractNegotiations {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractnegotiations".formatted(url)))
+                    .uri(URI.create("%s/v2/contractnegotiations".formatted(getUrl())))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
+            return this.send(requestBuilder, this::createResponse);
 
-            var request = interceptor.apply(requestBuilder).build();
-
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return createResponse(response);
-
-        } catch (IOException | InterruptedException | JsonLdError e) {
+        } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -195,15 +69,10 @@ public class ContractNegotiations {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractnegotiations".formatted(url)))
+                    .uri(URI.create("%s/v2/contractnegotiations".formatted(getUrl())))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
-
-            var request = interceptor.apply(requestBuilder).build();
-
-            CompletableFuture<HttpResponse<InputStream>> future =
-                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-            return future.thenApply(this::createResponse);
+            return this.sendAsync(requestBuilder, this::createResponse);
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
@@ -211,31 +80,23 @@ public class ContractNegotiations {
     }
 
     public Result<ContractAgreement> getAgreement(String id) {
-        try {
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractnegotiations/%s/agreement".formatted(url, id)))
-                    .GET();
-
-            var request = interceptor.apply(requestBuilder).build();
-
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return getAgreementResponse(response);
-
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/contractnegotiations/%s/agreement".formatted(getUrl(), id)))
+                .GET();
+        return this.send(
+                requestBuilder,
+                (Function<JsonObject, ContractAgreement>) this::getContractAgreement,
+                this::getResponse);
     }
 
     public CompletableFuture<Result<ContractAgreement>> getAgreementAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations/%s/agreement".formatted(url, id)))
+                .uri(URI.create("%s/v2/contractnegotiations/%s/agreement".formatted(getUrl(), id)))
                 .GET();
-
-        var request = interceptor.apply(requestBuilder).build();
-
-        CompletableFuture<HttpResponse<InputStream>> future =
-                httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-        return future.thenApply(this::getAgreementResponse);
+        return this.sendAsync(
+                requestBuilder,
+                (Function<JsonObject, ContractAgreement>) this::getContractAgreement,
+                this::getResponse);
     }
 
     public Result<String> terminate(TerminateNegotiation input) {
@@ -243,16 +104,12 @@ public class ContractNegotiations {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractnegotiations/%s/terminate".formatted(url, input.id())))
+                    .uri(URI.create("%s/v2/contractnegotiations/%s/terminate".formatted(getUrl(), input.id())))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
+            return this.send(requestBuilder, input.id(), this::deleteAndUpdateResponse);
 
-            var request = interceptor.apply(requestBuilder).build();
-
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return terminateResponse(response, input.id());
-
-        } catch (IOException | InterruptedException | JsonLdError e) {
+        } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -262,15 +119,10 @@ public class ContractNegotiations {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractnegotiations/%s/terminate".formatted(url, input.id())))
+                    .uri(URI.create("%s/v2/contractnegotiations/%s/terminate".formatted(getUrl(), input.id())))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
-
-            var request = interceptor.apply(requestBuilder).build();
-
-            CompletableFuture<HttpResponse<InputStream>> future =
-                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-            return future.thenApply(response -> terminateResponse(response, input.id()));
+            return this.sendAsync(requestBuilder, input.id(), this::deleteAndUpdateResponse);
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
@@ -282,15 +134,15 @@ public class ContractNegotiations {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractnegotiations/request".formatted(url)))
+                    .uri(URI.create("%s/v2/contractnegotiations/request".formatted(getUrl())))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
+            return this.send(
+                    requestBuilder,
+                    (Function<JsonArray, List<ContractNegotiation>>) this::getContractNegotiations,
+                    this::requestResponse);
 
-            var request = interceptor.apply(requestBuilder).build();
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return requestResponse(response);
-
-        } catch (IOException | InterruptedException | JsonLdError e) {
+        } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -300,15 +152,13 @@ public class ContractNegotiations {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractnegotiations/request".formatted(url)))
+                    .uri(URI.create("%s/v2/contractnegotiations/request".formatted(getUrl())))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
-
-            var request = interceptor.apply(requestBuilder).build();
-
-            CompletableFuture<HttpResponse<InputStream>> future =
-                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-            return future.thenApply(this::requestResponse);
+            return this.sendAsync(
+                    requestBuilder,
+                    (Function<JsonArray, List<ContractNegotiation>>) this::getContractNegotiations,
+                    this::requestResponse);
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
@@ -316,30 +166,34 @@ public class ContractNegotiations {
     }
 
     public Result<String> getState(String id) {
-        try {
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractnegotiations/%s/state".formatted(url, id)))
-                    .GET();
-
-            var request = interceptor.apply(requestBuilder).build();
-
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return getStateResponse(response);
-
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/contractnegotiations/%s/state".formatted(getUrl(), id)))
+                .GET();
+        return this.send(
+                requestBuilder,
+                (Function<JsonObject, String>) this::getContractNegotiationState,
+                this::getStatusResponse);
     }
 
     public CompletableFuture<Result<String>> getStateAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations/%s/state".formatted(url, id)))
+                .uri(URI.create("%s/v2/contractnegotiations/%s/state".formatted(getUrl(), id)))
                 .GET();
+        return this.sendAsync(
+                requestBuilder,
+                (Function<JsonObject, String>) this::getContractNegotiationState,
+                this::getStatusResponse);
+    }
 
-        var request = interceptor.apply(requestBuilder).build();
+    private ContractNegotiation getContractNegotiation(JsonObject object) {
+        return ContractNegotiation.Builder.newInstance().raw(object).build();
+    }
 
-        CompletableFuture<HttpResponse<InputStream>> future =
-                httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-        return future.thenApply(this::getStateResponse);
+    private List<ContractNegotiation> getContractNegotiations(JsonArray array) {
+        return array.stream()
+                .map(s -> ContractNegotiation.Builder.newInstance()
+                        .raw(s.asJsonObject())
+                        .build())
+                .toList();
     }
 }
