@@ -6,39 +6,32 @@ import static java.net.http.HttpRequest.BodyPublishers.ofString;
 import com.apicatalog.jsonld.JsonLdError;
 import io.thinkit.edc.client.connector.model.*;
 import jakarta.json.JsonArray;
-import jakarta.json.JsonObject;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-public class ContractDefinitions extends Service {
+public class ContractDefinitions {
+    private final ManagementApiHttpClient managementApiHttpClient;
 
     public ContractDefinitions(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
-        super(url, httpClient, interceptor);
+        managementApiHttpClient = new ManagementApiHttpClient(url, httpClient, interceptor);
     }
 
     public Result<ContractDefinition> get(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractdefinitions/%s".formatted(getUrl(), id)))
+                .uri(URI.create("%s/v2/contractdefinitions/%s".formatted(managementApiHttpClient.getUrl(), id)))
                 .GET();
-        return this.send(
-                requestBuilder,
-                (Function<JsonObject, ContractDefinition>) this::getContractDefinition,
-                this::getResponse);
+        return this.managementApiHttpClient.send(requestBuilder, "get", this::getContractDefinition);
     }
 
     public CompletableFuture<Result<ContractDefinition>> getAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractdefinitions/%s".formatted(getUrl(), id)))
+                .uri(URI.create("%s/v2/contractdefinitions/%s".formatted(managementApiHttpClient.getUrl(), id)))
                 .GET();
-        return this.sendAsync(
-                requestBuilder,
-                (Function<JsonObject, ContractDefinition>) this::getContractDefinition,
-                this::getResponse);
+        return this.managementApiHttpClient.sendAsync(requestBuilder, "get", this::getContractDefinition);
     }
 
     public Result<String> create(ContractDefinition input) {
@@ -46,10 +39,10 @@ public class ContractDefinitions extends Service {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractdefinitions".formatted(getUrl())))
+                    .uri(URI.create("%s/v2/contractdefinitions".formatted(managementApiHttpClient.getUrl())))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
-            return this.send(requestBuilder, this::createResponse);
+            return this.managementApiHttpClient.send(requestBuilder, "");
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
@@ -61,10 +54,10 @@ public class ContractDefinitions extends Service {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractdefinitions".formatted(getUrl())))
+                    .uri(URI.create("%s/v2/contractdefinitions".formatted(managementApiHttpClient.getUrl())))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
-            return this.sendAsync(requestBuilder, this::createResponse);
+            return this.managementApiHttpClient.sendAsync(requestBuilder, "");
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
@@ -72,16 +65,16 @@ public class ContractDefinitions extends Service {
 
     public Result<String> delete(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractdefinitions/%s".formatted(getUrl(), id)))
+                .uri(URI.create("%s/v2/contractdefinitions/%s".formatted(managementApiHttpClient.getUrl(), id)))
                 .DELETE();
-        return this.send(requestBuilder, id, this::deleteAndUpdateResponse);
+        return this.managementApiHttpClient.send(requestBuilder, id);
     }
 
     public CompletableFuture<Result<String>> deleteAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractdefinitions/%s".formatted(getUrl(), id)))
+                .uri(URI.create("%s/v2/contractdefinitions/%s".formatted(managementApiHttpClient.getUrl(), id)))
                 .DELETE();
-        return this.sendAsync(requestBuilder, id, this::deleteAndUpdateResponse);
+        return this.managementApiHttpClient.sendAsync(requestBuilder, id);
     }
 
     public Result<List<ContractDefinition>> request(QuerySpec input) {
@@ -89,13 +82,10 @@ public class ContractDefinitions extends Service {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractdefinitions/request".formatted(getUrl())))
+                    .uri(URI.create("%s/v2/contractdefinitions/request".formatted(managementApiHttpClient.getUrl())))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
-            return this.send(
-                    requestBuilder,
-                    (Function<JsonArray, List<ContractDefinition>>) this::getContractDefinitions,
-                    this::requestResponse);
+            return this.managementApiHttpClient.send(requestBuilder, "get", this::getContractDefinitions);
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
@@ -107,13 +97,10 @@ public class ContractDefinitions extends Service {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractdefinitions/request".formatted(getUrl())))
+                    .uri(URI.create("%s/v2/contractdefinitions/request".formatted(managementApiHttpClient.getUrl())))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
-            return this.sendAsync(
-                    requestBuilder,
-                    (Function<JsonArray, List<ContractDefinition>>) this::getContractDefinitions,
-                    this::requestResponse);
+            return this.managementApiHttpClient.sendAsync(requestBuilder, "get", this::getContractDefinitions);
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
@@ -125,10 +112,10 @@ public class ContractDefinitions extends Service {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractdefinitions".formatted(getUrl())))
+                    .uri(URI.create("%s/v2/contractdefinitions".formatted(managementApiHttpClient.getUrl())))
                     .header("content-type", "application/json")
                     .PUT(ofString(requestBody.toString()));
-            return this.send(requestBuilder, input.id(), this::deleteAndUpdateResponse);
+            return this.managementApiHttpClient.send(requestBuilder, input.id());
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
@@ -140,18 +127,20 @@ public class ContractDefinitions extends Service {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractdefinitions".formatted(getUrl())))
+                    .uri(URI.create("%s/v2/contractdefinitions".formatted(managementApiHttpClient.getUrl())))
                     .header("content-type", "application/json")
                     .PUT(ofString(requestBody.toString()));
-            return this.sendAsync(requestBuilder, input.id(), this::deleteAndUpdateResponse);
+            return this.managementApiHttpClient.sendAsync(requestBuilder, input.id());
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
 
-    private ContractDefinition getContractDefinition(JsonObject object) {
-        return ContractDefinition.Builder.newInstance().raw(object).build();
+    private ContractDefinition getContractDefinition(JsonArray array) {
+        return ContractDefinition.Builder.newInstance()
+                .raw(array.getJsonObject(0))
+                .build();
     }
 
     private List<ContractDefinition> getContractDefinitions(JsonArray array) {

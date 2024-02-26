@@ -6,35 +6,33 @@ import static java.net.http.HttpRequest.BodyPublishers.ofString;
 import com.apicatalog.jsonld.JsonLdError;
 import io.thinkit.edc.client.connector.model.*;
 import jakarta.json.JsonArray;
-import jakarta.json.JsonObject;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-public class PolicyDefinitions extends Service {
+public class PolicyDefinitions {
+
+    private final ManagementApiHttpClient managementApiHttpClient;
 
     public PolicyDefinitions(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
-        super(url, httpClient, interceptor);
+        managementApiHttpClient = new ManagementApiHttpClient(url, httpClient, interceptor);
     }
 
     public Result<PolicyDefinition> get(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(getUrl(), id)))
+                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(managementApiHttpClient.getUrl(), id)))
                 .GET();
-        return this.send(
-                requestBuilder, (Function<JsonObject, PolicyDefinition>) this::getPolicyDefinition, this::getResponse);
+        return this.managementApiHttpClient.send(requestBuilder, "get", this::getPolicyDefinition);
     }
 
     public CompletableFuture<Result<PolicyDefinition>> getAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(getUrl(), id)))
+                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(managementApiHttpClient.getUrl(), id)))
                 .GET();
-        return this.sendAsync(
-                requestBuilder, (Function<JsonObject, PolicyDefinition>) this::getPolicyDefinition, this::getResponse);
+        return this.managementApiHttpClient.sendAsync(requestBuilder, "get", this::getPolicyDefinition);
     }
 
     public Result<String> create(PolicyDefinition input) {
@@ -42,10 +40,10 @@ public class PolicyDefinitions extends Service {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/policydefinitions".formatted(getUrl())))
+                    .uri(URI.create("%s/v2/policydefinitions".formatted(managementApiHttpClient.getUrl())))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
-            return this.send(requestBuilder, this::createResponse);
+            return this.managementApiHttpClient.send(requestBuilder, "");
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
@@ -56,11 +54,11 @@ public class PolicyDefinitions extends Service {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/policydefinitions".formatted(getUrl())))
+                    .uri(URI.create("%s/v2/policydefinitions".formatted(managementApiHttpClient.getUrl())))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
 
-            return this.sendAsync(requestBuilder, this::createResponse);
+            return this.managementApiHttpClient.sendAsync(requestBuilder, "");
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
@@ -72,11 +70,12 @@ public class PolicyDefinitions extends Service {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/policydefinitions/%s".formatted(getUrl(), input.id())))
+                    .uri(URI.create(
+                            "%s/v2/policydefinitions/%s".formatted(managementApiHttpClient.getUrl(), input.id())))
                     .header("content-type", "application/json")
                     .PUT(ofString(requestBody.toString()));
 
-            return this.send(requestBuilder, input.id(), this::deleteAndUpdateResponse);
+            return this.managementApiHttpClient.send(requestBuilder, input.id());
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
@@ -88,11 +87,12 @@ public class PolicyDefinitions extends Service {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/policydefinitions/%s".formatted(getUrl(), input.id())))
+                    .uri(URI.create(
+                            "%s/v2/policydefinitions/%s".formatted(managementApiHttpClient.getUrl(), input.id())))
                     .header("content-type", "application/json")
                     .PUT(ofString(requestBody.toString()));
 
-            return this.sendAsync(requestBuilder, input.id(), this::deleteAndUpdateResponse);
+            return this.managementApiHttpClient.sendAsync(requestBuilder, input.id());
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
@@ -101,17 +101,17 @@ public class PolicyDefinitions extends Service {
 
     public Result<String> delete(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(getUrl(), id)))
+                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(managementApiHttpClient.getUrl(), id)))
                 .DELETE();
 
-        return this.send(requestBuilder, id, this::deleteAndUpdateResponse);
+        return this.managementApiHttpClient.send(requestBuilder, id);
     }
 
     public CompletableFuture<Result<String>> deleteAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(getUrl(), id)))
+                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(managementApiHttpClient.getUrl(), id)))
                 .DELETE();
-        return this.sendAsync(requestBuilder, id, this::deleteAndUpdateResponse);
+        return this.managementApiHttpClient.sendAsync(requestBuilder, id);
     }
 
     public Result<List<PolicyDefinition>> request(QuerySpec input) {
@@ -119,14 +119,11 @@ public class PolicyDefinitions extends Service {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/policydefinitions/request".formatted(getUrl())))
+                    .uri(URI.create("%s/v2/policydefinitions/request".formatted(managementApiHttpClient.getUrl())))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
 
-            return this.send(
-                    requestBuilder,
-                    (Function<JsonArray, List<PolicyDefinition>>) this::getPolicyDefinitions,
-                    this::requestResponse);
+            return this.managementApiHttpClient.send(requestBuilder, "get", this::getPolicyDefinitions);
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
@@ -137,22 +134,21 @@ public class PolicyDefinitions extends Service {
         try {
             var requestBody = compact(input);
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/policydefinitions/request".formatted(getUrl())))
+                    .uri(URI.create("%s/v2/policydefinitions/request".formatted(managementApiHttpClient.getUrl())))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
 
-            return this.sendAsync(
-                    requestBuilder,
-                    (Function<JsonArray, List<PolicyDefinition>>) this::getPolicyDefinitions,
-                    this::requestResponse);
+            return this.managementApiHttpClient.sendAsync(requestBuilder, "get", this::getPolicyDefinitions);
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
 
-    private PolicyDefinition getPolicyDefinition(JsonObject object) {
-        return PolicyDefinition.Builder.newInstance().raw(object).build();
+    private PolicyDefinition getPolicyDefinition(JsonArray array) {
+        return PolicyDefinition.Builder.newInstance()
+                .raw(array.getJsonObject(0))
+                .build();
     }
 
     private List<PolicyDefinition> getPolicyDefinitions(JsonArray array) {
