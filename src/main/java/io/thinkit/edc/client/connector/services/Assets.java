@@ -1,12 +1,13 @@
 package io.thinkit.edc.client.connector.services;
 
-import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
+import static io.thinkit.edc.client.connector.utils.JsonLdUtil.compact;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import com.apicatalog.jsonld.JsonLdError;
 import io.thinkit.edc.client.connector.model.Asset;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -26,7 +27,10 @@ public class Assets {
         var requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create("%s/v3/assets/%s".formatted(managementApiHttpClient.getUrl(), id)))
                 .GET();
-        return this.managementApiHttpClient.send(requestBuilder, "get", this::getAsset);
+        return this.managementApiHttpClient
+                .send(requestBuilder)
+                .map(JsonLdUtil::expand)
+                .map(this::getAsset);
     }
 
     public CompletableFuture<Result<Asset>> getAsync(String id) {
