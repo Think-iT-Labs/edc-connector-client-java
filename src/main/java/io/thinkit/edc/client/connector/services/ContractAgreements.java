@@ -5,6 +5,7 @@ import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import com.apicatalog.jsonld.JsonLdError;
 import io.thinkit.edc.client.connector.model.*;
+import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -14,40 +15,48 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.UnaryOperator;
 
 public class ContractAgreements {
+    private final String url;
     private final ManagementApiHttpClient managementApiHttpClient;
 
     public ContractAgreements(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
-        managementApiHttpClient = new ManagementApiHttpClient(url, httpClient, interceptor);
+        managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
+        this.url = url;
     }
 
     public Result<ContractAgreement> get(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractagreements/%s".formatted(managementApiHttpClient.getUrl(), id)))
+                .uri(URI.create("%s/v2/contractagreements/%s".formatted(this.url, id)))
                 .GET();
-        return this.managementApiHttpClient.send(requestBuilder, "get", this::getContractAgreement);
+        return this.managementApiHttpClient
+                .send(requestBuilder)
+                .map(JsonLdUtil::expand)
+                .map(this::getContractAgreement);
     }
 
     public CompletableFuture<Result<ContractAgreement>> getAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractagreements/%s".formatted(managementApiHttpClient.getUrl(), id)))
+                .uri(URI.create("%s/v2/contractagreements/%s".formatted(this.url, id)))
                 .GET();
-        return this.managementApiHttpClient.sendAsync(requestBuilder, "get", this::getContractAgreement);
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+                .map(this::getContractAgreement));
     }
 
     public Result<ContractNegotiation> getNegotiation(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create(
-                        "%s/v2/contractagreements/%s/negotiation".formatted(managementApiHttpClient.getUrl(), id)))
+                .uri(URI.create("%s/v2/contractagreements/%s/negotiation".formatted(this.url, id)))
                 .GET();
-        return this.managementApiHttpClient.send(requestBuilder, "get", this::getContractNegotiation);
+        return this.managementApiHttpClient
+                .send(requestBuilder)
+                .map(JsonLdUtil::expand)
+                .map(this::getContractNegotiation);
     }
 
     public CompletableFuture<Result<ContractNegotiation>> getNegotiationAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create(
-                        "%s/v2/contractagreements/%s/negotiation".formatted(managementApiHttpClient.getUrl(), id)))
+                .uri(URI.create("%s/v2/contractagreements/%s/negotiation".formatted(this.url, id)))
                 .GET();
-        return this.managementApiHttpClient.sendAsync(requestBuilder, "get", this::getContractNegotiation);
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+                .map(this::getContractNegotiation));
     }
 
     public Result<List<ContractAgreement>> request(QuerySpec input) {
@@ -55,10 +64,13 @@ public class ContractAgreements {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractagreements/request".formatted(managementApiHttpClient.getUrl())))
+                    .uri(URI.create("%s/v2/contractagreements/request".formatted(this.url)))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
-            return this.managementApiHttpClient.send(requestBuilder, "get", this::getContractAgreements);
+            return this.managementApiHttpClient
+                    .send(requestBuilder)
+                    .map(JsonLdUtil::expand)
+                    .map(this::getContractAgreements);
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
@@ -70,11 +82,12 @@ public class ContractAgreements {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractagreements/request".formatted(managementApiHttpClient.getUrl())))
+                    .uri(URI.create("%s/v2/contractagreements/request".formatted(this.url)))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
-
-            return this.managementApiHttpClient.sendAsync(requestBuilder, "get", this::getContractAgreements);
+            return this.managementApiHttpClient
+                    .sendAsync(requestBuilder)
+                    .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getContractAgreements));
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);

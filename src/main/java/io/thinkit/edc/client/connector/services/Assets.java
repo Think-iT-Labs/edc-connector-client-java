@@ -1,5 +1,6 @@
 package io.thinkit.edc.client.connector.services;
 
+import static io.thinkit.edc.client.connector.utils.Constants.ID;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.compact;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
@@ -17,15 +18,17 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.UnaryOperator;
 
 public class Assets {
+    private final String url;
     private final ManagementApiHttpClient managementApiHttpClient;
 
     public Assets(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
-        managementApiHttpClient = new ManagementApiHttpClient(url, httpClient, interceptor);
+        managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
+        this.url = url;
     }
 
     public Result<Asset> get(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/%s".formatted(managementApiHttpClient.getUrl(), id)))
+                .uri(URI.create("%s/v3/assets/%s".formatted(this.url, id)))
                 .GET();
         return this.managementApiHttpClient
                 .send(requestBuilder)
@@ -35,10 +38,11 @@ public class Assets {
 
     public CompletableFuture<Result<Asset>> getAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/%s".formatted(managementApiHttpClient.getUrl(), id)))
+                .uri(URI.create("%s/v3/assets/%s".formatted(this.url, id)))
                 .GET();
 
-        return this.managementApiHttpClient.sendAsync(requestBuilder, "get", this::getAsset);
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+                .map(this::getAsset));
     }
 
     public Result<String> create(Asset input) {
@@ -46,10 +50,13 @@ public class Assets {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v3/assets".formatted(managementApiHttpClient.getUrl())))
+                    .uri(URI.create("%s/v3/assets".formatted(this.url)))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
-            return this.managementApiHttpClient.send(requestBuilder, "");
+            return this.managementApiHttpClient
+                    .send(requestBuilder)
+                    .map(JsonLdUtil::expand)
+                    .map(content -> content.getJsonObject(0).getString(ID));
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
@@ -60,11 +67,13 @@ public class Assets {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v3/assets".formatted(managementApiHttpClient.getUrl())))
+                    .uri(URI.create("%s/v3/assets".formatted(this.url)))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
 
-            return this.managementApiHttpClient.sendAsync(requestBuilder, "");
+            return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(
+                            JsonLdUtil::expand)
+                    .map(content -> content.getJsonObject(0).getString(ID)));
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
@@ -76,11 +85,11 @@ public class Assets {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v3/assets".formatted(managementApiHttpClient.getUrl())))
+                    .uri(URI.create("%s/v3/assets".formatted(this.url)))
                     .header("content-type", "application/json")
                     .PUT(ofString(requestBody.toString()));
 
-            return this.managementApiHttpClient.send(requestBuilder, input.id());
+            return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
@@ -92,11 +101,13 @@ public class Assets {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v3/assets".formatted(managementApiHttpClient.getUrl())))
+                    .uri(URI.create("%s/v3/assets".formatted(this.url)))
                     .header("content-type", "application/json")
                     .PUT(ofString(requestBody.toString()));
 
-            return this.managementApiHttpClient.sendAsync(requestBuilder, input.id());
+            return this.managementApiHttpClient
+                    .sendAsync(requestBuilder)
+                    .thenApply(result -> result.map(content -> input.id()));
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
@@ -105,18 +116,18 @@ public class Assets {
 
     public Result<String> delete(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/%s".formatted(managementApiHttpClient.getUrl(), id)))
+                .uri(URI.create("%s/v3/assets/%s".formatted(this.url, id)))
                 .DELETE();
 
-        return this.managementApiHttpClient.send(requestBuilder, id);
+        return this.managementApiHttpClient.send(requestBuilder).map(result -> id);
     }
 
     public CompletableFuture<Result<String>> deleteAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/%s".formatted(managementApiHttpClient.getUrl(), id)))
+                .uri(URI.create("%s/v3/assets/%s".formatted(this.url, id)))
                 .DELETE();
 
-        return this.managementApiHttpClient.sendAsync(requestBuilder, id);
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
     }
 
     public Result<List<Asset>> request(QuerySpec input) {
@@ -124,11 +135,14 @@ public class Assets {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v3/assets/request".formatted(managementApiHttpClient.getUrl())))
+                    .uri(URI.create("%s/v3/assets/request".formatted(this.url)))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
 
-            return this.managementApiHttpClient.send(requestBuilder, "get", this::getAssets);
+            return this.managementApiHttpClient
+                    .send(requestBuilder)
+                    .map(JsonLdUtil::expand)
+                    .map(this::getAssets);
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
@@ -140,11 +154,13 @@ public class Assets {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v3/assets/request".formatted(managementApiHttpClient.getUrl())))
+                    .uri(URI.create("%s/v3/assets/request".formatted(this.url)))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
 
-            return this.managementApiHttpClient.sendAsync(requestBuilder, "get", this::getAssets);
+            return this.managementApiHttpClient
+                    .sendAsync(requestBuilder)
+                    .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getAssets));
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
