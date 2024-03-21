@@ -1,151 +1,46 @@
 package io.thinkit.edc.client.connector.services;
 
 import static io.thinkit.edc.client.connector.utils.Constants.ID;
-import static io.thinkit.edc.client.connector.utils.HttpClientUtil.isSuccessful;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import com.apicatalog.jsonld.JsonLdError;
 import io.thinkit.edc.client.connector.model.*;
-import java.io.IOException;
-import java.io.InputStream;
+import io.thinkit.edc.client.connector.utils.JsonLdUtil;
+import jakarta.json.JsonArray;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.UnaryOperator;
 
 public class PolicyDefinitions {
+
     private final String url;
-    private final HttpClient httpClient;
-    private final UnaryOperator<HttpRequest.Builder> interceptor;
+    private final ManagementApiHttpClient managementApiHttpClient;
 
     public PolicyDefinitions(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
+        managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
         this.url = url;
-        this.httpClient = httpClient;
-        this.interceptor = interceptor;
-    }
-
-    Result<PolicyDefinition> getResponse(HttpResponse<InputStream> response) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                var jsonArray = expand(response.body());
-                var policyDefinition = PolicyDefinition.Builder.newInstance()
-                        .raw(jsonArray.getJsonObject(0))
-                        .build();
-                return new Result<>(policyDefinition, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    Result<String> createResponse(HttpResponse<InputStream> response) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                var content = expand(response.body());
-                var id = content.getJsonObject(0).getString(ID);
-                return new Result<>(id, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    Result<String> updateResponse(HttpResponse<InputStream> response, String id) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                return new Result<>(id, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    Result<String> deleteResponse(HttpResponse<InputStream> response, String id) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                return new Result<>(id, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(null, error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    Result<List<PolicyDefinition>> requestResponse(HttpResponse<InputStream> response) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                var jsonArray = expand(response.body());
-                var policyDefinitions = jsonArray.stream()
-                        .map(s -> PolicyDefinition.Builder.newInstance()
-                                .raw(s.asJsonObject())
-                                .build())
-                        .toList();
-                return new Result<>(policyDefinitions, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public Result<PolicyDefinition> get(String id) {
-        try {
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/policydefinitions/%s".formatted(url, id)))
-                    .GET();
-
-            var request = interceptor.apply(requestBuilder).build();
-
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return getResponse(response);
-
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, id)))
+                .GET();
+        return this.managementApiHttpClient
+                .send(requestBuilder)
+                .map(JsonLdUtil::expand)
+                .map(this::getPolicyDefinition);
     }
 
     public CompletableFuture<Result<PolicyDefinition>> getAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(url, id)))
+                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, id)))
                 .GET();
-
-        var request = interceptor.apply(requestBuilder).build();
-
-        CompletableFuture<HttpResponse<InputStream>> future =
-                httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-        return future.thenApply(this::getResponse);
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+                .map(this::getPolicyDefinition));
     }
 
     public Result<String> create(PolicyDefinition input) {
@@ -153,14 +48,14 @@ public class PolicyDefinitions {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/policydefinitions".formatted(url)))
+                    .uri(URI.create("%s/v2/policydefinitions".formatted(this.url)))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
-            var request = interceptor.apply(requestBuilder).build();
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return createResponse(response);
-
-        } catch (IOException | InterruptedException | JsonLdError e) {
+            return this.managementApiHttpClient
+                    .send(requestBuilder)
+                    .map(JsonLdUtil::expand)
+                    .map(content -> content.getJsonObject(0).getString(ID));
+        } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -170,14 +65,14 @@ public class PolicyDefinitions {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/policydefinitions".formatted(url)))
+                    .uri(URI.create("%s/v2/policydefinitions".formatted(this.url)))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
 
-            var request = interceptor.apply(requestBuilder).build();
-            CompletableFuture<HttpResponse<InputStream>> future =
-                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-            return future.thenApply(this::createResponse);
+            return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(
+                            JsonLdUtil::expand)
+                    .map(content -> content.getJsonObject(0).getString(ID)));
+
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
@@ -188,16 +83,13 @@ public class PolicyDefinitions {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/policydefinitions/%s".formatted(url, input.id())))
+                    .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, input.id())))
                     .header("content-type", "application/json")
                     .PUT(ofString(requestBody.toString()));
 
-            var request = interceptor.apply(requestBuilder).build();
+            return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
 
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return updateResponse(response, input.id());
-
-        } catch (IOException | InterruptedException | JsonLdError e) {
+        } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -207,15 +99,13 @@ public class PolicyDefinitions {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/policydefinitions/%s".formatted(url, input.id())))
+                    .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, input.id())))
                     .header("content-type", "application/json")
                     .PUT(ofString(requestBody.toString()));
 
-            var request = interceptor.apply(requestBuilder).build();
-
-            CompletableFuture<HttpResponse<InputStream>> future =
-                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-            return future.thenApply(response -> updateResponse(response, input.id()));
+            return this.managementApiHttpClient
+                    .sendAsync(requestBuilder)
+                    .thenApply(result -> result.map(content -> input.id()));
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
@@ -223,31 +113,18 @@ public class PolicyDefinitions {
     }
 
     public Result<String> delete(String id) {
-        try {
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/policydefinitions/%s".formatted(url, id)))
-                    .DELETE();
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, id)))
+                .DELETE();
 
-            var request = interceptor.apply(requestBuilder).build();
-
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return deleteResponse(response, id);
-
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        return this.managementApiHttpClient.send(requestBuilder).map(result -> id);
     }
 
     public CompletableFuture<Result<String>> deleteAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(url, id)))
+                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, id)))
                 .DELETE();
-
-        var request = interceptor.apply(requestBuilder).build();
-
-        CompletableFuture<HttpResponse<InputStream>> future =
-                httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-        return future.thenApply(response -> deleteResponse(response, id));
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
     }
 
     public Result<List<PolicyDefinition>> request(QuerySpec input) {
@@ -255,15 +132,15 @@ public class PolicyDefinitions {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/policydefinitions/request".formatted(url)))
+                    .uri(URI.create("%s/v2/policydefinitions/request".formatted(this.url)))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
+            return this.managementApiHttpClient
+                    .send(requestBuilder)
+                    .map(JsonLdUtil::expand)
+                    .map(this::getPolicyDefinitions);
 
-            var request = interceptor.apply(requestBuilder).build();
-
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return requestResponse(response);
-        } catch (IOException | InterruptedException | JsonLdError e) {
+        } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -272,17 +149,30 @@ public class PolicyDefinitions {
         try {
             var requestBody = compact(input);
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/policydefinitions/request".formatted(url)))
+                    .uri(URI.create("%s/v2/policydefinitions/request".formatted(this.url)))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
 
-            var request = interceptor.apply(requestBuilder).build();
+            return this.managementApiHttpClient
+                    .sendAsync(requestBuilder)
+                    .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getPolicyDefinitions));
 
-            CompletableFuture<HttpResponse<InputStream>> future =
-                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-            return future.thenApply(this::requestResponse);
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private PolicyDefinition getPolicyDefinition(JsonArray array) {
+        return PolicyDefinition.Builder.newInstance()
+                .raw(array.getJsonObject(0))
+                .build();
+    }
+
+    private List<PolicyDefinition> getPolicyDefinitions(JsonArray array) {
+        return array.stream()
+                .map(s -> PolicyDefinition.Builder.newInstance()
+                        .raw(s.asJsonObject())
+                        .build())
+                .toList();
     }
 }

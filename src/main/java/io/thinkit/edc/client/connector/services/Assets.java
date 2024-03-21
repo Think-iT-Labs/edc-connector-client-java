@@ -1,156 +1,48 @@
 package io.thinkit.edc.client.connector.services;
 
 import static io.thinkit.edc.client.connector.utils.Constants.ID;
-import static io.thinkit.edc.client.connector.utils.HttpClientUtil.isSuccessful;
-import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
+import static io.thinkit.edc.client.connector.utils.JsonLdUtil.compact;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import com.apicatalog.jsonld.JsonLdError;
-import io.thinkit.edc.client.connector.model.ApiErrorDetail;
 import io.thinkit.edc.client.connector.model.Asset;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.UnaryOperator;
 
 public class Assets {
     private final String url;
-    private final HttpClient httpClient;
-    private final UnaryOperator<HttpRequest.Builder> interceptor;
+    private final ManagementApiHttpClient managementApiHttpClient;
 
     public Assets(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
+        managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
         this.url = url;
-        this.httpClient = httpClient;
-        this.interceptor = interceptor;
-    }
-
-    Result<Asset> getResponse(HttpResponse<InputStream> response) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                JsonArray jsonArray = expand(response.body());
-
-                var asset = Asset.Builder.newInstance()
-                        .raw(jsonArray.getJsonObject(0))
-                        .build();
-                return new Result<>(asset, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    Result<String> createResponse(HttpResponse<InputStream> response) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                var content = expand(response.body());
-                var id = content.getJsonObject(0).getString(ID);
-                return new Result<>(id, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(null, error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    Result<String> updateResponse(HttpResponse<InputStream> response, String id) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                return new Result<>(id, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(null, error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    Result<String> deleteResponse(HttpResponse<InputStream> response, String id) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                return new Result<>(id, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(null, error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    Result<List<Asset>> requestResponse(HttpResponse<InputStream> response) {
-        try {
-            var statusCode = response.statusCode();
-            if (isSuccessful(statusCode)) {
-                var jsonArray = expand(response.body());
-                var assets = jsonArray.stream()
-                        .map(s -> Asset.Builder.newInstance()
-                                .raw(s.asJsonObject())
-                                .build())
-                        .toList();
-                return new Result<>(assets, null);
-            } else {
-                var error = deserializeToArray(response.body()).stream()
-                        .map(s -> new ApiErrorDetail(s.asJsonObject()))
-                        .toList();
-                return new Result<>(error);
-            }
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public Result<Asset> get(String id) {
-        try {
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v3/assets/%s".formatted(url, id)))
-                    .GET();
-
-            var request = interceptor.apply(requestBuilder).build();
-
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return getResponse(response);
-
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v3/assets/%s".formatted(this.url, id)))
+                .GET();
+        return this.managementApiHttpClient
+                .send(requestBuilder)
+                .map(JsonLdUtil::expand)
+                .map(this::getAsset);
     }
 
     public CompletableFuture<Result<Asset>> getAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/%s".formatted(url, id)))
+                .uri(URI.create("%s/v3/assets/%s".formatted(this.url, id)))
                 .GET();
 
-        var request = interceptor.apply(requestBuilder).build();
-
-        CompletableFuture<HttpResponse<InputStream>> future =
-                httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-        return future.thenApply(this::getResponse);
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+                .map(this::getAsset));
     }
 
     public Result<String> create(Asset input) {
@@ -158,16 +50,14 @@ public class Assets {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v3/assets".formatted(url)))
+                    .uri(URI.create("%s/v3/assets".formatted(this.url)))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
-
-            var request = interceptor.apply(requestBuilder).build();
-
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return createResponse(response);
-
-        } catch (IOException | InterruptedException | JsonLdError e) {
+            return this.managementApiHttpClient
+                    .send(requestBuilder)
+                    .map(JsonLdUtil::expand)
+                    .map(content -> content.getJsonObject(0).getString(ID));
+        } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -177,15 +67,13 @@ public class Assets {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v3/assets".formatted(url)))
+                    .uri(URI.create("%s/v3/assets".formatted(this.url)))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
 
-            var request = interceptor.apply(requestBuilder).build();
-
-            CompletableFuture<HttpResponse<InputStream>> future =
-                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-            return future.thenApply(this::createResponse);
+            return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(
+                            JsonLdUtil::expand)
+                    .map(content -> content.getJsonObject(0).getString(ID)));
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
@@ -197,16 +85,13 @@ public class Assets {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v3/assets".formatted(url)))
+                    .uri(URI.create("%s/v3/assets".formatted(this.url)))
                     .header("content-type", "application/json")
                     .PUT(ofString(requestBody.toString()));
 
-            var request = interceptor.apply(requestBuilder).build();
+            return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
 
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return updateResponse(response, input.id());
-
-        } catch (IOException | InterruptedException | JsonLdError e) {
+        } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -216,15 +101,13 @@ public class Assets {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v3/assets".formatted(url)))
+                    .uri(URI.create("%s/v3/assets".formatted(this.url)))
                     .header("content-type", "application/json")
                     .PUT(ofString(requestBody.toString()));
 
-            var request = interceptor.apply(requestBuilder).build();
-
-            CompletableFuture<HttpResponse<InputStream>> future =
-                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-            return future.thenApply(response -> updateResponse(response, input.id()));
+            return this.managementApiHttpClient
+                    .sendAsync(requestBuilder)
+                    .thenApply(result -> result.map(content -> input.id()));
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
@@ -232,31 +115,19 @@ public class Assets {
     }
 
     public Result<String> delete(String id) {
-        try {
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v3/assets/%s".formatted(url, id)))
-                    .DELETE();
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v3/assets/%s".formatted(this.url, id)))
+                .DELETE();
 
-            var request = interceptor.apply(requestBuilder).build();
-
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return deleteResponse(response, id);
-
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        return this.managementApiHttpClient.send(requestBuilder).map(result -> id);
     }
 
     public CompletableFuture<Result<String>> deleteAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/%s".formatted(url, id)))
+                .uri(URI.create("%s/v3/assets/%s".formatted(this.url, id)))
                 .DELETE();
 
-        var request = interceptor.apply(requestBuilder).build();
-
-        CompletableFuture<HttpResponse<InputStream>> future =
-                httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-        return future.thenApply(response -> deleteResponse(response, id));
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
     }
 
     public Result<List<Asset>> request(QuerySpec input) {
@@ -264,16 +135,16 @@ public class Assets {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v3/assets/request".formatted(url)))
+                    .uri(URI.create("%s/v3/assets/request".formatted(this.url)))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
 
-            var request = interceptor.apply(requestBuilder).build();
+            return this.managementApiHttpClient
+                    .send(requestBuilder)
+                    .map(JsonLdUtil::expand)
+                    .map(this::getAssets);
 
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            return requestResponse(response);
-
-        } catch (IOException | InterruptedException | JsonLdError e) {
+        } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
     }
@@ -283,18 +154,26 @@ public class Assets {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v3/assets/request".formatted(url)))
+                    .uri(URI.create("%s/v3/assets/request".formatted(this.url)))
                     .header("content-type", "application/json")
                     .POST(ofString(requestBody.toString()));
 
-            var request = interceptor.apply(requestBuilder).build();
-
-            CompletableFuture<HttpResponse<InputStream>> future =
-                    httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-            return future.thenApply(this::requestResponse);
+            return this.managementApiHttpClient
+                    .sendAsync(requestBuilder)
+                    .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getAssets));
 
         } catch (JsonLdError e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Asset getAsset(JsonArray array) {
+        return Asset.Builder.newInstance().raw(array.getJsonObject(0)).build();
+    }
+
+    private List<Asset> getAssets(JsonArray array) {
+        return array.stream()
+                .map(s -> Asset.Builder.newInstance().raw(s.asJsonObject()).build())
+                .toList();
     }
 }

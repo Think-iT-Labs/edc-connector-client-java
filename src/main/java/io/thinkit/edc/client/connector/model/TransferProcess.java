@@ -1,17 +1,16 @@
 package io.thinkit.edc.client.connector.model;
 
-import io.thinkit.edc.client.connector.utils.JsonLdObject;
-import jakarta.json.JsonObject;
-
-import java.util.List;
-import java.util.Map;
-
 import static io.thinkit.edc.client.connector.utils.Constants.EDC_NAMESPACE;
 import static io.thinkit.edc.client.connector.utils.Constants.TYPE;
 import static io.thinkit.edc.client.connector.utils.Constants.VALUE;
 import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
 import static jakarta.json.stream.JsonCollectors.toJsonArray;
+
+import io.thinkit.edc.client.connector.utils.JsonLdObject;
+import jakarta.json.JsonObject;
+import java.util.List;
+import java.util.Map;
 
 public class TransferProcess extends JsonLdObject {
     private static final String TYPE_TRANSFER_PROCESS = EDC_NAMESPACE + "TransferProcess";
