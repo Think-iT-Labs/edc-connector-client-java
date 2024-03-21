@@ -28,7 +28,7 @@ public class ManagementApiHttpClient {
 
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
 
-            return get(response);
+            return toResult(response);
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -39,10 +39,10 @@ public class ManagementApiHttpClient {
 
         CompletableFuture<HttpResponse<InputStream>> future =
                 httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-        return future.thenApply(this::get);
+        return future.thenApply(this::toResult);
     }
 
-    protected Result<InputStream> get(HttpResponse<InputStream> response) {
+    protected Result<InputStream> toResult(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
             if (isSuccessful(statusCode)) {
