@@ -2,16 +2,15 @@ package io.thinkit.edc.client.connector;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.thinkit.edc.client.connector.model.CallbackAddress;
-import io.thinkit.edc.client.connector.model.TerminateTransfer;
-import io.thinkit.edc.client.connector.model.TransferRequest;
+import io.thinkit.edc.client.connector.model.*;
 import io.thinkit.edc.client.connector.services.TransferProcesses;
 import java.net.http.HttpClient;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class TransferProcessesTest extends ContainerTestBase {
@@ -28,10 +27,17 @@ class TransferProcessesTest extends ContainerTestBase {
         transferProcesses = client.transferProcesses();
     }
 
-    @Test
-    void should_get_a_transfer_process() {
-        var transferProcess = transferProcesses.get("process-id");
+    <T> void error_response(Result<T> error) {
+        assertThat(error.isSucceeded()).isFalse();
+        assertThat(error.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.message()).isEqualTo("error message");
+            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
+            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
+            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+        });
+    }
 
+    void should_get_a_transfer_process_response(Result<TransferProcess> transferProcess) {
         assertThat(transferProcess.isSucceeded()).isTrue();
         assertThat(transferProcess.getContent().id()).isNotBlank();
         assertThat(transferProcess.getContent().correlationId()).isNotNull().isEqualTo("correlation-id");
@@ -65,83 +71,7 @@ class TransferProcessesTest extends ContainerTestBase {
         assertThat(transferProcess.getContent().createdAt()).isGreaterThan(0);
     }
 
-    @Test
-    void should_get_a_transfer_process_async() {
-        try {
-            var transferProcess = transferProcesses.getAsync("process-id").get();
-
-            assertThat(transferProcess.isSucceeded()).isTrue();
-            assertThat(transferProcess.getContent().id()).isNotBlank();
-            assertThat(transferProcess.getContent().correlationId()).isNotNull().isEqualTo("correlation-id");
-            assertThat(transferProcess.getContent().type()).isNotNull().isEqualTo("PROVIDER");
-            assertThat(transferProcess.getContent().state()).isNotNull().isEqualTo("STARTED");
-            assertThat(transferProcess.getContent().stateTimestamp()).isGreaterThan(0);
-            assertThat(transferProcess.getContent().assetId()).isNotNull().isEqualTo("asset-id");
-            assertThat(transferProcess.getContent().contractId()).isNotNull().isEqualTo("contractId");
-            assertThat(transferProcess.getContent().dataDestination())
-                    .isNotNull()
-                    .satisfies(dataDestination -> {
-                        assertThat(dataDestination.size()).isGreaterThan(0);
-                        assertThat(dataDestination.getString("type")).isEqualTo("data-destination-type");
-                    });
-            assertThat(transferProcess.getContent().privateProperties())
-                    .isNotNull()
-                    .satisfies(privateProperties -> {
-                        assertThat(privateProperties.size()).isGreaterThan(0);
-                        assertThat(privateProperties.getString("private-key")).isEqualTo("private-value");
-                    });
-            assertThat(transferProcess.getContent().errorDetail()).isNotNull().isEqualTo("eventual-error-detail");
-            assertThat(transferProcess.getContent().callbackAddresses())
-                    .isNotNull()
-                    .first()
-                    .satisfies(callbackAddress -> {
-                        assertThat(callbackAddress.authCodeId()).isNotNull().isEqualTo("auth-code-id");
-                        assertThat(callbackAddress.authKey()).isNotNull().isEqualTo("auth-key");
-                        assertThat(callbackAddress.transactional()).isNotNull().isFalse();
-                        assertThat(callbackAddress.uri()).isNotNull().isEqualTo("http://callback/url");
-                        assertThat(callbackAddress.events()).isNotNull().satisfies(uri -> {
-                            assertThat(uri.get(0)).isEqualTo("contract.negotiation");
-                            assertThat(uri.get(1)).isEqualTo("transfer.process");
-                        });
-                    });
-            assertThat(transferProcess.getContent().createdAt()).isGreaterThan(0);
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Test
-    void should_not_get_a_transfer_process_when_id_is_empty() {
-        var transferProcess = transferProcesses.get("");
-
-        assertThat(transferProcess.isSucceeded()).isFalse();
-        assertThat(transferProcess.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-            assertThat(apiErrorDetail.message()).isEqualTo("error message");
-            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
-            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
-            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
-        });
-    }
-
-    @Test
-    void should_not_get_a_transfer_process_when_id_is_empty_async() {
-        try {
-            var transferProcess = transferProcesses.getAsync("").get();
-
-            assertThat(transferProcess.isSucceeded()).isFalse();
-            assertThat(transferProcess.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-                assertThat(apiErrorDetail.message()).isEqualTo("error message");
-                assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
-                assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
-                assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
-            });
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Test
-    void should_create_a_transfer_process() {
+    TransferRequest should_create_a_transfer_process_request() {
         var privateProperties = Map.of("private-key", "data-destination-type");
         var dataDestination = Map.of("type", "data-destination-type");
         var callbackAddresses = CallbackAddress.Builder.newInstance()
@@ -151,7 +81,7 @@ class TransferProcessesTest extends ContainerTestBase {
                 .authCodeId("auth-code-id")
                 .events(Arrays.asList("contract.negotiation", "transfer.process"))
                 .build();
-        var transferRequest = TransferRequest.Builder.newInstance()
+        return TransferRequest.Builder.newInstance()
                 .protocol("dataspace-protocol-http")
                 .counterPartyAddress("http://provider-address")
                 .connectorId("provider-id")
@@ -161,49 +91,11 @@ class TransferProcessesTest extends ContainerTestBase {
                 .privateProperties(privateProperties)
                 .callbackAddresses(List.of(callbackAddresses, callbackAddresses))
                 .build();
-
-        var created = transferProcesses.create(transferRequest);
-
-        assertThat(created.isSucceeded()).isTrue();
-        assertThat(created.getContent()).isNotNull();
     }
 
-    @Test
-    void should_create_a_transfer_process_async() {
-        try {
-            var privateProperties = Map.of("private-key", "data-destination-type");
-            var dataDestination = Map.of("type", "data-destination-type");
-            var callbackAddresses = CallbackAddress.Builder.newInstance()
-                    .transactional(false)
-                    .uri("http://callback/url")
-                    .authKey("auth-key")
-                    .authCodeId("auth-code-id")
-                    .events(Arrays.asList("contract.negotiation", "transfer.process"))
-                    .build();
-            var transferRequest = TransferRequest.Builder.newInstance()
-                    .protocol("dataspace-protocol-http")
-                    .counterPartyAddress("http://provider-address")
-                    .connectorId("provider-id")
-                    .contractId("contract-id")
-                    .assetId("asset-id")
-                    .dataDestination(dataDestination)
-                    .privateProperties(privateProperties)
-                    .callbackAddresses(List.of(callbackAddresses, callbackAddresses))
-                    .build();
-
-            var created = transferProcesses.createAsync(transferRequest).get();
-
-            assertThat(created.isSucceeded()).isTrue();
-            assertThat(created.getContent()).isNotNull();
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Test
-    void should_not_create_a_transfer_process_when_data_destination_is_empty() {
+    TransferRequest should_not_create_a_transfer_process_request() {
         var privateProperties = Map.of("private-key", "data-destination-type");
-        var transferRequest = TransferRequest.Builder.newInstance()
+        return TransferRequest.Builder.newInstance()
                 .protocol("dataspace-protocol-http")
                 .counterPartyAddress("http://provider-address")
                 .connectorId("provider-id")
@@ -211,210 +103,181 @@ class TransferProcessesTest extends ContainerTestBase {
                 .assetId("asset-id")
                 .privateProperties(privateProperties)
                 .build();
-
-        var created = transferProcesses.create(transferRequest);
-
-        assertThat(created.isSucceeded()).isFalse();
-        assertThat(created.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-            assertThat(apiErrorDetail.message()).isEqualTo("error message");
-            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
-            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
-            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
-        });
     }
 
-    @Test
-    void should_not_create_a_transfer_process_when_data_destination_is_empty_async() {
-        try {
-            var privateProperties = Map.of("private-key", "data-destination-type");
-            var transferRequest = TransferRequest.Builder.newInstance()
-                    .protocol("dataspace-protocol-http")
-                    .counterPartyAddress("http://provider-address")
-                    .connectorId("provider-id")
-                    .contractId("contract-id")
-                    .assetId("asset-id")
-                    .privateProperties(privateProperties)
-                    .build();
+    TerminateTransfer terminate_a_transfer_process_request(String id) {
+        return TerminateTransfer.Builder.newInstance()
+                .id(id)
+                .reason("a reason to terminate")
+                .build();
+    }
 
-            var created = transferProcesses.createAsync(transferRequest).get();
-
-            assertThat(created.isSucceeded()).isFalse();
-            assertThat(created.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-                assertThat(apiErrorDetail.message()).isEqualTo("error message");
-                assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
-                assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
-                assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
-            });
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
+    @Nested
+    class Sync {
+        @Test
+        void should_get_a_transfer_process() {
+            var transferProcess = transferProcesses.get("process-id");
+            should_get_a_transfer_process_response(transferProcess);
         }
-    }
 
-    @Test
-    void should_get_a_transfer_process_state() {
+        @Test
+        void should_not_get_a_transfer_process_when_id_is_empty() {
+            var transferProcess = transferProcesses.get("");
 
-        var state = transferProcesses.getState("process-id");
+            error_response(transferProcess);
+        }
 
-        assertThat(state.isSucceeded()).isTrue();
-        assertThat(state.getContent().state()).isNotNull().isEqualTo("STARTED");
-    }
+        @Test
+        void should_create_a_transfer_process() {
 
-    @Test
-    void should_get_a_transfer_process_state_async() {
-        try {
-            var state = transferProcesses.getStateAsync("process-id").get();
+            var created = transferProcesses.create(should_create_a_transfer_process_request());
+
+            assertThat(created.isSucceeded()).isTrue();
+            assertThat(created.getContent()).isNotNull();
+        }
+
+        @Test
+        void should_not_create_a_transfer_process_when_data_destination_is_empty() {
+
+            var created = transferProcesses.create(should_not_create_a_transfer_process_request());
+
+            error_response(created);
+        }
+
+        @Test
+        void should_get_a_transfer_process_state() {
+
+            var state = transferProcesses.getState("process-id");
 
             assertThat(state.isSucceeded()).isTrue();
             assertThat(state.getContent().state()).isNotNull().isEqualTo("STARTED");
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
         }
-    }
 
-    @Test
-    void should_not_get_a_transfer_process_state_when_id_is_empty() {
+        @Test
+        void should_not_get_a_transfer_process_state_when_id_is_empty() {
 
-        var state = transferProcesses.getState("");
+            var state = transferProcesses.getState("");
 
-        assertThat(state.isSucceeded()).isFalse();
-        assertThat(state.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-            assertThat(apiErrorDetail.message()).isEqualTo("error message");
-            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
-            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
-            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
-        });
-    }
-
-    @Test
-    void should_not_get_a_transfer_process_state_when_id_is_empty_async() {
-        try {
-            var state = transferProcesses.getStateAsync("").get();
-
-            assertThat(state.isSucceeded()).isFalse();
-            assertThat(state.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-                assertThat(apiErrorDetail.message()).isEqualTo("error message");
-                assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
-                assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
-                assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
-            });
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
+            error_response(state);
         }
-    }
 
-    @Test
-    void should_terminate_a_transfer_process() {
-        var input = TerminateTransfer.Builder.newInstance()
-                .id("process-id")
-                .reason("a reason to terminate")
-                .build();
-        var terminated = transferProcesses.terminate(input);
-
-        assertThat(terminated.isSucceeded()).isTrue();
-        assertThat(terminated.getContent()).isNotNull();
-    }
-
-    @Test
-    void should_terminate_a_transfer_process_async() {
-        try {
-            var input = TerminateTransfer.Builder.newInstance()
-                    .id("process-id")
-                    .reason("a reason to terminate")
-                    .build();
-            var terminated = transferProcesses.terminateAsync(input).get();
+        @Test
+        void should_terminate_a_transfer_process() {
+            var terminated = transferProcesses.terminate(terminate_a_transfer_process_request("process-id"));
 
             assertThat(terminated.isSucceeded()).isTrue();
             assertThat(terminated.getContent()).isNotNull();
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
         }
-    }
 
-    @Test
-    void should_not_terminate_a_transfer_process_when_id_is_empty() {
-        var input = TerminateTransfer.Builder.newInstance()
-                .id("")
-                .reason("a reason to terminate")
-                .build();
-        var terminated = transferProcesses.terminate(input);
+        @Test
+        void should_not_terminate_a_transfer_process_when_id_is_empty() {
 
-        assertThat(terminated.isSucceeded()).isFalse();
-        assertThat(terminated.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-            assertThat(apiErrorDetail.message()).isEqualTo("error message");
-            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
-            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
-            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
-        });
-    }
+            var terminated = transferProcesses.terminate(terminate_a_transfer_process_request(""));
 
-    @Test
-    void should_not_terminate_a_transfer_process_when_id_is_empty_async() {
-        try {
-            var input = TerminateTransfer.Builder.newInstance()
-                    .id("")
-                    .reason("a reason to terminate")
-                    .build();
-            var terminated = transferProcesses.terminateAsync(input).get();
-
-            assertThat(terminated.isSucceeded()).isFalse();
-            assertThat(terminated.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-                assertThat(apiErrorDetail.message()).isEqualTo("error message");
-                assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
-                assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
-                assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
-            });
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
+            error_response(terminated);
         }
-    }
 
-    @Test
-    void should_request_to_deprovision_the_transfer_process() {
-        var result = transferProcesses.deprovision("process-id");
-
-        assertThat(result.isSucceeded()).isTrue();
-        assertThat(result.getContent()).isNotNull();
-    }
-
-    @Test
-    void should_request_to_deprovision_the_transfer_process_async() {
-        try {
-            var result = transferProcesses.deprovisionAsync("process-id").get();
+        @Test
+        void should_request_to_deprovision_the_transfer_process() {
+            var result = transferProcesses.deprovision("process-id");
 
             assertThat(result.isSucceeded()).isTrue();
             assertThat(result.getContent()).isNotNull();
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
+        }
+
+        @Test
+        void should_not_request_to_deprovision_the_transfer_process_when_id_is_empty() {
+            var result = transferProcesses.deprovision("");
+
+            error_response(result);
         }
     }
 
-    @Test
-    void should_not_request_to_deprovision_the_transfer_process_when_id_is_empty() {
-        var result = transferProcesses.deprovision("");
+    @Nested
+    class Async {
+        @Test
+        void should_get_a_transfer_process_async() {
+            var transferProcess = transferProcesses.getAsync("process-id");
+            assertThat(transferProcess)
+                    .succeedsWithin(5, TimeUnit.SECONDS)
+                    .satisfies(TransferProcessesTest.this::should_get_a_transfer_process_response);
+        }
 
-        assertThat(result.isSucceeded()).isFalse();
-        assertThat(result.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-            assertThat(apiErrorDetail.message()).isEqualTo("error message");
-            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
-            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
-            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
-        });
-    }
+        @Test
+        void should_not_get_a_transfer_process_when_id_is_empty_async() {
+            var transferProcess = transferProcesses.getAsync("");
 
-    @Test
-    void should_not_request_to_deprovision_the_transfer_process_when_id_is_empty_async() {
-        try {
-            var result = transferProcesses.deprovisionAsync("").get();
+            assertThat(transferProcess)
+                    .succeedsWithin(5, TimeUnit.SECONDS)
+                    .satisfies(TransferProcessesTest.this::error_response);
+        }
 
-            assertThat(result.isSucceeded()).isFalse();
-            assertThat(result.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-                assertThat(apiErrorDetail.message()).isEqualTo("error message");
-                assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
-                assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
-                assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+        @Test
+        void should_create_a_transfer_process_async() {
+            var result = transferProcesses.createAsync(should_create_a_transfer_process_request());
+            assertThat(result).succeedsWithin(5, TimeUnit.SECONDS).satisfies(created -> {
+                assertThat(created.isSucceeded()).isTrue();
+                assertThat(created.getContent()).isNotNull();
             });
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
+        }
+
+        @Test
+        void should_not_create_a_transfer_process_when_data_destination_is_empty_async() {
+            var created = transferProcesses.createAsync(should_not_create_a_transfer_process_request());
+            assertThat(created)
+                    .succeedsWithin(5, TimeUnit.SECONDS)
+                    .satisfies(TransferProcessesTest.this::error_response);
+        }
+
+        @Test
+        void should_get_a_transfer_process_state_async() {
+            var result = transferProcesses.getStateAsync("process-id");
+            assertThat(result).succeedsWithin(5, TimeUnit.SECONDS).satisfies(state -> {
+                assertThat(state.isSucceeded()).isTrue();
+                assertThat(state.getContent().state()).isNotNull().isEqualTo("STARTED");
+            });
+        }
+
+        @Test
+        void should_not_get_a_transfer_process_state_when_id_is_empty_async() {
+            var state = transferProcesses.getStateAsync("");
+            assertThat(state).succeedsWithin(5, TimeUnit.SECONDS).satisfies(TransferProcessesTest.this::error_response);
+        }
+
+        @Test
+        void should_terminate_a_transfer_process_async() {
+
+            var result = transferProcesses.terminateAsync(terminate_a_transfer_process_request("process-id"));
+            assertThat(result).succeedsWithin(5, TimeUnit.SECONDS).satisfies(terminated -> {
+                assertThat(terminated.isSucceeded()).isTrue();
+                assertThat(terminated.getContent()).isNotNull();
+            });
+        }
+
+        @Test
+        void should_not_terminate_a_transfer_process_when_id_is_empty_async() {
+
+            var terminated = transferProcesses.terminateAsync(terminate_a_transfer_process_request(""));
+            assertThat(terminated)
+                    .succeedsWithin(5, TimeUnit.SECONDS)
+                    .satisfies(TransferProcessesTest.this::error_response);
+        }
+
+        @Test
+        void should_request_to_deprovision_the_transfer_process_async() {
+            var result = transferProcesses.deprovisionAsync("process-id");
+            assertThat(result).succeedsWithin(5, TimeUnit.SECONDS).satisfies(deprovision -> {
+                assertThat(deprovision.isSucceeded()).isTrue();
+                assertThat(deprovision.getContent()).isNotNull();
+            });
+        }
+
+        @Test
+        void should_not_request_to_deprovision_the_transfer_process_when_id_is_empty_async() {
+            var result = transferProcesses.deprovisionAsync("");
+            assertThat(result)
+                    .succeedsWithin(5, TimeUnit.SECONDS)
+                    .satisfies(TransferProcessesTest.this::error_response);
         }
     }
 }
