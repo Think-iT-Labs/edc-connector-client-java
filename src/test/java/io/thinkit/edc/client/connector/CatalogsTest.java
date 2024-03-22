@@ -5,13 +5,12 @@ import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.thinkit.edc.client.connector.model.CatalogRequest;
-import io.thinkit.edc.client.connector.model.DatasetRequest;
-import io.thinkit.edc.client.connector.model.QuerySpec;
+import io.thinkit.edc.client.connector.model.*;
 import io.thinkit.edc.client.connector.services.Catalogs;
 import java.net.http.HttpClient;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class CatalogsTest extends ContainerTestBase {
@@ -28,8 +27,7 @@ class CatalogsTest extends ContainerTestBase {
         catalogs = client.catalogs();
     }
 
-    @Test
-    void should_get_catalog() {
+    CatalogRequest should_get_catalog_request() {
         var query = QuerySpec.Builder.newInstance()
                 .offset(0)
                 .limit(50)
@@ -37,14 +35,14 @@ class CatalogsTest extends ContainerTestBase {
                 .sortField("fieldName")
                 .filterExpression(emptyList())
                 .build();
-        CatalogRequest input = CatalogRequest.Builder.newInstance()
+        return CatalogRequest.Builder.newInstance()
                 .protocol("dataspace-protocol-http")
                 .counterPartyAddress("http://provider-address")
                 .querySpec(query)
                 .build();
+    }
 
-        var result = catalogs.request(input);
-
+    void should_get_catalog_response(Result<Catalog> result) {
         assertThat(result.isSucceeded()).isTrue();
         assertThat(result.getContent().id()).isNotBlank();
         assertThat(result.getContent().participantId()).isNotNull().isEqualTo("urn:connector:provider");
@@ -64,56 +62,15 @@ class CatalogsTest extends ContainerTestBase {
         });
     }
 
-    @Test
-    void should_get_catalog_async() {
-        try {
-            var query = QuerySpec.Builder.newInstance()
-                    .offset(0)
-                    .limit(50)
-                    .sortOrder("DESC")
-                    .sortField("fieldName")
-                    .filterExpression(emptyList())
-                    .build();
-            CatalogRequest input = CatalogRequest.Builder.newInstance()
-                    .protocol("dataspace-protocol-http")
-                    .counterPartyAddress("http://provider-address")
-                    .querySpec(query)
-                    .build();
-
-            var result = catalogs.requestAsync(input).get();
-
-            assertThat(result.isSucceeded()).isTrue();
-            assertThat(result.getContent().id()).isNotBlank();
-            assertThat(result.getContent().participantId()).isNotNull().isEqualTo("urn:connector:provider");
-            assertThat(result.getContent().service()).isNotNull().satisfies(service -> {
-                assertThat(service.endpointUrl()).isEqualTo("http://localhost:16806/protocol");
-                assertThat(service.terms()).isEqualTo("connector");
-            });
-            assertThat(result.getContent().dataset()).isNotNull().satisfies(dataset -> {
-                assertThat(dataset.description()).isEqualTo("description");
-                assertThat(dataset.hasPolicy()).isNotNull().satisfies(policy -> assertThat(
-                                policy.getList(ODRL_NAMESPACE + "permission").size())
-                        .isGreaterThan(0));
-                assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {
-                    assertThat(distribution.accessService()).isNotBlank();
-                    assertThat(distribution.format().getString(ID)).isEqualTo("HttpData");
-                });
-            });
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Test
-    void should_get_dataset() {
-        DatasetRequest input = DatasetRequest.Builder.newInstance()
+    DatasetRequest should_get_dataset_request() {
+        return DatasetRequest.Builder.newInstance()
                 .id("dataset-id")
                 .protocol("dataspace-protocol-http")
                 .counterPartyAddress("http://provider-address")
                 .build();
+    }
 
-        var result = catalogs.requestDataset(input);
-
+    void should_get_dataset_response(Result<Dataset> result) {
         assertThat(result.isSucceeded()).isTrue();
         assertThat(result.getContent()).isNotNull().satisfies(dataset -> {
             assertThat(dataset.description()).isEqualTo("description");
@@ -127,30 +84,39 @@ class CatalogsTest extends ContainerTestBase {
         });
     }
 
-    @Test
-    void should_get_dataset_async() {
-        try {
-            DatasetRequest input = DatasetRequest.Builder.newInstance()
-                    .id("dataset-id")
-                    .protocol("dataspace-protocol-http")
-                    .counterPartyAddress("http://provider-address")
-                    .build();
+    @Nested
+    class Sync {
+        @Test
+        void should_get_catalog() {
+            var result = catalogs.request(should_get_catalog_request());
+            should_get_catalog_response(result);
+        }
 
-            var result = catalogs.requestDatasetAsync(input).get();
+        @Test
+        void should_get_dataset() {
 
-            assertThat(result.isSucceeded()).isTrue();
-            assertThat(result.getContent()).isNotNull().satisfies(dataset -> {
-                assertThat(dataset.description()).isEqualTo("description");
-                assertThat(dataset.hasPolicy()).isNotNull().satisfies(policy -> assertThat(
-                                policy.getList(ODRL_NAMESPACE + "permission").size())
-                        .isGreaterThan(0));
-                assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {
-                    assertThat(distribution.accessService()).isNotBlank();
-                    assertThat(distribution.format().getString(ID)).isEqualTo("HttpData");
-                });
-            });
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
+            var result = catalogs.requestDataset(should_get_dataset_request());
+            should_get_dataset_response(result);
+        }
+    }
+
+    @Nested
+    class Async {
+        @Test
+        void should_get_catalog_async() {
+            var result = catalogs.requestAsync(should_get_catalog_request());
+            assertThat(result)
+                    .succeedsWithin(5, TimeUnit.SECONDS)
+                    .satisfies(CatalogsTest.this::should_get_catalog_response);
+        }
+
+        @Test
+        void should_get_dataset_async() {
+
+            var result = catalogs.requestDatasetAsync(should_get_dataset_request());
+            assertThat(result)
+                    .succeedsWithin(5, TimeUnit.SECONDS)
+                    .satisfies(CatalogsTest.this::should_get_dataset_response);
         }
     }
 }
