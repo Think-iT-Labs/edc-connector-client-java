@@ -4,7 +4,11 @@ import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
 import static jakarta.json.Json.createObjectBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.thinkit.edc.client.connector.model.*;
+import io.thinkit.edc.client.connector.model.CallbackAddress;
+import io.thinkit.edc.client.connector.model.ContractRequest;
+import io.thinkit.edc.client.connector.model.Policy;
+import io.thinkit.edc.client.connector.model.QuerySpec;
+import io.thinkit.edc.client.connector.model.TerminateNegotiation;
 import io.thinkit.edc.client.connector.services.ContractNegotiations;
 import jakarta.json.Json;
 import java.net.http.HttpClient;
@@ -179,7 +183,6 @@ class ContractNegotiationsTest extends ContainerTestBase {
         var contractNegotiation = ContractRequest.Builder.newInstance()
                 .counterPartyAddress("http://provider-address")
                 .protocol("dataspace-protocol-http")
-                .providerId("provider-id")
                 .policy(policy)
                 .callbackAddresses(List.of(callbackAddresses, callbackAddresses))
                 .build();
@@ -210,7 +213,6 @@ class ContractNegotiationsTest extends ContainerTestBase {
             var contractNegotiation = ContractRequest.Builder.newInstance()
                     .counterPartyAddress("http://provider-address")
                     .protocol("dataspace-protocol-http")
-                    .providerId("provider-id")
                     .policy(policy)
                     .callbackAddresses(List.of(callbackAddresses, callbackAddresses))
                     .build();
@@ -218,46 +220,6 @@ class ContractNegotiationsTest extends ContainerTestBase {
 
             assertThat(created.isSucceeded()).isTrue();
             assertThat(created.getContent()).isNotNull();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Test
-    void should_not_create_a_contract_negotiation_when_provider_id_is_empty() {
-
-        var contractNegotiation = ContractRequest.Builder.newInstance()
-                .counterPartyAddress("http://provider-address")
-                .protocol("dataspace-protocol-http")
-                .build();
-
-        var created = contractNegotiations.create(contractNegotiation);
-
-        assertThat(created.isSucceeded()).isFalse();
-        assertThat(created.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-            assertThat(apiErrorDetail.message()).isEqualTo("error message");
-            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
-            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
-            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
-        });
-    }
-
-    @Test
-    void should_not_create_a_contract_negotiation_when_provider_id_is_empty_async() {
-        try {
-            var contractNegotiation = ContractRequest.Builder.newInstance()
-                    .counterPartyAddress("http://provider-address")
-                    .protocol("dataspace-protocol-http")
-                    .build();
-            var created = contractNegotiations.createAsync(contractNegotiation).get();
-
-            assertThat(created.isSucceeded()).isFalse();
-            assertThat(created.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-                assertThat(apiErrorDetail.message()).isEqualTo("error message");
-                assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
-                assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
-                assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
-            });
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }

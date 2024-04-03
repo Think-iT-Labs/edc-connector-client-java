@@ -1,6 +1,8 @@
 package io.thinkit.edc.client.connector.model;
 
-import static io.thinkit.edc.client.connector.utils.Constants.*;
+import static io.thinkit.edc.client.connector.utils.Constants.EDC_NAMESPACE;
+import static io.thinkit.edc.client.connector.utils.Constants.TYPE;
+import static io.thinkit.edc.client.connector.utils.Constants.VALUE;
 import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
 import static jakarta.json.stream.JsonCollectors.toJsonArray;
@@ -28,10 +30,6 @@ public class ContractRequest extends JsonLdObject {
 
     public String protocol() {
         return stringValue(CONTRACT_REQUEST_PROTOCOL);
-    }
-
-    public String providerId() {
-        return stringValue(CONTRACT_REQUEST_PROVIDER_ID);
     }
 
     public Policy policy() {
@@ -65,13 +63,6 @@ public class ContractRequest extends JsonLdObject {
             builder.add(
                     CONTRACT_REQUEST_PROTOCOL,
                     createArrayBuilder().add(createObjectBuilder().add(VALUE, protocol)));
-            return this;
-        }
-
-        public ContractRequest.Builder providerId(String providerId) {
-            builder.add(
-                    CONTRACT_REQUEST_PROVIDER_ID,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, providerId)));
             return this;
         }
 

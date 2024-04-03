@@ -1,6 +1,5 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.utils.Constants.ID;
 import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +36,7 @@ class CatalogsTest extends ContainerTestBase {
                 .sortField("fieldName")
                 .filterExpression(emptyList())
                 .build();
-        CatalogRequest input = CatalogRequest.Builder.newInstance()
+        var input = CatalogRequest.Builder.newInstance()
                 .protocol("dataspace-protocol-http")
                 .counterPartyAddress("http://provider-address")
                 .querySpec(query)
@@ -59,7 +58,7 @@ class CatalogsTest extends ContainerTestBase {
                     .isGreaterThan(0));
             assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {
                 assertThat(distribution.accessService()).isNotBlank();
-                assertThat(distribution.format().getString(ID)).isEqualTo("HttpData");
+                assertThat(distribution.format()).isEqualTo("HttpData");
             });
         });
     }
@@ -74,7 +73,7 @@ class CatalogsTest extends ContainerTestBase {
                     .sortField("fieldName")
                     .filterExpression(emptyList())
                     .build();
-            CatalogRequest input = CatalogRequest.Builder.newInstance()
+            var input = CatalogRequest.Builder.newInstance()
                     .protocol("dataspace-protocol-http")
                     .counterPartyAddress("http://provider-address")
                     .querySpec(query)
@@ -96,7 +95,7 @@ class CatalogsTest extends ContainerTestBase {
                         .isGreaterThan(0));
                 assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {
                     assertThat(distribution.accessService()).isNotBlank();
-                    assertThat(distribution.format().getString(ID)).isEqualTo("HttpData");
+                    assertThat(distribution.format()).isEqualTo("HttpData");
                 });
             });
         } catch (ExecutionException | InterruptedException e) {
@@ -106,7 +105,7 @@ class CatalogsTest extends ContainerTestBase {
 
     @Test
     void should_get_dataset() {
-        DatasetRequest input = DatasetRequest.Builder.newInstance()
+        var input = DatasetRequest.Builder.newInstance()
                 .id("dataset-id")
                 .protocol("dataspace-protocol-http")
                 .counterPartyAddress("http://provider-address")
@@ -122,7 +121,7 @@ class CatalogsTest extends ContainerTestBase {
                     .isGreaterThan(0));
             assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {
                 assertThat(distribution.accessService()).isNotBlank();
-                assertThat(distribution.format().getString(ID)).isEqualTo("HttpData");
+                assertThat(distribution.format()).isEqualTo("HttpData");
             });
         });
     }
@@ -130,7 +129,7 @@ class CatalogsTest extends ContainerTestBase {
     @Test
     void should_get_dataset_async() {
         try {
-            DatasetRequest input = DatasetRequest.Builder.newInstance()
+            var input = DatasetRequest.Builder.newInstance()
                     .id("dataset-id")
                     .protocol("dataspace-protocol-http")
                     .counterPartyAddress("http://provider-address")
@@ -146,7 +145,7 @@ class CatalogsTest extends ContainerTestBase {
                         .isGreaterThan(0));
                 assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {
                     assertThat(distribution.accessService()).isNotBlank();
-                    assertThat(distribution.format().getString(ID)).isEqualTo("HttpData");
+                    assertThat(distribution.format()).isEqualTo("HttpData");
                 });
             });
         } catch (ExecutionException | InterruptedException e) {
