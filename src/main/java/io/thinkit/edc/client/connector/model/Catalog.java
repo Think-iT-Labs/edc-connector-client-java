@@ -13,7 +13,7 @@ public class Catalog extends JsonLdObject {
     private static final String TYPE_CATALOG = EDC_NAMESPACE + "Catalog";
     private static final String CATALOG_DATASET = DCAT_NAMESPACE + "dataset";
     private static final String CATALOG_SERVICE = DCAT_NAMESPACE + "service";
-    private static final String CATALOG_PARTICIPANT_ID = EDC_NAMESPACE + "participantId";
+    private static final String CATALOG_PARTICIPANT_ID = DSCPACE_NAMESPACE + "participantId";
 
     private Catalog(JsonObject raw) {
         super(raw);

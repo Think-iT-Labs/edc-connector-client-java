@@ -17,7 +17,7 @@ public class Distribution extends JsonLdObject {
         return stringValue(DISTRIBUTION_ACCESS_SERVICE);
     }
 
-    public JsonObject format() {
-        return object(DISTRIBUTION_FORMAT);
+    public String format() {
+        return object(DISTRIBUTION_FORMAT).getString(ID);
     }
 }
