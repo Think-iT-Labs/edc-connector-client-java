@@ -57,7 +57,7 @@ class CatalogsTest extends ContainerTestBase {
                     .isGreaterThan(0));
             assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {
                 assertThat(distribution.accessService()).isNotBlank();
-                assertThat(distribution.format().getString(ID)).isEqualTo("HttpData");
+                assertThat(distribution.format()).isEqualTo("HttpData");
             });
         });
     }
@@ -79,7 +79,7 @@ class CatalogsTest extends ContainerTestBase {
                     .isGreaterThan(0));
             assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {
                 assertThat(distribution.accessService()).isNotBlank();
-                assertThat(distribution.format().getString(ID)).isEqualTo("HttpData");
+                assertThat(distribution.format()).isEqualTo("HttpData");
             });
         });
     }

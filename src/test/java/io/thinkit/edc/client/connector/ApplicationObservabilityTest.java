@@ -8,9 +8,10 @@ import io.thinkit.edc.client.connector.services.ApplicationObservability;
 import java.net.http.HttpClient;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
+@Disabled // will be tackled in https://github.com/Think-iT-Labs/edc-connector-client-java/issues/125
 class ApplicationObservabilityTest extends ContainerTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();

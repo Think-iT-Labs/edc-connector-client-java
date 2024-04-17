@@ -102,16 +102,8 @@ class ContractNegotiationsTest extends ContainerTestBase {
         return ContractRequest.Builder.newInstance()
                 .counterPartyAddress("http://provider-address")
                 .protocol("dataspace-protocol-http")
-                .providerId("provider-id")
                 .policy(policy)
                 .callbackAddresses(List.of(callbackAddresses, callbackAddresses))
-                .build();
-    }
-
-    ContractRequest should_not_create_a_contract_negotiation_request() {
-        return ContractRequest.Builder.newInstance()
-                .counterPartyAddress("http://provider-address")
-                .protocol("dataspace-protocol-http")
                 .build();
     }
 
@@ -207,13 +199,6 @@ class ContractNegotiationsTest extends ContainerTestBase {
         }
 
         @Test
-        void should_not_create_a_contract_negotiation_when_provider_id_is_empty() {
-
-            var created = contractNegotiations.create(should_not_create_a_contract_negotiation_request());
-            error_response(created);
-        }
-
-        @Test
         void should_get_a_contract_negotiation_attached_agreement() {
             var contractAgreement = contractNegotiations.getAgreement("negotiation-id");
             should_get_a_contract_agreement_response(contractAgreement);
@@ -299,15 +284,6 @@ class ContractNegotiationsTest extends ContainerTestBase {
                 assertThat(created.isSucceeded()).isTrue();
                 assertThat(created.getContent()).isNotNull();
             });
-        }
-
-        @Test
-        void should_not_create_a_contract_negotiation_when_provider_id_is_empty_async() {
-
-            var created = contractNegotiations.createAsync(should_not_create_a_contract_negotiation_request());
-            assertThat(created)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(ContractNegotiationsTest.this::error_response);
         }
 
         @Test
