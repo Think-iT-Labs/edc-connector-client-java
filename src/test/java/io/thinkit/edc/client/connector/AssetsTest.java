@@ -30,7 +30,143 @@ class AssetsTest extends ContainerTestBase {
         assets = client.assets();
     }
 
-    <T> void error_response(Result<T> error) {
+    @Nested
+    class Sync {
+        @Test
+        void should_get_an_asset() {
+            var asset = assets.get("123");
+            assertThat(asset).satisfies(AssetsTest.this::shouldGetAnAssetResponse);
+        }
+
+        @Test
+        void should_create_an_asset() {
+
+            var created = assets.create(shouldCreateAnAssetRequest());
+
+            assertThat(created.isSucceeded()).isTrue();
+            assertThat(created.getContent()).isNotNull();
+        }
+
+        @Test
+        void should_not_create_an_asset_when_data_address_is_missing() {
+
+            var created = assets.create(shouldNotCreateAnAssetRequest());
+            assertThat(created).satisfies(AssetsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_update_an_asset() {
+            var created = assets.update(shouldCreateAnAssetRequest());
+
+            assertThat(created.isSucceeded()).isTrue();
+        }
+
+        @Test
+        void should_not_update_an_asset_when_id_is_empty() {
+
+            var created = assets.update(shouldNotCreateAnAssetRequest());
+            assertThat(created).satisfies(AssetsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_delete_an_asset() {
+            var deleted = assets.delete("assetId");
+
+            assertThat(deleted.isSucceeded()).isTrue();
+        }
+
+        @Test
+        void should_not_delete_an_asset_when_id_is_empty() {
+            var deleted = assets.delete("");
+            assertThat(deleted).satisfies(AssetsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_get_assets() {
+
+            var assetsList = assets.request(shouldGetAssetsQuery());
+            assertThat(assetsList).satisfies(AssetsTest.this::shouldGetAssetsResponse);
+        }
+
+        @Test
+        void should_not_get_assets_when_sort_schema_is_not_as_expected() {
+            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+
+            var assetsList = assets.request(input);
+            assertThat(assetsList).satisfies(AssetsTest.this::errorResponse);
+        }
+    }
+
+    @Nested
+    class Async {
+        @Test
+        void should_get_an_asset_async() {
+            var result = assets.getAsync("123");
+            assertThat(result)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(AssetsTest.this::shouldGetAnAssetResponse);
+        }
+
+        @Test
+        void should_create_an_asset_async() {
+
+            var result = assets.createAsync(shouldCreateAnAssetRequest());
+            assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(created -> {
+                assertThat(created.isSucceeded()).isTrue();
+                assertThat(created.getContent()).isNotNull();
+            });
+        }
+
+        @Test
+        void should_not_create_an_asset_when_data_address_is_missing_async() {
+            var result = assets.createAsync(shouldNotCreateAnAssetRequest());
+            assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(AssetsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_update_an_asset_async() {
+
+            var result = assets.updateAsync(shouldCreateAnAssetRequest());
+            assertThat(result).succeedsWithin(5, TimeUnit.SECONDS).matches(Result::isSucceeded);
+        }
+
+        @Test
+        void should_not_update_an_asset_when_id_is_empty_async() {
+
+            var result = assets.updateAsync(shouldNotCreateAnAssetRequest());
+            assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(AssetsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_delete_an_asset_async() {
+
+            var result = assets.deleteAsync("assetId");
+            assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).matches(Result::isSucceeded);
+        }
+
+        @Test
+        void should_not_delete_an_asset_when_id_is_empty_async() {
+            var result = assets.deleteAsync("");
+            assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(AssetsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_get_assets_async() {
+            var result = assets.requestAsync(shouldGetAssetsQuery());
+            assertThat(result)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(AssetsTest.this::shouldGetAssetsResponse);
+        }
+
+        @Test
+        void should_not_get_assets_when_sort_schema_is_not_as_expected_async() {
+            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var result = assets.requestAsync(input);
+            assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(AssetsTest.this::errorResponse);
+        }
+    }
+
+    private <T> void errorResponse(Result<T> error) {
         assertThat(error.isSucceeded()).isFalse();
         assertThat(error.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
@@ -40,7 +176,7 @@ class AssetsTest extends ContainerTestBase {
         });
     }
 
-    void should_get_an_asset_response(Result<Asset> asset) {
+    private void shouldGetAnAssetResponse(Result<Asset> asset) {
         assertThat(asset.getContent().id()).isNotBlank();
         assertThat(asset.getContent().properties()).isNotNull().satisfies(properties -> {
             assertThat(properties.size()).isGreaterThan(0);
@@ -62,7 +198,7 @@ class AssetsTest extends ContainerTestBase {
         assertThat(asset.getContent().createdAt()).isGreaterThan(0);
     }
 
-    void should_get_assets_response(Result<List<Asset>> assetsList) {
+    private void shouldGetAssetsResponse(Result<List<Asset>> assetsList) {
         assertThat(assetsList.isSucceeded()).isTrue();
         assertThat(assetsList.getContent()).isNotNull().first().satisfies(asset -> {
             assertThat(asset.id()).isNotBlank();
@@ -87,7 +223,7 @@ class AssetsTest extends ContainerTestBase {
         });
     }
 
-    Asset should_create_an_asset_request() {
+    private Asset shouldCreateAnAssetRequest() {
         var properties = Map.of("key", Map.of("value", "value"));
         var privateProperties = Map.of("private-key", Map.of("private-value", "private-value"));
         var dataAddress = Map.of("type", "data-address-type");
@@ -100,10 +236,9 @@ class AssetsTest extends ContainerTestBase {
                 .build();
     }
 
-    Asset should_not_create_an_asset_request() {
+    private Asset shouldNotCreateAnAssetRequest() {
         var properties = Map.of("key", Map.of("value", "value"));
         var privateProperties = Map.of("private-key", Map.of("private-value", "private-value"));
-        var dataAddress = Map.of("type", "data-address-type");
 
         return Asset.Builder.newInstance()
                 .id("")
@@ -112,7 +247,7 @@ class AssetsTest extends ContainerTestBase {
                 .build();
     }
 
-    QuerySpec should_get_assets_query() {
+    private QuerySpec shouldGetAssetsQuery() {
         return QuerySpec.Builder.newInstance()
                 .offset(5)
                 .limit(10)
@@ -120,146 +255,5 @@ class AssetsTest extends ContainerTestBase {
                 .sortField("fieldName")
                 .filterExpression(emptyList())
                 .build();
-    }
-
-    @Nested
-    class Sync {
-        @Test
-        void should_get_an_asset() {
-            var asset = assets.get("123");
-
-            should_get_an_asset_response(asset);
-        }
-
-        @Test
-        void should_create_an_asset() {
-
-            var created = assets.create(should_create_an_asset_request());
-
-            assertThat(created.isSucceeded()).isTrue();
-            assertThat(created.getContent()).isNotNull();
-        }
-
-        @Test
-        void should_not_create_an_asset_when_data_address_is_missing() {
-
-            var created = assets.create(should_not_create_an_asset_request());
-            error_response(created);
-        }
-
-        @Test
-        void should_update_an_asset() {
-            var created = assets.update(should_create_an_asset_request());
-
-            assertThat(created.isSucceeded()).isTrue();
-        }
-
-        @Test
-        void should_not_update_an_asset_when_id_is_empty() {
-
-            var created = assets.update(should_not_create_an_asset_request());
-            error_response(created);
-        }
-
-        @Test
-        void should_delete_an_asset() {
-            var deleted = assets.delete("assetId");
-
-            assertThat(deleted.isSucceeded()).isTrue();
-        }
-
-        @Test
-        void should_not_delete_an_asset_when_id_is_empty() {
-            var deleted = assets.delete("");
-            error_response(deleted);
-        }
-
-        @Test
-        void should_get_assets() {
-
-            var assetsList = assets.request(should_get_assets_query());
-            should_get_assets_response(assetsList);
-        }
-
-        @Test
-        void should_not_get_assets_when_sort_schema_is_not_as_expected() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
-
-            var assetsList = assets.request(input);
-            error_response(assetsList);
-        }
-    }
-
-    @Nested
-    class Async {
-        @Test
-        void should_get_an_asset_async() {
-            var result = assets.getAsync("123");
-            assertThat(result)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(AssetsTest.this::should_get_an_asset_response);
-        }
-
-        @Test
-        void should_create_an_asset_async() {
-
-            var result = assets.createAsync(should_create_an_asset_request());
-            assertThat(result).succeedsWithin(5, TimeUnit.SECONDS).satisfies(created -> {
-                assertThat(created.isSucceeded()).isTrue();
-                assertThat(created.getContent()).isNotNull();
-            });
-        }
-
-        @Test
-        void should_not_create_an_asset_when_data_address_is_missing_async() {
-            var result = assets.createAsync(should_not_create_an_asset_request());
-            assertThat(result).succeedsWithin(5, TimeUnit.SECONDS).satisfies(AssetsTest.this::error_response);
-        }
-
-        @Test
-        void should_update_an_asset_async() {
-
-            var result = assets.updateAsync(should_create_an_asset_request());
-            assertThat(result).succeedsWithin(5, TimeUnit.SECONDS).satisfies(created -> {
-                assertThat(created.isSucceeded()).isTrue();
-            });
-        }
-
-        @Test
-        void should_not_update_an_asset_when_id_is_empty_async() {
-
-            var result = assets.updateAsync(should_not_create_an_asset_request());
-            assertThat(result).succeedsWithin(5, TimeUnit.SECONDS).satisfies(AssetsTest.this::error_response);
-        }
-
-        @Test
-        void should_delete_an_asset_async() {
-
-            var result = assets.deleteAsync("assetId");
-            assertThat(result).succeedsWithin(5, TimeUnit.SECONDS).satisfies(deleted -> {
-                assertThat(deleted.isSucceeded()).isTrue();
-            });
-        }
-
-        @Test
-        void should_not_delete_an_asset_when_id_is_empty_async() {
-            var result = assets.deleteAsync("");
-            assertThat(result).succeedsWithin(5, TimeUnit.SECONDS).satisfies(AssetsTest.this::error_response);
-        }
-
-        @Test
-        void should_get_assets_async() {
-            var result = assets.requestAsync(should_get_assets_query());
-            assertThat(result)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(AssetsTest.this::should_get_assets_response);
-        }
-
-        @Test
-        void should_not_get_assets_when_sort_schema_is_not_as_expected_async() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
-            var result = assets.requestAsync(input);
-            assertThat(result).succeedsWithin(5, TimeUnit.SECONDS).satisfies(AssetsTest.this::error_response);
-        }
     }
 }

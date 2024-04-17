@@ -1,6 +1,5 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.ContractNegotiationsTest.should_get_a_contract_negotiation_response;
 import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,7 +28,103 @@ public class ContractAgreementsTest extends ContainerTestBase {
         contractAgreements = client.contractAgreements();
     }
 
-    <T> void error_response(Result<T> error) {
+    @Nested
+    class Sync {
+        @Test
+        void should_get_a_contract_agreement() {
+            var contractAgreement = contractAgreements.get("negotiation-id");
+            assertThat(contractAgreement).satisfies(ContractAgreementsTest::shouldGetAContractAgreementResponse);
+        }
+
+        @Test
+        void should_not_get_a_contract_agreement_when_id_is_empty() {
+            var contractAgreement = contractAgreements.get("");
+            assertThat(contractAgreement).satisfies(ContractAgreementsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_get_a_contract_agreement_negotiation() {
+            var contractNegotiation = contractAgreements.getNegotiation("agreement-id");
+            assertThat(contractNegotiation).satisfies(ContractNegotiationsTest::shouldGetAContractNegotiationResponse);
+        }
+
+        @Test
+        void should_not_get_a_contract_agreement_negotiation_when_id_is_empty() {
+            var contractNegotiation = contractAgreements.getNegotiation("");
+            assertThat(contractNegotiation).satisfies(ContractAgreementsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_get_a_contract_agreements() {
+            var contractAgreementList = contractAgreements.request(shouldGetAContractAgreementsQuery());
+            assertThat(contractAgreementList)
+                    .satisfies(ContractAgreementsTest.this::shouldGetAContractAgreementsResponse);
+        }
+
+        @Test
+        void should_not_get_contract_agreements() {
+            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+
+            var result = contractAgreements.request(input);
+            assertThat(result).satisfies(ContractAgreementsTest.this::errorResponse);
+        }
+    }
+
+    @Nested
+    class Async {
+        @Test
+        void should_get_a_contract_agreement_async() {
+            var contractAgreement = contractAgreements.getAsync("negotiation-id");
+            assertThat(contractAgreement)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(ContractAgreementsTest::shouldGetAContractAgreementResponse);
+        }
+
+        @Test
+        void should_not_get_a_contract_agreement_when_id_is_empty_async() {
+            var result = contractAgreements.getAsync("");
+            assertThat(result)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(ContractAgreementsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_get_a_contract_agreement_negotiation_async() {
+            var contractNegotiation = contractAgreements.getNegotiationAsync("agreement-id");
+
+            assertThat(contractNegotiation)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(ContractNegotiationsTest::shouldGetAContractNegotiationResponse);
+        }
+
+        @Test
+        void should_not_get_a_contract_agreement_negotiation_when_id_is_empty_async() {
+            var contractNegotiation = contractAgreements.getNegotiationAsync("");
+            assertThat(contractNegotiation)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(ContractAgreementsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_get_a_contract_agreements_async() {
+
+            var contractAgreementList = contractAgreements.requestAsync(shouldGetAContractAgreementsQuery());
+            assertThat(contractAgreementList)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(ContractAgreementsTest.this::shouldGetAContractAgreementsResponse);
+        }
+
+        @Test
+        void should_not_get_contract_agreements_async() {
+            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var result = contractAgreements.requestAsync(input);
+            assertThat(result)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(ContractAgreementsTest.this::errorResponse);
+        }
+    }
+
+    private <T> void errorResponse(Result<T> error) {
         assertThat(error.isSucceeded()).isFalse();
         assertThat(error.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
@@ -39,7 +134,7 @@ public class ContractAgreementsTest extends ContainerTestBase {
         });
     }
 
-    protected static void should_get_a_contract_agreement_response(Result<ContractAgreement> contractAgreement) {
+    protected static void shouldGetAContractAgreementResponse(Result<ContractAgreement> contractAgreement) {
 
         assertThat(contractAgreement.isSucceeded()).isTrue();
         assertThat(contractAgreement.getContent().id()).isNotBlank();
@@ -52,7 +147,7 @@ public class ContractAgreementsTest extends ContainerTestBase {
                 .isGreaterThan(0));
     }
 
-    QuerySpec should_get_a_contract_agreements_query() {
+    private QuerySpec shouldGetAContractAgreementsQuery() {
         return QuerySpec.Builder.newInstance()
                 .offset(5)
                 .limit(10)
@@ -61,7 +156,7 @@ public class ContractAgreementsTest extends ContainerTestBase {
                 .build();
     }
 
-    void should_get_a_contract_agreements_response(Result<List<ContractAgreement>> contractAgreementList) {
+    private void shouldGetAContractAgreementsResponse(Result<List<ContractAgreement>> contractAgreementList) {
         assertThat(contractAgreementList.isSucceeded()).isTrue();
         assertThat(contractAgreementList.getContent()).isNotNull().first().satisfies(contractAgreement -> {
             assertThat(contractAgreement.id()).isNotBlank();
@@ -73,100 +168,5 @@ public class ContractAgreementsTest extends ContainerTestBase {
                             policy.getList(ODRL_NAMESPACE + "permission").size())
                     .isGreaterThan(0));
         });
-    }
-
-    @Nested
-    class Sync {
-        @Test
-        void should_get_a_contract_agreement() {
-            var contractAgreement = contractAgreements.get("negotiation-id");
-            should_get_a_contract_agreement_response(contractAgreement);
-        }
-
-        @Test
-        void should_not_get_a_contract_agreement_when_id_is_empty() {
-            var contractAgreement = contractAgreements.get("");
-            error_response(contractAgreement);
-        }
-
-        @Test
-        void should_get_a_contract_agreement_negotiation() {
-            var contractNegotiation = contractAgreements.getNegotiation("agreement-id");
-            should_get_a_contract_negotiation_response(contractNegotiation);
-        }
-
-        @Test
-        void should_not_get_a_contract_agreement_negotiation_when_id_is_empty() {
-            var contractNegotiation = contractAgreements.getNegotiation("");
-            error_response(contractNegotiation);
-        }
-
-        @Test
-        void should_get_a_contract_agreements() {
-            var contractAgreementList = contractAgreements.request(should_get_a_contract_agreements_query());
-            should_get_a_contract_agreements_response(contractAgreementList);
-        }
-
-        @Test
-        void should_not_get_contract_agreements() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
-
-            var result = contractAgreements.request(input);
-            error_response(result);
-        }
-    }
-
-    @Nested
-    class Async {
-        @Test
-        void should_get_a_contract_agreement_async() {
-            var contractAgreement = contractAgreements.getAsync("negotiation-id");
-            assertThat(contractAgreement)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(ContractAgreementsTest::should_get_a_contract_agreement_response);
-        }
-
-        @Test
-        void should_not_get_a_contract_agreement_when_id_is_empty_async() {
-            var result = contractAgreements.getAsync("");
-            assertThat(result)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(ContractAgreementsTest.this::error_response);
-        }
-
-        @Test
-        void should_get_a_contract_agreement_negotiation_async() {
-            var contractNegotiation = contractAgreements.getNegotiationAsync("agreement-id");
-
-            assertThat(contractNegotiation)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(ContractNegotiationsTest::should_get_a_contract_negotiation_response);
-        }
-
-        @Test
-        void should_not_get_a_contract_agreement_negotiation_when_id_is_empty_async() {
-            var contractNegotiation = contractAgreements.getNegotiationAsync("");
-            assertThat(contractNegotiation)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(ContractAgreementsTest.this::error_response);
-        }
-
-        @Test
-        void should_get_a_contract_agreements_async() {
-
-            var contractAgreementList = contractAgreements.requestAsync(should_get_a_contract_agreements_query());
-            assertThat(contractAgreementList)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(ContractAgreementsTest.this::should_get_a_contract_agreements_response);
-        }
-
-        @Test
-        void should_not_get_contract_agreements_async() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
-            var result = contractAgreements.requestAsync(input);
-            assertThat(result)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(ContractAgreementsTest.this::error_response);
-        }
     }
 }

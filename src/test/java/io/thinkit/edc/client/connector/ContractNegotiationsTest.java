@@ -1,6 +1,5 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.ContractAgreementsTest.should_get_a_contract_agreement_response;
 import static jakarta.json.Json.createObjectBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,7 +28,188 @@ class ContractNegotiationsTest extends ContainerTestBase {
         contractNegotiations = client.contractNegotiations();
     }
 
-    <T> void error_response(Result<T> error) {
+    @Nested
+    class Sync {
+        @Test
+        void should_get_a_contract_negotiation() {
+            var contractNegotiation = contractNegotiations.get("negotiation-id");
+            assertThat(contractNegotiation).satisfies(ContractNegotiationsTest::shouldGetAContractNegotiationResponse);
+        }
+
+        @Test
+        void should_not_get_a_contract_negotiation_when_id_is_empty() {
+            var contractNegotiation = contractNegotiations.get("");
+            assertThat(contractNegotiation).satisfies(ContractNegotiationsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_create_a_contract_negotiation() {
+            var created = contractNegotiations.create(shouldCreateAContractNegotiationRequest());
+            assertThat(created.isSucceeded()).isTrue();
+            assertThat(created.getContent()).isNotNull();
+        }
+
+        @Test
+        void should_get_a_contract_negotiation_attached_agreement() {
+            var contractAgreement = contractNegotiations.getAgreement("negotiation-id");
+            assertThat(contractAgreement).satisfies(ContractAgreementsTest::shouldGetAContractAgreementResponse);
+        }
+
+        @Test
+        void should_not_get_a_contract_negotiation_attached_agreement() {
+            var contractAgreement = contractNegotiations.getAgreement("");
+            assertThat(contractAgreement).satisfies(ContractNegotiationsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_terminate_a_contract_negotiation() {
+            var terminated = contractNegotiations.terminate(shouldTerminateAContractNegotiationRequest());
+            assertThat(terminated.isSucceeded()).isTrue();
+            assertThat(terminated.getContent()).isNotNull();
+        }
+
+        @Test
+        void should_not_terminate_a_contract_negotiation_when_id_is_empty() {
+
+            var terminated = contractNegotiations.terminate(shouldNotTerminateAContractNegotiationRequest());
+            assertThat(terminated).satisfies(ContractNegotiationsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_get_contract_negotiations() {
+
+            var ContractNegotiationList = contractNegotiations.request(shouldGetContractNegotiationsQuery());
+            assertThat(ContractNegotiationList)
+                    .satisfies(ContractNegotiationsTest.this::shouldGetContractNegotiationsResponse);
+        }
+
+        @Test
+        void should_not_get_contract_negotiations() {
+            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+
+            var result = contractNegotiations.request(input);
+            assertThat(result).satisfies(ContractNegotiationsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_get_a_contract_negotiation_state() {
+
+            var state = contractNegotiations.getState("negotiation-id");
+
+            assertThat(state.isSucceeded()).isTrue();
+            assertThat(state.getContent()).isNotNull().isEqualTo("string");
+        }
+
+        @Test
+        void should_not_get_a_contract_negotiation_state() {
+
+            var state = contractNegotiations.getState("");
+            assertThat(state).satisfies(ContractNegotiationsTest.this::errorResponse);
+        }
+    }
+
+    @Nested
+    class Async {
+        @Test
+        void should_get_a_contract_negotiation_async() {
+            var contractNegotiation = contractNegotiations.getAsync("negotiation-id");
+            assertThat(contractNegotiation)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(ContractNegotiationsTest::shouldGetAContractNegotiationResponse);
+        }
+
+        @Test
+        void should_not_get_a_contract_negotiation_when_id_is_empty_async() {
+            var result = contractNegotiations.getAsync("");
+            assertThat(result)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(ContractNegotiationsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_create_a_contract_negotiation_async() {
+
+            var result = contractNegotiations.createAsync(shouldCreateAContractNegotiationRequest());
+            assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(created -> {
+                assertThat(created.isSucceeded()).isTrue();
+                assertThat(created.getContent()).isNotNull();
+            });
+        }
+
+        @Test
+        void should_get_a_contract_negotiation_attached_agreement_async() {
+            var contractAgreement = contractNegotiations.getAgreementAsync("negotiation-id");
+            assertThat(contractAgreement)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(ContractAgreementsTest::shouldGetAContractAgreementResponse);
+        }
+
+        @Test
+        void should_not_get_a_contract_negotiation_attached_agreement_async() {
+            var contractAgreement = contractNegotiations.getAgreementAsync("");
+            assertThat(contractAgreement)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(ContractNegotiationsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_terminate_a_contract_negotiation_async() {
+
+            var terminated = contractNegotiations.terminateAsync(shouldTerminateAContractNegotiationRequest());
+            assertThat(terminated).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(created -> {
+                assertThat(created.isSucceeded()).isTrue();
+                assertThat(created.getContent()).isNotNull();
+            });
+        }
+
+        @Test
+        void should_not_terminate_a_contract_negotiation_when_id_is_empty_async() {
+
+            var terminated = contractNegotiations.terminateAsync(shouldNotTerminateAContractNegotiationRequest());
+            assertThat(terminated)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(ContractNegotiationsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_get_contract_negotiations_async() {
+
+            var ContractNegotiationList = contractNegotiations.requestAsync(shouldGetContractNegotiationsQuery());
+            assertThat(ContractNegotiationList)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(ContractNegotiationsTest.this::shouldGetContractNegotiationsResponse);
+        }
+
+        @Test
+        void should_not_get_contract_negotiations_async() {
+            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+
+            var result = contractNegotiations.requestAsync(input);
+            assertThat(result)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(ContractNegotiationsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_get_a_contract_negotiation_state_async() {
+
+            var result = contractNegotiations.getStateAsync("negotiation-id");
+            assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(state -> {
+                assertThat(state.isSucceeded()).isTrue();
+                assertThat(state.getContent()).isNotNull().isEqualTo("string");
+            });
+        }
+
+        @Test
+        void should_not_get_a_contract_negotiation_state_async() {
+            var state = contractNegotiations.getStateAsync("");
+            assertThat(state)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(ContractNegotiationsTest.this::errorResponse);
+        }
+    }
+
+    private <T> void errorResponse(Result<T> error) {
         assertThat(error.isSucceeded()).isFalse();
         assertThat(error.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
@@ -39,7 +219,7 @@ class ContractNegotiationsTest extends ContainerTestBase {
         });
     }
 
-    protected static void should_get_a_contract_negotiation_response(Result<ContractNegotiation> contractNegotiation) {
+    protected static void shouldGetAContractNegotiationResponse(Result<ContractNegotiation> contractNegotiation) {
 
         assertThat(contractNegotiation.isSucceeded()).isTrue();
         assertThat(contractNegotiation.getContent().id()).isNotBlank();
@@ -84,7 +264,7 @@ class ContractNegotiationsTest extends ContainerTestBase {
         assertThat(contractNegotiation.getContent().createdAt()).isGreaterThan(0);
     }
 
-    ContractRequest should_create_a_contract_negotiation_request() {
+    private ContractRequest shouldCreateAContractNegotiationRequest() {
         var permissions = Json.createArrayBuilder()
                 .add(createObjectBuilder().add("target", "asset-id").add("action", "display"))
                 .build();
@@ -107,21 +287,21 @@ class ContractNegotiationsTest extends ContainerTestBase {
                 .build();
     }
 
-    TerminateNegotiation should_terminate_a_contract_negotiation_request() {
+    private TerminateNegotiation shouldTerminateAContractNegotiationRequest() {
         return TerminateNegotiation.Builder.newInstance()
                 .id("negotiation-id")
                 .reason("a reason to terminate")
                 .build();
     }
 
-    TerminateNegotiation should_not_terminate_a_contract_negotiation_request() {
+    private TerminateNegotiation shouldNotTerminateAContractNegotiationRequest() {
         return TerminateNegotiation.Builder.newInstance()
                 .id("")
                 .reason("a reason to terminate")
                 .build();
     }
 
-    QuerySpec should_get_contract_negotiations_query() {
+    private QuerySpec shouldGetContractNegotiationsQuery() {
         return QuerySpec.Builder.newInstance()
                 .offset(5)
                 .limit(10)
@@ -130,7 +310,7 @@ class ContractNegotiationsTest extends ContainerTestBase {
                 .build();
     }
 
-    void should_get_contract_negotiations_response(Result<List<ContractNegotiation>> ContractNegotiationList) {
+    private void shouldGetContractNegotiationsResponse(Result<List<ContractNegotiation>> ContractNegotiationList) {
 
         assertThat(ContractNegotiationList.isSucceeded()).isTrue();
         assertThat(ContractNegotiationList.getContent()).isNotNull().first().satisfies(contractNegotiation -> {
@@ -175,187 +355,5 @@ class ContractNegotiationsTest extends ContainerTestBase {
                     });
             assertThat(contractNegotiation.createdAt()).isGreaterThan(0);
         });
-    }
-
-    @Nested
-    class Sync {
-        @Test
-        void should_get_a_contract_negotiation() {
-            var contractNegotiation = contractNegotiations.get("negotiation-id");
-            should_get_a_contract_negotiation_response(contractNegotiation);
-        }
-
-        @Test
-        void should_not_get_a_contract_negotiation_when_id_is_empty() {
-            var contractNegotiation = contractNegotiations.get("");
-            error_response(contractNegotiation);
-        }
-
-        @Test
-        void should_create_a_contract_negotiation() {
-            var created = contractNegotiations.create(should_create_a_contract_negotiation_request());
-            assertThat(created.isSucceeded()).isTrue();
-            assertThat(created.getContent()).isNotNull();
-        }
-
-        @Test
-        void should_get_a_contract_negotiation_attached_agreement() {
-            var contractAgreement = contractNegotiations.getAgreement("negotiation-id");
-            should_get_a_contract_agreement_response(contractAgreement);
-        }
-
-        @Test
-        void should_not_get_a_contract_negotiation_attached_agreement() {
-            var contractAgreement = contractNegotiations.getAgreement("");
-            error_response(contractAgreement);
-        }
-
-        @Test
-        void should_terminate_a_contract_negotiation() {
-            var terminated = contractNegotiations.terminate(should_terminate_a_contract_negotiation_request());
-            assertThat(terminated.isSucceeded()).isTrue();
-            assertThat(terminated.getContent()).isNotNull();
-        }
-
-        @Test
-        void should_not_terminate_a_contract_negotiation_when_id_is_empty() {
-
-            var terminated = contractNegotiations.terminate(should_not_terminate_a_contract_negotiation_request());
-            error_response(terminated);
-        }
-
-        @Test
-        void should_get_contract_negotiations() {
-
-            var ContractNegotiationList = contractNegotiations.request(should_get_contract_negotiations_query());
-            should_get_contract_negotiations_response(ContractNegotiationList);
-        }
-
-        @Test
-        void should_not_get_contract_negotiations() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
-
-            var result = contractNegotiations.request(input);
-
-            error_response(result);
-        }
-
-        @Test
-        void should_get_a_contract_negotiation_state() {
-
-            var state = contractNegotiations.getState("negotiation-id");
-
-            assertThat(state.isSucceeded()).isTrue();
-            assertThat(state.getContent()).isNotNull().isEqualTo("string");
-        }
-
-        @Test
-        void should_not_get_a_contract_negotiation_state() {
-
-            var state = contractNegotiations.getState("");
-
-            error_response(state);
-        }
-    }
-
-    @Nested
-    class Async {
-        @Test
-        void should_get_a_contract_negotiation_async() {
-            var contractNegotiation = contractNegotiations.getAsync("negotiation-id");
-            assertThat(contractNegotiation)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(ContractNegotiationsTest::should_get_a_contract_negotiation_response);
-        }
-
-        @Test
-        void should_not_get_a_contract_negotiation_when_id_is_empty_async() {
-            var result = contractNegotiations.getAsync("");
-            assertThat(result)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(ContractNegotiationsTest.this::error_response);
-        }
-
-        @Test
-        void should_create_a_contract_negotiation_async() {
-
-            var result = contractNegotiations.createAsync(should_create_a_contract_negotiation_request());
-            assertThat(result).succeedsWithin(5, TimeUnit.SECONDS).satisfies(created -> {
-                assertThat(created.isSucceeded()).isTrue();
-                assertThat(created.getContent()).isNotNull();
-            });
-        }
-
-        @Test
-        void should_get_a_contract_negotiation_attached_agreement_async() {
-            var contractAgreement = contractNegotiations.getAgreementAsync("negotiation-id");
-            assertThat(contractAgreement)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(ContractAgreementsTest::should_get_a_contract_agreement_response);
-        }
-
-        @Test
-        void should_not_get_a_contract_negotiation_attached_agreement_async() {
-            var contractAgreement = contractNegotiations.getAgreementAsync("");
-            assertThat(contractAgreement)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(ContractNegotiationsTest.this::error_response);
-        }
-
-        @Test
-        void should_terminate_a_contract_negotiation_async() {
-
-            var terminated = contractNegotiations.terminateAsync(should_terminate_a_contract_negotiation_request());
-            assertThat(terminated).succeedsWithin(5, TimeUnit.SECONDS).satisfies(created -> {
-                assertThat(created.isSucceeded()).isTrue();
-                assertThat(created.getContent()).isNotNull();
-            });
-        }
-
-        @Test
-        void should_not_terminate_a_contract_negotiation_when_id_is_empty_async() {
-
-            var terminated = contractNegotiations.terminateAsync(should_not_terminate_a_contract_negotiation_request());
-            assertThat(terminated)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(ContractNegotiationsTest.this::error_response);
-        }
-
-        @Test
-        void should_get_contract_negotiations_async() {
-
-            var ContractNegotiationList = contractNegotiations.requestAsync(should_get_contract_negotiations_query());
-            assertThat(ContractNegotiationList)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(ContractNegotiationsTest.this::should_get_contract_negotiations_response);
-        }
-
-        @Test
-        void should_not_get_contract_negotiations_async() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
-
-            var result = contractNegotiations.requestAsync(input);
-            assertThat(result)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(ContractNegotiationsTest.this::error_response);
-        }
-
-        @Test
-        void should_get_a_contract_negotiation_state_async() {
-
-            var result = contractNegotiations.getStateAsync("negotiation-id");
-            assertThat(result).succeedsWithin(5, TimeUnit.SECONDS).satisfies(state -> {
-                assertThat(state.isSucceeded()).isTrue();
-                assertThat(state.getContent()).isNotNull().isEqualTo("string");
-            });
-        }
-
-        @Test
-        void should_not_get_a_contract_negotiation_state_async() {
-            var state = contractNegotiations.getStateAsync("");
-            assertThat(state)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(ContractNegotiationsTest.this::error_response);
-        }
     }
 }

@@ -1,6 +1,5 @@
 package io.thinkit.edc.client.connector;
 
-import static io.thinkit.edc.client.connector.utils.Constants.ID;
 import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,7 +26,43 @@ class CatalogsTest extends ContainerTestBase {
         catalogs = client.catalogs();
     }
 
-    CatalogRequest should_get_catalog_request() {
+    @Nested
+    class Sync {
+        @Test
+        void should_get_catalog() {
+            var result = catalogs.request(shouldGetCatalogRequest());
+            assertThat(result).satisfies(CatalogsTest.this::shouldGetCatalogResponse);
+        }
+
+        @Test
+        void should_get_dataset() {
+
+            var result = catalogs.requestDataset(shouldGetDatasetRequest());
+            assertThat(result).satisfies(CatalogsTest.this::shouldGetDatasetResponse);
+        }
+    }
+
+    @Nested
+    class Async {
+        @Test
+        void should_get_catalog_async() {
+            var result = catalogs.requestAsync(shouldGetCatalogRequest());
+            assertThat(result)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(CatalogsTest.this::shouldGetCatalogResponse);
+        }
+
+        @Test
+        void should_get_dataset_async() {
+
+            var result = catalogs.requestDatasetAsync(shouldGetDatasetRequest());
+            assertThat(result)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(CatalogsTest.this::shouldGetDatasetResponse);
+        }
+    }
+
+    private CatalogRequest shouldGetCatalogRequest() {
         var query = QuerySpec.Builder.newInstance()
                 .offset(0)
                 .limit(50)
@@ -42,7 +77,7 @@ class CatalogsTest extends ContainerTestBase {
                 .build();
     }
 
-    void should_get_catalog_response(Result<Catalog> result) {
+    private void shouldGetCatalogResponse(Result<Catalog> result) {
         assertThat(result.isSucceeded()).isTrue();
         assertThat(result.getContent().id()).isNotBlank();
         assertThat(result.getContent().participantId()).isNotNull().isEqualTo("urn:connector:provider");
@@ -62,7 +97,7 @@ class CatalogsTest extends ContainerTestBase {
         });
     }
 
-    DatasetRequest should_get_dataset_request() {
+    private DatasetRequest shouldGetDatasetRequest() {
         return DatasetRequest.Builder.newInstance()
                 .id("dataset-id")
                 .protocol("dataspace-protocol-http")
@@ -70,7 +105,7 @@ class CatalogsTest extends ContainerTestBase {
                 .build();
     }
 
-    void should_get_dataset_response(Result<Dataset> result) {
+    private void shouldGetDatasetResponse(Result<Dataset> result) {
         assertThat(result.isSucceeded()).isTrue();
         assertThat(result.getContent()).isNotNull().satisfies(dataset -> {
             assertThat(dataset.description()).isEqualTo("description");
@@ -82,41 +117,5 @@ class CatalogsTest extends ContainerTestBase {
                 assertThat(distribution.format()).isEqualTo("HttpData");
             });
         });
-    }
-
-    @Nested
-    class Sync {
-        @Test
-        void should_get_catalog() {
-            var result = catalogs.request(should_get_catalog_request());
-            should_get_catalog_response(result);
-        }
-
-        @Test
-        void should_get_dataset() {
-
-            var result = catalogs.requestDataset(should_get_dataset_request());
-            should_get_dataset_response(result);
-        }
-    }
-
-    @Nested
-    class Async {
-        @Test
-        void should_get_catalog_async() {
-            var result = catalogs.requestAsync(should_get_catalog_request());
-            assertThat(result)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(CatalogsTest.this::should_get_catalog_response);
-        }
-
-        @Test
-        void should_get_dataset_async() {
-
-            var result = catalogs.requestDatasetAsync(should_get_dataset_request());
-            assertThat(result)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(CatalogsTest.this::should_get_dataset_response);
-        }
     }
 }

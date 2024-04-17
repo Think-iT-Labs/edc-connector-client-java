@@ -29,7 +29,74 @@ class DataplanesTest extends ContainerTestBase {
         dataplanes = client.dataplanes();
     }
 
-    <T> void error_response(Result<T> error) {
+    @Nested
+    class Sync {
+        @Test
+        void should_get_dataplanes() {
+            var dataplanesList = dataplanes.get();
+            assertThat(dataplanesList).satisfies(DataplanesTest.this::shouldGetDataplanesResponse);
+        }
+
+        @Test
+        void should_create_a_dataplane() {
+            var created = dataplanes.create(shouldCreateADataplaneRequest());
+
+            assertThat(created.isSucceeded()).isTrue();
+            assertThat(created.getContent()).isNotNull();
+        }
+
+        @Test
+        void should_not_create_a_dataplane() {
+
+            var created = dataplanes.create(shouldNotCreateADataplaneRequest());
+            assertThat(created).satisfies(DataplanesTest.this::errorResponse);
+        }
+
+        @Test
+        void should_select_a_dataplane() {
+
+            var dataplane = dataplanes.select(shouldSelectADataplaneRequest());
+            assertThat(dataplane).satisfies(DataplanesTest.this::shouldSelectADataplaneResponse);
+        }
+    }
+
+    @Nested
+    class Async {
+        @Test
+        void should_get_dataplanes_async() {
+            var dataplanesList = dataplanes.getAsync();
+            assertThat(dataplanesList)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(DataplanesTest.this::shouldGetDataplanesResponse);
+        }
+
+        @Test
+        void should_create_a_dataplane_async() {
+
+            var result = dataplanes.createAsync(shouldCreateADataplaneRequest());
+            assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(created -> {
+                assertThat(created.isSucceeded()).isTrue();
+                assertThat(created.getContent()).isNotNull();
+            });
+        }
+
+        @Test
+        void should_not_create_a_dataplane_async() {
+            var created = dataplanes.createAsync(shouldNotCreateADataplaneRequest());
+            assertThat(created).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(DataplanesTest.this::errorResponse);
+        }
+
+        @Test
+        void should_select_a_dataplane_async() {
+
+            var dataplane = dataplanes.selectAsync(shouldSelectADataplaneRequest());
+            assertThat(dataplane)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(DataplanesTest.this::shouldSelectADataplaneResponse);
+        }
+    }
+
+    private <T> void errorResponse(Result<T> error) {
         assertThat(error.isSucceeded()).isFalse();
         assertThat(error.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
@@ -39,7 +106,7 @@ class DataplanesTest extends ContainerTestBase {
         });
     }
 
-    void should_get_dataplanes_response(Result<List<DataPlaneInstance>> dataplanesList) {
+    private void shouldGetDataplanesResponse(Result<List<DataPlaneInstance>> dataplanesList) {
         assertThat(dataplanesList.isSucceeded()).isTrue();
         assertThat(dataplanesList.getContent()).isNotNull().first().satisfies(dataPlaneInstance -> {
             assertThat(dataPlaneInstance.id()).isNotBlank();
@@ -52,7 +119,7 @@ class DataplanesTest extends ContainerTestBase {
         });
     }
 
-    DataPlaneInstance should_create_a_dataplane_request() {
+    private DataPlaneInstance shouldCreateADataplaneRequest() {
         return DataPlaneInstance.Builder.newInstance()
                 .id("your-dataplane-id")
                 .allowedDestTypes(Arrays.asList("your-dest-type", "your-dest-type2"))
@@ -61,7 +128,7 @@ class DataplanesTest extends ContainerTestBase {
                 .build();
     }
 
-    DataPlaneInstance should_not_create_a_dataplane_request() {
+    private DataPlaneInstance shouldNotCreateADataplaneRequest() {
         return DataPlaneInstance.Builder.newInstance()
                 .id("your-dataplane-id")
                 .allowedSourceTypes(Arrays.asList("source-type1", "source-type2"))
@@ -69,7 +136,7 @@ class DataplanesTest extends ContainerTestBase {
                 .build();
     }
 
-    SelectionRequest should_select_a_dataplane_request() {
+    private SelectionRequest shouldSelectADataplaneRequest() {
         var source = DataAddress.Builder.newInstance().type("test-src1").build();
         var destination = DataAddress.Builder.newInstance().type("test-dst2").build();
         return SelectionRequest.Builder.newInstance()
@@ -79,7 +146,7 @@ class DataplanesTest extends ContainerTestBase {
                 .build();
     }
 
-    void should_select_a_dataplane_response(Result<DataPlaneInstance> dataplane) {
+    private void shouldSelectADataplaneResponse(Result<DataPlaneInstance> dataplane) {
         assertThat(dataplane.isSucceeded()).isTrue();
         assertThat(dataplane.getContent()).isNotNull().satisfies(dataPlaneInstance -> {
             assertThat(dataPlaneInstance.id()).isNotBlank();
@@ -90,73 +157,5 @@ class DataplanesTest extends ContainerTestBase {
             assertThat(dataPlaneInstance.allowedSourceTypes().get(1)).isEqualTo("source-type2");
             assertThat(dataPlaneInstance.url()).isEqualTo("http://somewhere.com:1234/api/v1");
         });
-    }
-
-    @Nested
-    class Sync {
-        @Test
-        void should_get_dataplanes() {
-            var dataplanesList = dataplanes.get();
-            should_get_dataplanes_response(dataplanesList);
-        }
-
-        @Test
-        void should_create_a_dataplane() {
-            var created = dataplanes.create(should_create_a_dataplane_request());
-
-            assertThat(created.isSucceeded()).isTrue();
-            assertThat(created.getContent()).isNotNull();
-        }
-
-        @Test
-        void should_not_create_a_dataplane() {
-
-            var created = dataplanes.create(should_not_create_a_dataplane_request());
-
-            error_response(created);
-        }
-
-        @Test
-        void should_select_a_dataplane() {
-
-            var dataplane = dataplanes.select(should_select_a_dataplane_request());
-            should_select_a_dataplane_response(dataplane);
-        }
-    }
-
-    @Nested
-    class Async {
-        @Test
-        void should_get_dataplanes_async() {
-            var dataplanesList = dataplanes.getAsync();
-            assertThat(dataplanesList)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(DataplanesTest.this::should_get_dataplanes_response);
-        }
-
-        @Test
-        void should_create_a_dataplane_async() {
-
-            var result = dataplanes.createAsync(should_create_a_dataplane_request());
-            assertThat(result).succeedsWithin(5, TimeUnit.SECONDS).satisfies(created -> {
-                assertThat(created.isSucceeded()).isTrue();
-                assertThat(created.getContent()).isNotNull();
-            });
-        }
-
-        @Test
-        void should_not_create_a_dataplane_async() {
-            var created = dataplanes.createAsync(should_not_create_a_dataplane_request());
-            assertThat(created).succeedsWithin(5, TimeUnit.SECONDS).satisfies(DataplanesTest.this::error_response);
-        }
-
-        @Test
-        void should_select_a_dataplane_async() {
-
-            var dataplane = dataplanes.selectAsync(should_select_a_dataplane_request());
-            assertThat(dataplane)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(DataplanesTest.this::should_select_a_dataplane_response);
-        }
     }
 }

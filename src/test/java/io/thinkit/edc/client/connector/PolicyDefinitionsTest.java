@@ -31,7 +31,180 @@ public class PolicyDefinitionsTest extends ContainerTestBase {
         policyDefinitions = client.policyDefinitions();
     }
 
-    <T> void error_response(Result<T> error) {
+    @Nested
+    class Sync {
+        @Test
+        void should_get_a_policy_definition() {
+            var policyDefinition = policyDefinitions.get("definition-id");
+            assertThat(policyDefinition).satisfies(PolicyDefinitionsTest.this::shouldGetAPolicyDefinitionResponse);
+        }
+
+        @Test
+        void should_not_get_a_policy_definition_when_id_is_empty() {
+            var policyDefinition = policyDefinitions.get("");
+            assertThat(policyDefinition).satisfies(PolicyDefinitionsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_create_a_policy_definition() {
+
+            var created = policyDefinitions.create(shouldCreateAPolicyDefinitionRequest());
+
+            assertThat(created.isSucceeded()).isTrue();
+            assertThat(created.getContent()).isNotNull();
+        }
+
+        @Test
+        void should_not_create_a_policy_definition() {
+
+            var policyDefinition =
+                    PolicyDefinition.Builder.newInstance().id("definition-id").build();
+
+            var created = policyDefinitions.create(policyDefinition);
+            assertThat(created).satisfies(PolicyDefinitionsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_update_a_policy_definition() {
+            var updated = policyDefinitions.update(shouldCreateAPolicyDefinitionRequest());
+
+            assertThat(updated.isSucceeded()).isTrue();
+        }
+
+        @Test
+        void should_not_update_a_policy_definition() {
+
+            var policyDefinition =
+                    PolicyDefinition.Builder.newInstance().id("definition-id").build();
+
+            var updated = policyDefinitions.update(policyDefinition);
+            assertThat(updated).satisfies(PolicyDefinitionsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_delete_a_policy_definition() {
+            var deleted = policyDefinitions.delete("definition-id");
+
+            assertThat(deleted.isSucceeded()).isTrue();
+        }
+
+        @Test
+        void should_not_delete_a_policy_definition_when_id_is_empty() {
+            var deleted = policyDefinitions.delete("");
+
+            assertThat(deleted).satisfies(PolicyDefinitionsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_get_policy_definitions() {
+
+            var PolicyDefinitionList = policyDefinitions.request(shouldGetPolicyDefinitionsRequest());
+            assertThat(PolicyDefinitionList).satisfies(PolicyDefinitionsTest.this::shouldGetPolicyDefinitionsResponse);
+        }
+
+        @Test
+        void should_not_get_policy_definitions() {
+            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var result = policyDefinitions.request(input);
+            assertThat(result).satisfies(PolicyDefinitionsTest.this::errorResponse);
+        }
+    }
+
+    @Nested
+    class Async {
+        @Test
+        void should_get_a_policy_definition_async() {
+            var policyDefinition = policyDefinitions.getAsync("definition-id");
+            assertThat(policyDefinition)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(PolicyDefinitionsTest.this::shouldGetAPolicyDefinitionResponse);
+        }
+
+        @Test
+        void should_not_get_a_policy_definition_when_id_is_empty_async() {
+            var policyDefinition = policyDefinitions.getAsync("");
+
+            assertThat(policyDefinition)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(PolicyDefinitionsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_create_a_policy_definition_async() {
+            var result = policyDefinitions.createAsync(shouldCreateAPolicyDefinitionRequest());
+            assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(created -> {
+                assertThat(created.isSucceeded()).isTrue();
+                assertThat(created.getContent()).isNotNull();
+            });
+        }
+
+        @Test
+        void should_not_create_a_policy_definition_async() {
+            var policyDefinition =
+                    PolicyDefinition.Builder.newInstance().id("definition-id").build();
+
+            var created = policyDefinitions.createAsync(policyDefinition);
+
+            assertThat(created)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(PolicyDefinitionsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_update_a_policy_definition_async() {
+
+            var result = policyDefinitions.updateAsync(shouldCreateAPolicyDefinitionRequest());
+            assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).matches(Result::isSucceeded);
+        }
+
+        @Test
+        void should_not_update_a_policy_definition_async() {
+            var policyDefinition =
+                    PolicyDefinition.Builder.newInstance().id("definition-id").build();
+
+            var updated = policyDefinitions.updateAsync(policyDefinition);
+            assertThat(updated)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(PolicyDefinitionsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_delete_a_policy_definition_async() {
+            var result = policyDefinitions.deleteAsync("definition-id");
+            assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).matches(Result::isSucceeded);
+        }
+
+        @Test
+        void should_not_delete_a_policy_definition_when_id_is_empty_async() {
+            var deleted = policyDefinitions.deleteAsync("");
+
+            assertThat(deleted)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(PolicyDefinitionsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_get_policy_definitions_async() {
+
+            var PolicyDefinitionList = policyDefinitions.requestAsync(shouldGetPolicyDefinitionsRequest());
+            assertThat(PolicyDefinitionList)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(PolicyDefinitionsTest.this::shouldGetPolicyDefinitionsResponse);
+        }
+
+        @Test
+        void should_not_get_policy_definitions_async() {
+            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+
+            var result = policyDefinitions.requestAsync(input);
+
+            assertThat(result)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(PolicyDefinitionsTest.this::errorResponse);
+        }
+    }
+
+    private <T> void errorResponse(Result<T> error) {
         assertThat(error.isSucceeded()).isFalse();
         assertThat(error.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
             assertThat(apiErrorDetail.message()).isEqualTo("error message");
@@ -41,7 +214,7 @@ public class PolicyDefinitionsTest extends ContainerTestBase {
         });
     }
 
-    void should_get_a_policy_definition_response(Result<PolicyDefinition> policyDefinition) {
+    private void shouldGetAPolicyDefinitionResponse(Result<PolicyDefinition> policyDefinition) {
         assertThat(policyDefinition.isSucceeded()).isTrue();
         assertThat(policyDefinition.getContent().id()).isNotBlank();
         assertThat(policyDefinition.getContent().policy()).isNotNull().satisfies(policy -> assertThat(
@@ -50,7 +223,7 @@ public class PolicyDefinitionsTest extends ContainerTestBase {
         assertThat(policyDefinition.getContent().createdAt()).isGreaterThan(0);
     }
 
-    PolicyDefinition should_create_a_policy_definition_request() {
+    private PolicyDefinition shouldCreateAPolicyDefinitionRequest() {
         var constraints = Json.createArrayBuilder()
                 .add(createObjectBuilder()
                         .add("leftOperand", "spatial")
@@ -75,7 +248,7 @@ public class PolicyDefinitionsTest extends ContainerTestBase {
                 .build();
     }
 
-    QuerySpec should_get_policy_definitions_request() {
+    private QuerySpec shouldGetPolicyDefinitionsRequest() {
         return QuerySpec.Builder.newInstance()
                 .offset(0)
                 .limit(10)
@@ -84,7 +257,7 @@ public class PolicyDefinitionsTest extends ContainerTestBase {
                 .build();
     }
 
-    void should_get_policy_definitions_response(Result<List<PolicyDefinition>> PolicyDefinitionList) {
+    private void shouldGetPolicyDefinitionsResponse(Result<List<PolicyDefinition>> PolicyDefinitionList) {
         assertThat(PolicyDefinitionList.isSucceeded()).isTrue();
         assertThat(PolicyDefinitionList.getContent()).isNotNull().first().satisfies(policyDefinition -> {
             assertThat(policyDefinition.id()).isNotBlank();
@@ -93,183 +266,5 @@ public class PolicyDefinitionsTest extends ContainerTestBase {
                     .isGreaterThan(0));
             assertThat(policyDefinition.createdAt()).isGreaterThan(0);
         });
-    }
-
-    @Nested
-    class Sync {
-        @Test
-        void should_get_a_policy_definition() {
-            Result<PolicyDefinition> policyDefinition = policyDefinitions.get("definition-id");
-            should_get_a_policy_definition_response(policyDefinition);
-        }
-
-        @Test
-        void should_not_get_a_policy_definition_when_id_is_empty() {
-            Result<PolicyDefinition> policyDefinition = policyDefinitions.get("");
-            error_response(policyDefinition);
-        }
-
-        @Test
-        void should_create_a_policy_definition() {
-
-            var created = policyDefinitions.create(should_create_a_policy_definition_request());
-
-            assertThat(created.isSucceeded()).isTrue();
-            assertThat(created.getContent()).isNotNull();
-        }
-
-        @Test
-        void should_not_create_a_policy_definition() {
-
-            var policyDefinition =
-                    PolicyDefinition.Builder.newInstance().id("definition-id").build();
-
-            var created = policyDefinitions.create(policyDefinition);
-            error_response(created);
-        }
-
-        @Test
-        void should_update_a_policy_definition() {
-            var updated = policyDefinitions.update(should_create_a_policy_definition_request());
-
-            assertThat(updated.isSucceeded()).isTrue();
-        }
-
-        @Test
-        void should_not_update_a_policy_definition() {
-
-            var policyDefinition =
-                    PolicyDefinition.Builder.newInstance().id("definition-id").build();
-
-            var updated = policyDefinitions.update(policyDefinition);
-
-            error_response(updated);
-        }
-
-        @Test
-        void should_delete_a_policy_definition() {
-            var deleted = policyDefinitions.delete("definition-id");
-
-            assertThat(deleted.isSucceeded()).isTrue();
-        }
-
-        @Test
-        void should_not_delete_a_policy_definition_when_id_is_empty() {
-            var deleted = policyDefinitions.delete("");
-
-            error_response(deleted);
-        }
-
-        @Test
-        void should_get_policy_definitions() {
-
-            var PolicyDefinitionList = policyDefinitions.request(should_get_policy_definitions_request());
-            should_get_policy_definitions_response(PolicyDefinitionList);
-        }
-
-        @Test
-        void should_not_get_policy_definitions() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
-            var result = policyDefinitions.request(input);
-            error_response(result);
-        }
-    }
-
-    @Nested
-    class Async {
-        @Test
-        void should_get_a_policy_definition_async() {
-            var policyDefinition = policyDefinitions.getAsync("definition-id");
-            assertThat(policyDefinition)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(PolicyDefinitionsTest.this::should_get_a_policy_definition_response);
-        }
-
-        @Test
-        void should_not_get_a_policy_definition_when_id_is_empty_async() {
-            var policyDefinition = policyDefinitions.getAsync("");
-
-            assertThat(policyDefinition)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(PolicyDefinitionsTest.this::error_response);
-        }
-
-        @Test
-        void should_create_a_policy_definition_async() {
-            var result = policyDefinitions.createAsync(should_create_a_policy_definition_request());
-            assertThat(result).succeedsWithin(5, TimeUnit.SECONDS).satisfies(created -> {
-                assertThat(created.isSucceeded()).isTrue();
-                assertThat(created.getContent()).isNotNull();
-            });
-        }
-
-        @Test
-        void should_not_create_a_policy_definition_async() {
-            var policyDefinition =
-                    PolicyDefinition.Builder.newInstance().id("definition-id").build();
-
-            var created = policyDefinitions.createAsync(policyDefinition);
-
-            assertThat(created)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(PolicyDefinitionsTest.this::error_response);
-        }
-
-        @Test
-        void should_update_a_policy_definition_async() {
-
-            var result = policyDefinitions.updateAsync(should_create_a_policy_definition_request());
-            assertThat(result)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(updated -> assertThat(updated.isSucceeded()).isTrue());
-        }
-
-        @Test
-        void should_not_update_a_policy_definition_async() {
-            var policyDefinition =
-                    PolicyDefinition.Builder.newInstance().id("definition-id").build();
-
-            var updated = policyDefinitions.updateAsync(policyDefinition);
-            assertThat(updated)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(PolicyDefinitionsTest.this::error_response);
-        }
-
-        @Test
-        void should_delete_a_policy_definition_async() {
-            var result = policyDefinitions.deleteAsync("definition-id");
-            assertThat(result)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(deleted -> assertThat(deleted.isSucceeded()).isTrue());
-        }
-
-        @Test
-        void should_not_delete_a_policy_definition_when_id_is_empty_async() {
-            var deleted = policyDefinitions.deleteAsync("");
-
-            assertThat(deleted)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(PolicyDefinitionsTest.this::error_response);
-        }
-
-        @Test
-        void should_get_policy_definitions_async() {
-
-            var PolicyDefinitionList = policyDefinitions.requestAsync(should_get_policy_definitions_request());
-            assertThat(PolicyDefinitionList)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(PolicyDefinitionsTest.this::should_get_policy_definitions_response);
-        }
-
-        @Test
-        void should_not_get_policy_definitions_async() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
-
-            var result = policyDefinitions.requestAsync(input);
-
-            assertThat(result)
-                    .succeedsWithin(5, TimeUnit.SECONDS)
-                    .satisfies(PolicyDefinitionsTest.this::error_response);
-        }
     }
 }
