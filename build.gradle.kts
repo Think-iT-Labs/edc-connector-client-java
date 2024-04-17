@@ -56,7 +56,7 @@ val downloadOpenapiSpec by tasks.register("downloadOpenapiSpec") {
     doLast {
         managementApi?.let { fileSpec ->
             fileSpec.parentFile.mkdirs()
-            download("https://api.swaggerhub.com/apis/eclipse-edc-bot/management-api/${libs.versions.edc.get()}/yaml")
+            download("https://eclipse-edc.github.io/Connector/openapi/management-api/${libs.versions.edc.get()}/management-api.yaml")
                 .replace("example: null", "")
                 .let { fileSpec.writeText(it) }
         }
