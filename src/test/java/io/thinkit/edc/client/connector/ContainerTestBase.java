@@ -8,6 +8,8 @@ public abstract class ContainerTestBase {
     @Container
     static final ManagementApiContainer prism;
 
+    static final int timeout = 5;
+
     static {
         prism = new ManagementApiContainer();
     }
