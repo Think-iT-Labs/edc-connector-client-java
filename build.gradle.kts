@@ -30,6 +30,7 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
     dependsOn(downloadOpenapiSpec)
+    dependsOn(downloadObservabilityOpenapiSpec)
 }
 
 spotless {
@@ -59,6 +60,19 @@ val downloadOpenapiSpec by tasks.register("downloadOpenapiSpec") {
             download("https://eclipse-edc.github.io/Connector/openapi/management-api/${libs.versions.edc.get()}/management-api.yaml")
                 .replace("example: null", "")
                 .let { fileSpec.writeText(it) }
+        }
+    }
+}
+val downloadObservabilityOpenapiSpec by tasks.register("downloadObservabilityOpenapiSpec") {
+    dependsOn(tasks.findByName("processTestResources"))
+    val observabilityApi = sourceSets.test.get().output.resourcesDir?.let { File("$it/observability-api.yml") }
+    onlyIf { observabilityApi?.exists()?.not() ?: false }
+    doLast {
+        observabilityApi?.let { fileSpec ->
+            fileSpec.parentFile.mkdirs()
+            download("https://eclipse-edc.github.io/Connector/openapi/observability-api/${libs.versions.edc.get()}/observability-api.yaml")
+                    .replace("example: null", "")
+                    .let { fileSpec.writeText(it) }
         }
     }
 }

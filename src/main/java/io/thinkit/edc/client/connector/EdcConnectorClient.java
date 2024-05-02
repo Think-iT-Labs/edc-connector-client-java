@@ -8,6 +8,7 @@ import java.util.function.UnaryOperator;
 public class EdcConnectorClient {
 
     private String managementUrl;
+    private String observabilityUrl;
     private HttpClient httpClient = HttpClient.newHttpClient();
     private UnaryOperator<HttpRequest.Builder> interceptor = UnaryOperator.identity();
 
@@ -76,11 +77,11 @@ public class EdcConnectorClient {
     }
 
     public ApplicationObservability applicationObservability() {
-        if (managementUrl == null) {
+        if (observabilityUrl == null) {
             throw new IllegalArgumentException(
-                    "Cannot instantiate ApplicationObservability client without the management url");
+                    "Cannot instantiate ApplicationObservability client without the observability url");
         }
-        return new ApplicationObservability(managementUrl, httpClient, interceptor);
+        return new ApplicationObservability(observabilityUrl, httpClient, interceptor);
     }
 
     public Catalogs catalogs() {
@@ -97,6 +98,11 @@ public class EdcConnectorClient {
 
         public Builder managementUrl(String managementUrl) {
             client.managementUrl = managementUrl;
+            return this;
+        }
+
+        public Builder observabilityUrl(String observabilityUrl) {
+            client.observabilityUrl = observabilityUrl;
             return this;
         }
 
