@@ -4,9 +4,9 @@ import static org.testcontainers.containers.BindMode.READ_WRITE;
 
 import org.testcontainers.containers.GenericContainer;
 
-public class ManagementApiContainer extends GenericContainer<ManagementApiContainer> {
+public class ApiContainer extends GenericContainer<ApiContainer> {
 
-    public ManagementApiContainer(String file) {
+    public ApiContainer(String file) {
         super("stoplight/prism:5.4.0");
         this.withClasspathResourceMapping(file, file, READ_WRITE);
         this.withCommand("mock -h 0.0.0.0 " + file);
