@@ -29,8 +29,7 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-    dependsOn(downloadOpenapiSpec)
-    dependsOn(downloadObservabilityOpenapiSpec)
+    downloadOpenapiSpecTasks.forEach { task -> dependsOn(task) }
 }
 
 spotless {
@@ -50,32 +49,29 @@ allprojects {
     }
 }
 
-val downloadOpenapiSpec by tasks.register("downloadOpenapiSpec") {
-    dependsOn(tasks.findByName("processTestResources"))
-    val managementApi = sourceSets.test.get().output.resourcesDir?.let { File("$it/management-api.yml") }
-    onlyIf { managementApi?.exists()?.not() ?: false }
-    doLast {
-        managementApi?.let { fileSpec ->
-            fileSpec.parentFile.mkdirs()
-            download("https://eclipse-edc.github.io/Connector/openapi/management-api/${libs.versions.edc.get()}/management-api.yaml")
-                .replace("example: null", "")
-                .let { fileSpec.writeText(it) }
-        }
-    }
-}
-val downloadObservabilityOpenapiSpec by tasks.register("downloadObservabilityOpenapiSpec") {
-    dependsOn(tasks.findByName("processTestResources"))
-    val observabilityApi = sourceSets.test.get().output.resourcesDir?.let { File("$it/observability-api.yml") }
-    onlyIf { observabilityApi?.exists()?.not() ?: false }
-    doLast {
-        observabilityApi?.let { fileSpec ->
-            fileSpec.parentFile.mkdirs()
-            download("https://eclipse-edc.github.io/Connector/openapi/observability-api/${libs.versions.edc.get()}/observability-api.yaml")
+val downloadOpenapiSpecTasks = listOf(
+    registerDownloadOpenapiSpec("management"),
+    registerDownloadOpenapiSpec("observability")
+)
+
+fun registerDownloadOpenapiSpec(context: String): Task {
+    val uppercasedContext = context.replaceFirstChar { c -> c.uppercase() }
+    val downloadOpenapiSpec by tasks.register("download${uppercasedContext}OpenapiSpec") {
+        dependsOn(tasks.findByName("processTestResources"))
+        val openapiFile = sourceSets.test.get().output.resourcesDir?.let { File("$it/$context-api.yml") }
+        onlyIf { openapiFile?.exists()?.not() ?: false }
+        doLast {
+            openapiFile?.let { fileSpec ->
+                fileSpec.parentFile.mkdirs()
+                download("https://eclipse-edc.github.io/Connector/openapi/$context-api/${libs.versions.edc.get()}/$context-api.yaml")
                     .replace("example: null", "")
                     .let { fileSpec.writeText(it) }
+            }
         }
     }
+    return downloadOpenapiSpec
 }
+
 
 fun download(url: String): String = URL(url).openConnection().getInputStream().bufferedReader().use { it.readText() }
 
