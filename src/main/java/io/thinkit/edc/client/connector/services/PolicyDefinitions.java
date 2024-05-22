@@ -44,7 +44,7 @@ public class PolicyDefinitions {
     }
 
     public Result<String> create(PolicyDefinition input) {
-        try {
+       
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -55,13 +55,11 @@ public class PolicyDefinitions {
                     .send(requestBuilder)
                     .map(JsonLdUtil::expand)
                     .map(content -> content.getJsonObject(0).getString(ID));
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public CompletableFuture<Result<String>> createAsync(PolicyDefinition input) {
-        try {
+       
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -73,13 +71,11 @@ public class PolicyDefinitions {
                             JsonLdUtil::expand)
                     .map(content -> content.getJsonObject(0).getString(ID)));
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public Result<String> update(PolicyDefinition input) {
-        try {
+       
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -89,13 +85,11 @@ public class PolicyDefinitions {
 
             return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public CompletableFuture<Result<String>> updateAsync(PolicyDefinition input) {
-        try {
+       
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -107,9 +101,7 @@ public class PolicyDefinitions {
                     .sendAsync(requestBuilder)
                     .thenApply(result -> result.map(content -> input.id()));
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public Result<String> delete(String id) {
@@ -128,7 +120,7 @@ public class PolicyDefinitions {
     }
 
     public Result<List<PolicyDefinition>> request(QuerySpec input) {
-        try {
+       
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -140,13 +132,11 @@ public class PolicyDefinitions {
                     .map(JsonLdUtil::expand)
                     .map(this::getPolicyDefinitions);
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public CompletableFuture<Result<List<PolicyDefinition>>> requestAsync(QuerySpec input) {
-        try {
+       
             var requestBody = compact(input);
             var requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create("%s/v2/policydefinitions/request".formatted(this.url)))
@@ -157,9 +147,7 @@ public class PolicyDefinitions {
                     .sendAsync(requestBuilder)
                     .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getPolicyDefinitions));
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     private PolicyDefinition getPolicyDefinition(JsonArray array) {

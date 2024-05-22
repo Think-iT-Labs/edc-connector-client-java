@@ -3,7 +3,6 @@ package io.thinkit.edc.client.connector.services;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
-import com.apicatalog.jsonld.JsonLdError;
 import io.thinkit.edc.client.connector.model.*;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
@@ -23,7 +22,7 @@ public class Catalogs {
     }
 
     public Result<Catalog> request(CatalogRequest input) {
-        try {
+        
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -35,13 +34,11 @@ public class Catalogs {
                     .map(JsonLdUtil::expand)
                     .map(this::getCatalog);
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public CompletableFuture<Result<Catalog>> requestAsync(CatalogRequest input) {
-        try {
+        
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -52,13 +49,11 @@ public class Catalogs {
                     .sendAsync(requestBuilder)
                     .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getCatalog));
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public Result<Dataset> requestDataset(DatasetRequest input) {
-        try {
+        
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -71,13 +66,11 @@ public class Catalogs {
                     .map(JsonLdUtil::expand)
                     .map(this::getDataset);
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public CompletableFuture<Result<Dataset>> requestDatasetAsync(DatasetRequest input) {
-        try {
+        
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -88,9 +81,7 @@ public class Catalogs {
             return this.managementApiHttpClient
                     .sendAsync(requestBuilder)
                     .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getDataset));
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     private Catalog getCatalog(JsonArray array) {

@@ -43,7 +43,7 @@ public class Dataplanes {
     }
 
     public Result<String> create(DataPlaneInstance input) {
-        try {
+        
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -54,13 +54,11 @@ public class Dataplanes {
                     .send(requestBuilder)
                     .map(JsonLdUtil::expand)
                     .map(content -> content.getJsonObject(0).getString(ID));
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public CompletableFuture<Result<String>> createAsync(DataPlaneInstance input) {
-        try {
+        
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -71,13 +69,11 @@ public class Dataplanes {
             return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(
                             JsonLdUtil::expand)
                     .map(content -> content.getJsonObject(0).getString(ID)));
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public Result<DataPlaneInstance> select(SelectionRequest selectionRequest) {
-        try {
+        
             var requestBody = compact(selectionRequest);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -89,13 +85,11 @@ public class Dataplanes {
                     .map(JsonLdUtil::expand)
                     .map(this::getDataPlaneInstance);
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public CompletableFuture<Result<DataPlaneInstance>> selectAsync(SelectionRequest selectionRequest) {
-        try {
+        
             var requestBody = compact(selectionRequest);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -106,9 +100,7 @@ public class Dataplanes {
                     .sendAsync(requestBuilder)
                     .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getDataPlaneInstance));
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     private DataPlaneInstance getDataPlaneInstance(JsonArray array) {

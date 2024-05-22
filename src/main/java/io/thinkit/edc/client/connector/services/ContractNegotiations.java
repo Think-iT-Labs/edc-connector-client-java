@@ -44,7 +44,7 @@ public class ContractNegotiations {
     }
 
     public Result<String> create(ContractRequest input) {
-        try {
+       
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -56,13 +56,11 @@ public class ContractNegotiations {
                     .map(JsonLdUtil::expand)
                     .map(content -> content.getJsonObject(0).getString(ID));
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public CompletableFuture<Result<String>> createAsync(ContractRequest input) {
-        try {
+       
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -73,9 +71,7 @@ public class ContractNegotiations {
                             JsonLdUtil::expand)
                     .map(content -> content.getJsonObject(0).getString(ID)));
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public Result<ContractAgreement> getAgreement(String id) {
@@ -97,7 +93,7 @@ public class ContractNegotiations {
     }
 
     public Result<String> terminate(TerminateNegotiation input) {
-        try {
+       
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -106,13 +102,11 @@ public class ContractNegotiations {
                     .POST(ofString(requestBody.toString()));
             return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public CompletableFuture<Result<String>> terminateAsync(TerminateNegotiation input) {
-        try {
+       
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -124,13 +118,11 @@ public class ContractNegotiations {
                     .sendAsync(requestBuilder)
                     .thenApply(result -> result.map(content -> input.id()));
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public Result<List<ContractNegotiation>> request(QuerySpec input) {
-        try {
+       
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -142,13 +134,11 @@ public class ContractNegotiations {
                     .map(JsonLdUtil::expand)
                     .map(this::getContractNegotiations);
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public CompletableFuture<Result<List<ContractNegotiation>>> requestAsync(QuerySpec input) {
-        try {
+       
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -159,9 +149,7 @@ public class ContractNegotiations {
                     .sendAsync(requestBuilder)
                     .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getContractNegotiations));
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public Result<String> getState(String id) {

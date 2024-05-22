@@ -60,7 +60,6 @@ public class EdrCache {
     }
 
     public Result<Edr> request(QuerySpec input) {
-        try {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -73,13 +72,10 @@ public class EdrCache {
                     .map(JsonLdUtil::expand)
                     .map(this::getEDR);
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     public CompletableFuture<Result<Edr>> requestAsync(QuerySpec input) {
-        try {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -91,9 +87,7 @@ public class EdrCache {
                     .sendAsync(requestBuilder)
                     .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getEDR));
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     private DataAddress getDataAddress(JsonArray array) {

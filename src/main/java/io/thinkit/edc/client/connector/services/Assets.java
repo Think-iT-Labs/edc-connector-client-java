@@ -46,7 +46,6 @@ public class Assets {
     }
 
     public Result<String> create(Asset input) {
-        try {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -57,13 +56,10 @@ public class Assets {
                     .send(requestBuilder)
                     .map(JsonLdUtil::expand)
                     .map(content -> content.getJsonObject(0).getString(ID));
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public CompletableFuture<Result<String>> createAsync(Asset input) {
-        try {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -75,13 +71,10 @@ public class Assets {
                             JsonLdUtil::expand)
                     .map(content -> content.getJsonObject(0).getString(ID)));
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public Result<String> update(Asset input) {
-        try {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -91,13 +84,10 @@ public class Assets {
 
             return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public CompletableFuture<Result<String>> updateAsync(Asset input) {
-        try {
+        
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -109,9 +99,7 @@ public class Assets {
                     .sendAsync(requestBuilder)
                     .thenApply(result -> result.map(content -> input.id()));
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public Result<String> delete(String id) {
@@ -131,7 +119,7 @@ public class Assets {
     }
 
     public Result<List<Asset>> request(QuerySpec input) {
-        try {
+        
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -144,13 +132,11 @@ public class Assets {
                     .map(JsonLdUtil::expand)
                     .map(this::getAssets);
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public CompletableFuture<Result<List<Asset>>> requestAsync(QuerySpec input) {
-        try {
+        
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -162,9 +148,7 @@ public class Assets {
                     .sendAsync(requestBuilder)
                     .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getAssets));
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     private Asset getAsset(JsonArray array) {

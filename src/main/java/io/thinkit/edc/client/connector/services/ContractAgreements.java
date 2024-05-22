@@ -60,7 +60,6 @@ public class ContractAgreements {
     }
 
     public Result<List<ContractAgreement>> request(QuerySpec input) {
-        try {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -72,13 +71,9 @@ public class ContractAgreements {
                     .map(JsonLdUtil::expand)
                     .map(this::getContractAgreements);
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public CompletableFuture<Result<List<ContractAgreement>>> requestAsync(QuerySpec input) {
-        try {
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -89,9 +84,6 @@ public class ContractAgreements {
                     .sendAsync(requestBuilder)
                     .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getContractAgreements));
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private ContractAgreement getContractAgreement(JsonArray array) {

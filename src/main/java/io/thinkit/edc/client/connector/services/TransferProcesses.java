@@ -42,7 +42,7 @@ public class TransferProcesses {
     }
 
     public Result<String> create(TransferRequest input) {
-        try {
+        
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -53,13 +53,11 @@ public class TransferProcesses {
                     .send(requestBuilder)
                     .map(JsonLdUtil::expand)
                     .map(content -> content.getJsonObject(0).getString(ID));
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public CompletableFuture<Result<String>> createAsync(TransferRequest input) {
-        try {
+        
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -70,9 +68,7 @@ public class TransferProcesses {
             return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(
                             JsonLdUtil::expand)
                     .map(content -> content.getJsonObject(0).getString(ID)));
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public Result<TransferState> getState(String id) {
@@ -95,7 +91,7 @@ public class TransferProcesses {
     }
 
     public Result<String> terminate(TerminateTransfer input) {
-        try {
+        
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -105,13 +101,11 @@ public class TransferProcesses {
 
             return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public CompletableFuture<Result<String>> terminateAsync(TerminateTransfer input) {
-        try {
+        
             var requestBody = compact(input);
 
             var requestBuilder = HttpRequest.newBuilder()
@@ -122,9 +116,7 @@ public class TransferProcesses {
             return this.managementApiHttpClient
                     .sendAsync(requestBuilder)
                     .thenApply(result -> result.map(content -> input.id()));
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        
     }
 
     public Result<String> deprovision(String id) {
