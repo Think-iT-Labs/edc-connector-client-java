@@ -3,7 +3,6 @@ package io.thinkit.edc.client.connector.services;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
-import com.apicatalog.jsonld.JsonLdError;
 import io.thinkit.edc.client.connector.model.*;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
@@ -23,74 +22,57 @@ public class Catalogs {
     }
 
     public Result<Catalog> request(CatalogRequest input) {
-        try {
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/catalog/request".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
-            return this.managementApiHttpClient
-                    .send(requestBuilder)
-                    .map(JsonLdUtil::expand)
-                    .map(this::getCatalog);
+        var requestBody = compact(input);
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/catalog/request".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+        return this.managementApiHttpClient
+                .send(requestBuilder)
+                .map(JsonLdUtil::expand)
+                .map(this::getCatalog);
     }
 
     public CompletableFuture<Result<Catalog>> requestAsync(CatalogRequest input) {
-        try {
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/catalog/request".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
-            return this.managementApiHttpClient
-                    .sendAsync(requestBuilder)
-                    .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getCatalog));
+        var requestBody = compact(input);
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/catalog/request".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+                .map(this::getCatalog));
     }
 
     public Result<Dataset> requestDataset(DatasetRequest input) {
-        try {
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/catalog/dataset/request".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
+        var requestBody = compact(input);
 
-            return this.managementApiHttpClient
-                    .send(requestBuilder)
-                    .map(JsonLdUtil::expand)
-                    .map(this::getDataset);
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/catalog/dataset/request".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        return this.managementApiHttpClient
+                .send(requestBuilder)
+                .map(JsonLdUtil::expand)
+                .map(this::getDataset);
     }
 
     public CompletableFuture<Result<Dataset>> requestDatasetAsync(DatasetRequest input) {
-        try {
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/catalog/dataset/request".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
+        var requestBody = compact(input);
 
-            return this.managementApiHttpClient
-                    .sendAsync(requestBuilder)
-                    .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getDataset));
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/catalog/dataset/request".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+                .map(this::getDataset));
     }
 
     private Catalog getCatalog(JsonArray array) {

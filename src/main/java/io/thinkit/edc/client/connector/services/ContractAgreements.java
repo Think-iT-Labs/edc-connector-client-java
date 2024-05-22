@@ -3,7 +3,6 @@ package io.thinkit.edc.client.connector.services;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
-import com.apicatalog.jsonld.JsonLdError;
 import io.thinkit.edc.client.connector.model.*;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
@@ -60,38 +59,27 @@ public class ContractAgreements {
     }
 
     public Result<List<ContractAgreement>> request(QuerySpec input) {
-        try {
-            var requestBody = compact(input);
+        var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractagreements/request".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
-            return this.managementApiHttpClient
-                    .send(requestBuilder)
-                    .map(JsonLdUtil::expand)
-                    .map(this::getContractAgreements);
-
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/contractagreements/request".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+        return this.managementApiHttpClient
+                .send(requestBuilder)
+                .map(JsonLdUtil::expand)
+                .map(this::getContractAgreements);
     }
 
     public CompletableFuture<Result<List<ContractAgreement>>> requestAsync(QuerySpec input) {
-        try {
-            var requestBody = compact(input);
+        var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractagreements/request".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
-            return this.managementApiHttpClient
-                    .sendAsync(requestBuilder)
-                    .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getContractAgreements));
-
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/contractagreements/request".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+                .map(this::getContractAgreements));
     }
 
     private ContractAgreement getContractAgreement(JsonArray array) {

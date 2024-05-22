@@ -4,7 +4,6 @@ import static io.thinkit.edc.client.connector.utils.Constants.ID;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
-import com.apicatalog.jsonld.JsonLdError;
 import io.thinkit.edc.client.connector.model.*;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
@@ -42,37 +41,30 @@ public class TransferProcesses {
     }
 
     public Result<String> create(TransferRequest input) {
-        try {
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/transferprocesses".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
-            return this.managementApiHttpClient
-                    .send(requestBuilder)
-                    .map(JsonLdUtil::expand)
-                    .map(content -> content.getJsonObject(0).getString(ID));
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        var requestBody = compact(input);
+
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/transferprocesses".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+        return this.managementApiHttpClient
+                .send(requestBuilder)
+                .map(JsonLdUtil::expand)
+                .map(content -> content.getJsonObject(0).getString(ID));
     }
 
     public CompletableFuture<Result<String>> createAsync(TransferRequest input) {
-        try {
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/transferprocesses".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
+        var requestBody = compact(input);
 
-            return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(
-                            JsonLdUtil::expand)
-                    .map(content -> content.getJsonObject(0).getString(ID)));
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/transferprocesses".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+                .map(content -> content.getJsonObject(0).getString(ID)));
     }
 
     public Result<TransferState> getState(String id) {
@@ -95,36 +87,29 @@ public class TransferProcesses {
     }
 
     public Result<String> terminate(TerminateTransfer input) {
-        try {
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/transferprocesses/%s/terminate".formatted(this.url, input.id())))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
+        var requestBody = compact(input);
 
-            return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/transferprocesses/%s/terminate".formatted(this.url, input.id())))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
     }
 
     public CompletableFuture<Result<String>> terminateAsync(TerminateTransfer input) {
-        try {
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/transferprocesses/%s/terminate".formatted(this.url, input.id())))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
+        var requestBody = compact(input);
 
-            return this.managementApiHttpClient
-                    .sendAsync(requestBuilder)
-                    .thenApply(result -> result.map(content -> input.id()));
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/transferprocesses/%s/terminate".formatted(this.url, input.id())))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+
+        return this.managementApiHttpClient
+                .sendAsync(requestBuilder)
+                .thenApply(result -> result.map(content -> input.id()));
     }
 
     public Result<String> deprovision(String id) {

@@ -4,7 +4,6 @@ import static io.thinkit.edc.client.connector.utils.Constants.ID;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
-import com.apicatalog.jsonld.JsonLdError;
 import io.thinkit.edc.client.connector.model.*;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
@@ -43,72 +42,56 @@ public class Dataplanes {
     }
 
     public Result<String> create(DataPlaneInstance input) {
-        try {
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/dataplanes".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
-            return this.managementApiHttpClient
-                    .send(requestBuilder)
-                    .map(JsonLdUtil::expand)
-                    .map(content -> content.getJsonObject(0).getString(ID));
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        var requestBody = compact(input);
+
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/dataplanes".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+        return this.managementApiHttpClient
+                .send(requestBuilder)
+                .map(JsonLdUtil::expand)
+                .map(content -> content.getJsonObject(0).getString(ID));
     }
 
     public CompletableFuture<Result<String>> createAsync(DataPlaneInstance input) {
-        try {
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/dataplanes".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
+        var requestBody = compact(input);
 
-            return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(
-                            JsonLdUtil::expand)
-                    .map(content -> content.getJsonObject(0).getString(ID)));
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/dataplanes".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+                .map(content -> content.getJsonObject(0).getString(ID)));
     }
 
     public Result<DataPlaneInstance> select(SelectionRequest selectionRequest) {
-        try {
-            var requestBody = compact(selectionRequest);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/dataplanes/select".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
-            return this.managementApiHttpClient
-                    .send(requestBuilder)
-                    .map(JsonLdUtil::expand)
-                    .map(this::getDataPlaneInstance);
+        var requestBody = compact(selectionRequest);
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/dataplanes/select".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+        return this.managementApiHttpClient
+                .send(requestBuilder)
+                .map(JsonLdUtil::expand)
+                .map(this::getDataPlaneInstance);
     }
 
     public CompletableFuture<Result<DataPlaneInstance>> selectAsync(SelectionRequest selectionRequest) {
-        try {
-            var requestBody = compact(selectionRequest);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/dataplanes/select".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
-            return this.managementApiHttpClient
-                    .sendAsync(requestBuilder)
-                    .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getDataPlaneInstance));
+        var requestBody = compact(selectionRequest);
 
-        } catch (JsonLdError e) {
-            throw new RuntimeException(e);
-        }
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/dataplanes/select".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+                .map(this::getDataPlaneInstance));
     }
 
     private DataPlaneInstance getDataPlaneInstance(JsonArray array) {

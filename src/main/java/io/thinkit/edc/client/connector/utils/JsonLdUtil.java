@@ -32,12 +32,16 @@ public class JsonLdUtil {
         }
     }
 
-    public static JsonObject compact(JsonLdObject input) throws JsonLdError {
+    public static JsonObject compact(JsonLdObject input) {
         var expanded = JsonDocument.of(input.raw());
         var context = JsonDocument.of(Json.createObjectBuilder()
                 .add(CONTEXT, Json.createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
                 .build());
-        return JsonLd.compact(expanded, context).get();
+        try {
+            return JsonLd.compact(expanded, context).get();
+        } catch (JsonLdError e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static JsonArray deserializeToArray(InputStream body) throws JsonLdError {

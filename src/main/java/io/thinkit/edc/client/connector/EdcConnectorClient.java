@@ -92,6 +92,13 @@ public class EdcConnectorClient {
         return new Catalogs(managementUrl, httpClient, interceptor);
     }
 
+    public EdrCache edrCache() {
+        if (managementUrl == null) {
+            throw new IllegalArgumentException("Cannot instantiate EdrCache client without the management url");
+        }
+        return new EdrCache(managementUrl, httpClient, interceptor);
+    }
+
     public static class Builder {
 
         private final EdcConnectorClient client = new EdcConnectorClient();
