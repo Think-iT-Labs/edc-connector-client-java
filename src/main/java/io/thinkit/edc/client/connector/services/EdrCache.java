@@ -3,7 +3,6 @@ package io.thinkit.edc.client.connector.services;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.compact;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
-import com.apicatalog.jsonld.JsonLdError;
 import io.thinkit.edc.client.connector.model.*;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
@@ -23,17 +22,13 @@ public class EdrCache {
     }
 
     public Result<String> delete(String transferProcessId) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v1/edrs/%s".formatted(this.url, transferProcessId)))
-                .DELETE();
+        var requestBuilder = getDeleteRequestBuilder(transferProcessId);
 
         return this.managementApiHttpClient.send(requestBuilder).map(result -> transferProcessId);
     }
 
     public CompletableFuture<Result<String>> deleteAsync(String transferProcessId) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v1/edrs/%s".formatted(this.url, transferProcessId)))
-                .DELETE();
+        var requestBuilder = getDeleteRequestBuilder(transferProcessId);
 
         return this.managementApiHttpClient
                 .sendAsync(requestBuilder)
@@ -41,9 +36,7 @@ public class EdrCache {
     }
 
     public Result<DataAddress> dataAddress(String transferProcessId) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v1/edrs/%s/dataaddress".formatted(this.url, transferProcessId)))
-                .GET();
+        var requestBuilder = getDataAddressRequestBuilder(transferProcessId);
         return this.managementApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
@@ -51,43 +44,46 @@ public class EdrCache {
     }
 
     public CompletableFuture<Result<DataAddress>> dataAddressAsync(String transferProcessId) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v1/edrs/%s/dataaddress".formatted(this.url, transferProcessId)))
-                .GET();
+        var requestBuilder = getDataAddressRequestBuilder(transferProcessId);
 
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getDataAddress));
     }
 
     public Result<Edr> request(QuerySpec input) {
-            var requestBody = compact(input);
+        var requestBuilder = getRequestBuilder(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v1/edrs/request".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
-
-            return this.managementApiHttpClient
-                    .send(requestBuilder)
-                    .map(JsonLdUtil::expand)
-                    .map(this::getEDR);
-
-
+        return this.managementApiHttpClient
+                .send(requestBuilder)
+                .map(JsonLdUtil::expand)
+                .map(this::getEDR);
     }
 
     public CompletableFuture<Result<Edr>> requestAsync(QuerySpec input) {
-            var requestBody = compact(input);
+        var requestBuilder = getRequestBuilder(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v1/edrs/request".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+                .map(this::getEDR));
+    }
 
-            return this.managementApiHttpClient
-                    .sendAsync(requestBuilder)
-                    .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getEDR));
+    private HttpRequest.Builder getDeleteRequestBuilder(String transferProcessId) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/v1/edrs/%s".formatted(this.url, transferProcessId)))
+                .DELETE();
+    }
 
+    private HttpRequest.Builder getDataAddressRequestBuilder(String transferProcessId) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/v1/edrs/%s/dataaddress".formatted(this.url, transferProcessId)))
+                .GET();
+    }
 
+    private HttpRequest.Builder getRequestBuilder(QuerySpec input) {
+        var requestBody = compact(input);
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/v1/edrs/request".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
     }
 
     private DataAddress getDataAddress(JsonArray array) {

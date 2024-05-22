@@ -4,7 +4,6 @@ import static io.thinkit.edc.client.connector.utils.Constants.ID;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
-import com.apicatalog.jsonld.JsonLdError;
 import io.thinkit.edc.client.connector.model.*;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
@@ -44,34 +43,29 @@ public class ContractNegotiations {
     }
 
     public Result<String> create(ContractRequest input) {
-       
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractnegotiations".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
-            return this.managementApiHttpClient
-                    .send(requestBuilder)
-                    .map(JsonLdUtil::expand)
-                    .map(content -> content.getJsonObject(0).getString(ID));
+        var requestBody = compact(input);
 
-        
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/contractnegotiations".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+        return this.managementApiHttpClient
+                .send(requestBuilder)
+                .map(JsonLdUtil::expand)
+                .map(content -> content.getJsonObject(0).getString(ID));
     }
 
     public CompletableFuture<Result<String>> createAsync(ContractRequest input) {
-       
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractnegotiations".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
-            return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(
-                            JsonLdUtil::expand)
-                    .map(content -> content.getJsonObject(0).getString(ID)));
+        var requestBody = compact(input);
 
-        
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/contractnegotiations".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+                .map(content -> content.getJsonObject(0).getString(ID)));
     }
 
     public Result<ContractAgreement> getAgreement(String id) {
@@ -93,63 +87,54 @@ public class ContractNegotiations {
     }
 
     public Result<String> terminate(TerminateNegotiation input) {
-       
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractnegotiations/%s/terminate".formatted(this.url, input.id())))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
-            return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
+        var requestBody = compact(input);
 
-        
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/contractnegotiations/%s/terminate".formatted(this.url, input.id())))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+        return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
     }
 
     public CompletableFuture<Result<String>> terminateAsync(TerminateNegotiation input) {
-       
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractnegotiations/%s/terminate".formatted(this.url, input.id())))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
+        var requestBody = compact(input);
 
-            return this.managementApiHttpClient
-                    .sendAsync(requestBuilder)
-                    .thenApply(result -> result.map(content -> input.id()));
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/contractnegotiations/%s/terminate".formatted(this.url, input.id())))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
 
-        
+        return this.managementApiHttpClient
+                .sendAsync(requestBuilder)
+                .thenApply(result -> result.map(content -> input.id()));
     }
 
     public Result<List<ContractNegotiation>> request(QuerySpec input) {
-       
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractnegotiations/request".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
-            return this.managementApiHttpClient
-                    .send(requestBuilder)
-                    .map(JsonLdUtil::expand)
-                    .map(this::getContractNegotiations);
+        var requestBody = compact(input);
 
-        
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/contractnegotiations/request".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+        return this.managementApiHttpClient
+                .send(requestBuilder)
+                .map(JsonLdUtil::expand)
+                .map(this::getContractNegotiations);
     }
 
     public CompletableFuture<Result<List<ContractNegotiation>>> requestAsync(QuerySpec input) {
-       
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/contractnegotiations/request".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
-            return this.managementApiHttpClient
-                    .sendAsync(requestBuilder)
-                    .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getContractNegotiations));
+        var requestBody = compact(input);
 
-        
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/contractnegotiations/request".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+                .map(this::getContractNegotiations));
     }
 
     public Result<String> getState(String id) {

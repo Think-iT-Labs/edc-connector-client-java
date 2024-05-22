@@ -22,66 +22,57 @@ public class Catalogs {
     }
 
     public Result<Catalog> request(CatalogRequest input) {
-        
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/catalog/request".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
-            return this.managementApiHttpClient
-                    .send(requestBuilder)
-                    .map(JsonLdUtil::expand)
-                    .map(this::getCatalog);
+        var requestBody = compact(input);
 
-        
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/catalog/request".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+        return this.managementApiHttpClient
+                .send(requestBuilder)
+                .map(JsonLdUtil::expand)
+                .map(this::getCatalog);
     }
 
     public CompletableFuture<Result<Catalog>> requestAsync(CatalogRequest input) {
-        
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/catalog/request".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
-            return this.managementApiHttpClient
-                    .sendAsync(requestBuilder)
-                    .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getCatalog));
+        var requestBody = compact(input);
 
-        
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/catalog/request".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+                .map(this::getCatalog));
     }
 
     public Result<Dataset> requestDataset(DatasetRequest input) {
-        
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/catalog/dataset/request".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
+        var requestBody = compact(input);
 
-            return this.managementApiHttpClient
-                    .send(requestBuilder)
-                    .map(JsonLdUtil::expand)
-                    .map(this::getDataset);
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/catalog/dataset/request".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
 
-        
+        return this.managementApiHttpClient
+                .send(requestBuilder)
+                .map(JsonLdUtil::expand)
+                .map(this::getDataset);
     }
 
     public CompletableFuture<Result<Dataset>> requestDatasetAsync(DatasetRequest input) {
-        
-            var requestBody = compact(input);
 
-            var requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create("%s/v2/catalog/dataset/request".formatted(this.url)))
-                    .header("content-type", "application/json")
-                    .POST(ofString(requestBody.toString()));
+        var requestBody = compact(input);
 
-            return this.managementApiHttpClient
-                    .sendAsync(requestBuilder)
-                    .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getDataset));
-        
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/catalog/dataset/request".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+                .map(this::getDataset));
     }
 
     private Catalog getCatalog(JsonArray array) {
