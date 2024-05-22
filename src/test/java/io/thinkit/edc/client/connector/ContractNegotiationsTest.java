@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.thinkit.edc.client.connector.model.*;
 import io.thinkit.edc.client.connector.services.ContractNegotiations;
-import jakarta.json.Json;
 import java.net.http.HttpClient;
 import java.util.Arrays;
 import java.util.List;
@@ -265,12 +264,11 @@ class ContractNegotiationsTest extends ContainerTestBase {
     }
 
     private ContractRequest shouldCreateAContractNegotiationRequest() {
-        var permissions = Json.createArrayBuilder()
-                .add(createObjectBuilder().add("target", "asset-id").add("action", "display"))
-                .build();
 
         var policy = Policy.Builder.newInstance()
-                .raw(createObjectBuilder().add("permission", permissions).build())
+                .id("offer-id")
+                .raw(createObjectBuilder().add("assigner", "providerId").build())
+                .raw(createObjectBuilder().add("target", "assetId").build())
                 .build();
         var callbackAddresses = CallbackAddress.Builder.newInstance()
                 .transactional(false)

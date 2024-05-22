@@ -258,6 +258,7 @@ class TransferProcessesTest extends ContainerTestBase {
                 .dataDestination(dataDestination)
                 .privateProperties(privateProperties)
                 .callbackAddresses(List.of(callbackAddresses, callbackAddresses))
+                .transferType("transferType")
                 .build();
     }
 
