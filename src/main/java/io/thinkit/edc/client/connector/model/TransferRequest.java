@@ -20,6 +20,7 @@ public class TransferRequest extends JsonLdObject {
     private static final String TRANSFER_REQUEST_DATA_DESTINATION = EDC_NAMESPACE + "dataDestination";
     private static final String TRANSFER_REQUEST_PRIVATE_PROPERTIES = EDC_NAMESPACE + "privateProperties";
     private static final String TRANSFER_REQUEST_CALLBACK_ADDRESSES = EDC_NAMESPACE + "callbackAddresses";
+    private static final String TRANSFER_REQUEST_TRANSFER_TYPE = EDC_NAMESPACE + "transferType";
 
     private TransferRequest(JsonObject raw) {
         super(raw);
@@ -43,6 +44,10 @@ public class TransferRequest extends JsonLdObject {
 
     public String assetId() {
         return stringValue(TRANSFER_REQUEST_ASSET_ID);
+    }
+
+    public String transferType() {
+        return stringValue(TRANSFER_REQUEST_TRANSFER_TYPE);
     }
 
     public Properties dataDestination() {
@@ -101,6 +106,13 @@ public class TransferRequest extends JsonLdObject {
             builder.add(
                     TRANSFER_REQUEST_ASSET_ID,
                     createArrayBuilder().add(createObjectBuilder().add(VALUE, assetId)));
+            return this;
+        }
+
+        public TransferRequest.Builder transferType(String transferType) {
+            builder.add(
+                    TRANSFER_REQUEST_TRANSFER_TYPE,
+                    createArrayBuilder().add(createObjectBuilder().add(VALUE, transferType)));
             return this;
         }
 
