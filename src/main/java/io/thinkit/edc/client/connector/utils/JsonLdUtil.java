@@ -14,17 +14,34 @@ import java.io.InputStream;
 
 public class JsonLdUtil {
 
-    public static JsonArray expand(InputStream body) throws JsonLdError {
-        var jsonDocument = JsonDocument.of(body);
-        return JsonLd.expand(jsonDocument).get();
+    public static JsonArray expand(InputStream body) {
+        try {
+            var jsonDocument = JsonDocument.of(body);
+            return JsonLd.expand(jsonDocument).get();
+        } catch (JsonLdError e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public static JsonObject compact(JsonLdObject input) throws JsonLdError {
+    public static JsonObject ToJsonObject(InputStream body) {
+        try {
+            var jsonDocument = JsonDocument.of(body);
+            return jsonDocument.getJsonContent().get().asJsonObject();
+        } catch (JsonLdError e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static JsonObject compact(JsonLdObject input) {
         var expanded = JsonDocument.of(input.raw());
         var context = JsonDocument.of(Json.createObjectBuilder()
                 .add(CONTEXT, Json.createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
                 .build());
-        return JsonLd.compact(expanded, context).get();
+        try {
+            return JsonLd.compact(expanded, context).get();
+        } catch (JsonLdError e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static JsonArray deserializeToArray(InputStream body) throws JsonLdError {

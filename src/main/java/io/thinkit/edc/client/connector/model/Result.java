@@ -1,6 +1,7 @@
 package io.thinkit.edc.client.connector.model;
 
 import java.util.List;
+import java.util.function.Function;
 
 public class Result<T> {
     private T content;
@@ -25,5 +26,13 @@ public class Result<T> {
 
     public T getContent() {
         return content;
+    }
+
+    public <R> Result<R> map(Function<T, R> mappingFunction) {
+        if (isSucceeded()) {
+            return new Result<>(mappingFunction.apply(this.content), null);
+        } else {
+            return new Result<>(null, this.errors);
+        }
     }
 }
