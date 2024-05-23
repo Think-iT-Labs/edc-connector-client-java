@@ -1,5 +1,9 @@
 package io.thinkit.edc.client.connector.services;
 
+import static io.thinkit.edc.client.connector.utils.Constants.ID;
+import static io.thinkit.edc.client.connector.utils.JsonLdUtil.compact;
+import static java.net.http.HttpRequest.BodyPublishers.ofString;
+
 import io.thinkit.edc.client.connector.model.Result;
 import io.thinkit.edc.client.connector.model.Secret;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
@@ -34,10 +38,34 @@ public class Secrets {
                 .map(this::getSecret));
     }
 
+    public Result<String> create(Secret input) {
+        var requestBuilder = createRequestBuilder(input);
+
+        return this.managementApiHttpClient
+                .send(requestBuilder)
+                .map(JsonLdUtil::expand)
+                .map(content -> content.getJsonObject(0).getString(ID));
+    }
+
+    public CompletableFuture<Result<String>> createAsync(Secret input) {
+        var requestBuilder = createRequestBuilder(input);
+
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+                .map(content -> content.getJsonObject(0).getString(ID)));
+    }
+
     private HttpRequest.Builder getRequestBuilder(String id) {
         return HttpRequest.newBuilder()
                 .uri(URI.create("%s/v1/secrets/%s".formatted(this.url, id)))
                 .GET();
+    }
+
+    private HttpRequest.Builder createRequestBuilder(Secret input) {
+        var requestBody = compact(input);
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/v1/secrets".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
     }
 
     private Secret getSecret(JsonArray array) {

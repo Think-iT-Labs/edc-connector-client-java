@@ -38,6 +38,22 @@ class SecretsTest extends ContainerTestBase {
             var secret = secrets.get("");
             assertThat(secret).satisfies(SecretsTest.this::errorResponse);
         }
+
+        @Test
+        void should_create_a_secret() {
+
+            var created = secrets.create(shouldCreateASecretRequest());
+
+            assertThat(created.isSucceeded()).isTrue();
+            assertThat(created.getContent()).isNotNull();
+        }
+
+        @Test
+        void should_not_create_a_secret_when_value_is_missing() {
+
+            var created = secrets.create(shouldNotCreateASecretRequest());
+            assertThat(created).satisfies(SecretsTest.this::errorResponse);
+        }
     }
 
     @Nested
@@ -55,6 +71,22 @@ class SecretsTest extends ContainerTestBase {
             var result = secrets.getAsync("");
             assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(SecretsTest.this::errorResponse);
         }
+
+        @Test
+        void should_create_a_secret_async() {
+
+            var result = secrets.createAsync(shouldCreateASecretRequest());
+            assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(created -> {
+                assertThat(created.isSucceeded()).isTrue();
+                assertThat(created.getContent()).isNotNull();
+            });
+        }
+
+        @Test
+        void should_not_create_a_secret_when_value_is_missing_async() {
+            var result = secrets.createAsync(shouldNotCreateASecretRequest());
+            assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(SecretsTest.this::errorResponse);
+        }
     }
 
     private <T> void errorResponse(Result<T> error) {
@@ -70,5 +102,14 @@ class SecretsTest extends ContainerTestBase {
     private void shouldGetASecretResponse(Result<Secret> secret) {
         assertThat(secret.isSucceeded()).isTrue();
         assertThat(secret.getContent().value()).isNotBlank();
+    }
+
+    private Secret shouldCreateASecretRequest() {
+
+        return Secret.Builder.newInstance().id("secretId").value("secretValue").build();
+    }
+
+    private Secret shouldNotCreateASecretRequest() {
+        return Secret.Builder.newInstance().id("").build();
     }
 }
