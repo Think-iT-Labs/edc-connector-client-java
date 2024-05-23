@@ -68,6 +68,19 @@ class SecretsTest extends ContainerTestBase {
             var created = secrets.update(shouldNotCreateASecretRequest());
             assertThat(created).satisfies(SecretsTest.this::errorResponse);
         }
+
+        @Test
+        void should_delete_a_secret() {
+            var deleted = secrets.delete("secret-id");
+
+            assertThat(deleted.isSucceeded()).isTrue();
+        }
+
+        @Test
+        void should_not_delete_a_secret_when_id_is_empty() {
+            var deleted = secrets.delete("");
+            assertThat(deleted).satisfies(SecretsTest.this::errorResponse);
+        }
     }
 
     @Nested
@@ -113,6 +126,19 @@ class SecretsTest extends ContainerTestBase {
         void should_not_update_a_secret_when_id_is_empty_async() {
 
             var result = secrets.updateAsync(shouldNotCreateASecretRequest());
+            assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(SecretsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_delete_a_secret_async() {
+
+            var result = secrets.deleteAsync("secret-id");
+            assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).matches(Result::isSucceeded);
+        }
+
+        @Test
+        void should_not_delete_a_secret_when_id_is_empty_async() {
+            var result = secrets.deleteAsync("");
             assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(SecretsTest.this::errorResponse);
         }
     }

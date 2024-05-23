@@ -69,6 +69,18 @@ public class Secrets {
                 .thenApply(result -> result.map(content -> input.id()));
     }
 
+    public Result<String> delete(String id) {
+        var requestBuilder = deleteRequestBuilder(id);
+
+        return this.managementApiHttpClient.send(requestBuilder).map(result -> id);
+    }
+
+    public CompletableFuture<Result<String>> deleteAsync(String id) {
+        var requestBuilder = deleteRequestBuilder(id);
+
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
+    }
+
     private HttpRequest.Builder getRequestBuilder(String id) {
         return HttpRequest.newBuilder()
                 .uri(URI.create("%s/v1/secrets/%s".formatted(this.url, id)))
@@ -89,6 +101,12 @@ public class Secrets {
                 .uri(URI.create("%s/v1/secrets".formatted(this.url)))
                 .header("content-type", "application/json")
                 .PUT(ofString(requestBody.toString()));
+    }
+
+    private HttpRequest.Builder deleteRequestBuilder(String id) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/v1/secrets/%s".formatted(this.url, id)))
+                .DELETE();
     }
 
     private Secret getSecret(JsonArray array) {
