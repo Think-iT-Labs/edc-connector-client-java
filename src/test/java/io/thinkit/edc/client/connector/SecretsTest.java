@@ -54,6 +54,20 @@ class SecretsTest extends ContainerTestBase {
             var created = secrets.create(shouldNotCreateASecretRequest());
             assertThat(created).satisfies(SecretsTest.this::errorResponse);
         }
+
+        @Test
+        void should_update_a_secret() {
+            var created = secrets.update(shouldCreateASecretRequest());
+
+            assertThat(created.isSucceeded()).isTrue();
+        }
+
+        @Test
+        void should_not_update_a_secret_when_id_is_empty() {
+
+            var created = secrets.update(shouldNotCreateASecretRequest());
+            assertThat(created).satisfies(SecretsTest.this::errorResponse);
+        }
     }
 
     @Nested
@@ -85,6 +99,20 @@ class SecretsTest extends ContainerTestBase {
         @Test
         void should_not_create_a_secret_when_value_is_missing_async() {
             var result = secrets.createAsync(shouldNotCreateASecretRequest());
+            assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(SecretsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_update_a_secret_async() {
+
+            var result = secrets.updateAsync(shouldCreateASecretRequest());
+            assertThat(result).succeedsWithin(5, TimeUnit.SECONDS).matches(Result::isSucceeded);
+        }
+
+        @Test
+        void should_not_update_a_secret_when_id_is_empty_async() {
+
+            var result = secrets.updateAsync(shouldNotCreateASecretRequest());
             assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(SecretsTest.this::errorResponse);
         }
     }
