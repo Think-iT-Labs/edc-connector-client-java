@@ -99,6 +99,13 @@ public class EdcConnectorClient {
         return new EdrCache(managementUrl, httpClient, interceptor);
     }
 
+    public Secrets secrets() {
+        if (managementUrl == null) {
+            throw new IllegalArgumentException("Cannot instantiate Secrets client without the management url");
+        }
+        return new Secrets(managementUrl, httpClient, interceptor);
+    }
+
     public static class Builder {
 
         private final EdcConnectorClient client = new EdcConnectorClient();
