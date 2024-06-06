@@ -25,9 +25,8 @@ public class PolicyDefinitions {
     }
 
     public Result<PolicyDefinition> get(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, id)))
-                .GET();
+        var requestBuilder = getRequestBuilder(id);
+
         return this.managementApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
@@ -35,21 +34,15 @@ public class PolicyDefinitions {
     }
 
     public CompletableFuture<Result<PolicyDefinition>> getAsync(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, id)))
-                .GET();
+        var requestBuilder = getRequestBuilder(id);
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getPolicyDefinition));
     }
 
     public Result<String> create(PolicyDefinition input) {
 
-        var requestBody = compact(input);
+        var requestBuilder = createRequestBuilder(input);
 
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions".formatted(this.url)))
-                .header("content-type", "application/json")
-                .POST(ofString(requestBody.toString()));
         return this.managementApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
@@ -58,12 +51,7 @@ public class PolicyDefinitions {
 
     public CompletableFuture<Result<String>> createAsync(PolicyDefinition input) {
 
-        var requestBody = compact(input);
-
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions".formatted(this.url)))
-                .header("content-type", "application/json")
-                .POST(ofString(requestBody.toString()));
+        var requestBuilder = createRequestBuilder(input);
 
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(content -> content.getJsonObject(0).getString(ID)));
@@ -71,24 +59,14 @@ public class PolicyDefinitions {
 
     public Result<String> update(PolicyDefinition input) {
 
-        var requestBody = compact(input);
-
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, input.id())))
-                .header("content-type", "application/json")
-                .PUT(ofString(requestBody.toString()));
+        var requestBuilder = updateRequestBuilder(input);
 
         return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
     }
 
     public CompletableFuture<Result<String>> updateAsync(PolicyDefinition input) {
 
-        var requestBody = compact(input);
-
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, input.id())))
-                .header("content-type", "application/json")
-                .PUT(ofString(requestBody.toString()));
+        var requestBuilder = updateRequestBuilder(input);
 
         return this.managementApiHttpClient
                 .sendAsync(requestBuilder)
@@ -96,28 +74,21 @@ public class PolicyDefinitions {
     }
 
     public Result<String> delete(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, id)))
-                .DELETE();
+        var requestBuilder = deleteRequestBuilder(id);
 
         return this.managementApiHttpClient.send(requestBuilder).map(result -> id);
     }
 
     public CompletableFuture<Result<String>> deleteAsync(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, id)))
-                .DELETE();
+        var requestBuilder = deleteRequestBuilder(id);
+
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
     }
 
     public Result<List<PolicyDefinition>> request(QuerySpec input) {
 
-        var requestBody = compact(input);
+        var requestBuilder = getPolicyDefinitionsRequestBuilder(input);
 
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/request".formatted(this.url)))
-                .header("content-type", "application/json")
-                .POST(ofString(requestBody.toString()));
         return this.managementApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
@@ -126,14 +97,46 @@ public class PolicyDefinitions {
 
     public CompletableFuture<Result<List<PolicyDefinition>>> requestAsync(QuerySpec input) {
 
-        var requestBody = compact(input);
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/request".formatted(this.url)))
-                .header("content-type", "application/json")
-                .POST(ofString(requestBody.toString()));
+        var requestBuilder = getPolicyDefinitionsRequestBuilder(input);
 
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getPolicyDefinitions));
+    }
+
+    private HttpRequest.Builder getRequestBuilder(String id) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, id)))
+                .GET();
+    }
+
+    private HttpRequest.Builder createRequestBuilder(PolicyDefinition input) {
+        var requestBody = compact(input);
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/policydefinitions".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+    }
+
+    private HttpRequest.Builder updateRequestBuilder(PolicyDefinition input) {
+        var requestBody = compact(input);
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, input.id())))
+                .header("content-type", "application/json")
+                .PUT(ofString(requestBody.toString()));
+    }
+
+    private HttpRequest.Builder deleteRequestBuilder(String id) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, id)))
+                .DELETE();
+    }
+
+    private HttpRequest.Builder getPolicyDefinitionsRequestBuilder(QuerySpec input) {
+        var requestBody = compact(input);
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/policydefinitions/request".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
     }
 
     private PolicyDefinition getPolicyDefinition(JsonArray array) {
