@@ -23,9 +23,7 @@ public class TransferProcesses {
     }
 
     public Result<TransferProcess> get(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/transferprocesses/%s".formatted(this.url, id)))
-                .GET();
+        var requestBuilder = getContractAgreementRequestBuilder(id);
         return this.managementApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
@@ -33,21 +31,15 @@ public class TransferProcesses {
     }
 
     public CompletableFuture<Result<TransferProcess>> getAsync(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/transferprocesses/%s".formatted(this.url, id)))
-                .GET();
+        var requestBuilder = getContractAgreementRequestBuilder(id);
+
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getTransferProcess));
     }
 
     public Result<String> create(TransferRequest input) {
+        var requestBuilder = createRequestBuilder(input);
 
-        var requestBody = compact(input);
-
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/transferprocesses".formatted(this.url)))
-                .header("content-type", "application/json")
-                .POST(ofString(requestBody.toString()));
         return this.managementApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
@@ -56,21 +48,14 @@ public class TransferProcesses {
 
     public CompletableFuture<Result<String>> createAsync(TransferRequest input) {
 
-        var requestBody = compact(input);
-
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/transferprocesses".formatted(this.url)))
-                .header("content-type", "application/json")
-                .POST(ofString(requestBody.toString()));
+        var requestBuilder = createRequestBuilder(input);
 
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(content -> content.getJsonObject(0).getString(ID)));
     }
 
     public Result<TransferState> getState(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/transferprocesses/%s/state".formatted(this.url, id)))
-                .GET();
+        var requestBuilder = getStateRequestBuilder(id);
 
         return this.managementApiHttpClient
                 .send(requestBuilder)
@@ -79,33 +64,21 @@ public class TransferProcesses {
     }
 
     public CompletableFuture<Result<TransferState>> getStateAsync(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/transferprocesses/%s/state".formatted(this.url, id)))
-                .GET();
+        var requestBuilder = getStateRequestBuilder(id);
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getTransferState));
     }
 
     public Result<String> terminate(TerminateTransfer input) {
 
-        var requestBody = compact(input);
-
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/transferprocesses/%s/terminate".formatted(this.url, input.id())))
-                .header("content-type", "application/json")
-                .POST(ofString(requestBody.toString()));
+        var requestBuilder = terminateRequestBuilder(input);
 
         return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
     }
 
     public CompletableFuture<Result<String>> terminateAsync(TerminateTransfer input) {
 
-        var requestBody = compact(input);
-
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/transferprocesses/%s/terminate".formatted(this.url, input.id())))
-                .header("content-type", "application/json")
-                .POST(ofString(requestBody.toString()));
+        var requestBuilder = terminateRequestBuilder(input);
 
         return this.managementApiHttpClient
                 .sendAsync(requestBuilder)
@@ -113,20 +86,49 @@ public class TransferProcesses {
     }
 
     public Result<String> deprovision(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/transferprocesses/%s/deprovision".formatted(this.url, id)))
-                .header("content-type", "application/json")
-                .POST(HttpRequest.BodyPublishers.noBody());
+        var requestBuilder = deprovisionRequestBuilder(id);
 
         return this.managementApiHttpClient.send(requestBuilder).map(result -> id);
     }
 
     public CompletableFuture<Result<String>> deprovisionAsync(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
+        var requestBuilder = deprovisionRequestBuilder(id);
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
+    }
+
+    private HttpRequest.Builder getContractAgreementRequestBuilder(String id) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/transferprocesses/%s".formatted(this.url, id)))
+                .GET();
+    }
+
+    private HttpRequest.Builder createRequestBuilder(TransferRequest input) {
+        var requestBody = compact(input);
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/transferprocesses".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+    }
+
+    private HttpRequest.Builder terminateRequestBuilder(TerminateTransfer input) {
+        var requestBody = compact(input);
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/transferprocesses/%s/terminate".formatted(this.url, input.id())))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+    }
+
+    private HttpRequest.Builder getStateRequestBuilder(String id) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/transferprocesses/%s/state".formatted(this.url, id)))
+                .GET();
+    }
+
+    private HttpRequest.Builder deprovisionRequestBuilder(String id) {
+        return HttpRequest.newBuilder()
                 .uri(URI.create("%s/v2/transferprocesses/%s/deprovision".formatted(this.url, id)))
                 .header("content-type", "application/json")
                 .POST(HttpRequest.BodyPublishers.noBody());
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
     }
 
     private TransferProcess getTransferProcess(JsonArray array) {

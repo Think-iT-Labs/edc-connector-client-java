@@ -23,9 +23,8 @@ public class ContractAgreements {
     }
 
     public Result<ContractAgreement> get(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractagreements/%s".formatted(this.url, id)))
-                .GET();
+        var requestBuilder = getContractAgreementRequestBuilder(id);
+
         return this.managementApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
@@ -33,17 +32,14 @@ public class ContractAgreements {
     }
 
     public CompletableFuture<Result<ContractAgreement>> getAsync(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractagreements/%s".formatted(this.url, id)))
-                .GET();
+        var requestBuilder = getContractAgreementRequestBuilder(id);
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getContractAgreement));
     }
 
     public Result<ContractNegotiation> getNegotiation(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractagreements/%s/negotiation".formatted(this.url, id)))
-                .GET();
+        var requestBuilder = getContractNegotiationRequestBuilder(id);
+
         return this.managementApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
@@ -51,20 +47,13 @@ public class ContractAgreements {
     }
 
     public CompletableFuture<Result<ContractNegotiation>> getNegotiationAsync(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractagreements/%s/negotiation".formatted(this.url, id)))
-                .GET();
+        var requestBuilder = getContractNegotiationRequestBuilder(id);
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getContractNegotiation));
     }
 
     public Result<List<ContractAgreement>> request(QuerySpec input) {
-        var requestBody = compact(input);
-
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractagreements/request".formatted(this.url)))
-                .header("content-type", "application/json")
-                .POST(ofString(requestBody.toString()));
+        var requestBuilder = ContractAgreementsRequestBuilder(input);
         return this.managementApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
@@ -72,14 +61,30 @@ public class ContractAgreements {
     }
 
     public CompletableFuture<Result<List<ContractAgreement>>> requestAsync(QuerySpec input) {
-        var requestBody = compact(input);
+        var requestBuilder = ContractAgreementsRequestBuilder(input);
 
-        var requestBuilder = HttpRequest.newBuilder()
+        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+                .map(this::getContractAgreements));
+    }
+
+    private HttpRequest.Builder getContractAgreementRequestBuilder(String id) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/contractagreements/%s".formatted(this.url, id)))
+                .GET();
+    }
+
+    private HttpRequest.Builder getContractNegotiationRequestBuilder(String id) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/v2/contractagreements/%s/negotiation".formatted(this.url, id)))
+                .GET();
+    }
+
+    private HttpRequest.Builder ContractAgreementsRequestBuilder(QuerySpec input) {
+        var requestBody = compact(input);
+        return HttpRequest.newBuilder()
                 .uri(URI.create("%s/v2/contractagreements/request".formatted(this.url)))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
-                .map(this::getContractAgreements));
     }
 
     private ContractAgreement getContractAgreement(JsonArray array) {

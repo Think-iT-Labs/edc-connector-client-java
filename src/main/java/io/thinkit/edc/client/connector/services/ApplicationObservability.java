@@ -20,9 +20,8 @@ public class ApplicationObservability {
     }
 
     public Result<HealthStatus> checkHealth() {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/check/health".formatted(this.url)))
-                .GET();
+        var requestBuilder = checkHealthRequestBuilder();
+
         return this.managementApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::ToJsonObject)
@@ -30,9 +29,7 @@ public class ApplicationObservability {
     }
 
     public CompletableFuture<Result<HealthStatus>> checkHealthAsync() {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/check/health".formatted(this.url)))
-                .GET();
+        var requestBuilder = checkHealthRequestBuilder();
 
         return this.managementApiHttpClient
                 .sendAsync(requestBuilder)
@@ -40,9 +37,8 @@ public class ApplicationObservability {
     }
 
     public Result<HealthStatus> checkReadiness() {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/check/readiness".formatted(this.url)))
-                .GET();
+        var requestBuilder = checkReadinessRequestBuilder();
+
         return this.managementApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::ToJsonObject)
@@ -50,9 +46,7 @@ public class ApplicationObservability {
     }
 
     public CompletableFuture<Result<HealthStatus>> checkReadinessAsync() {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/check/readiness".formatted(this.url)))
-                .GET();
+        var requestBuilder = checkReadinessRequestBuilder();
 
         return this.managementApiHttpClient
                 .sendAsync(requestBuilder)
@@ -60,9 +54,8 @@ public class ApplicationObservability {
     }
 
     public Result<HealthStatus> checkStartup() {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/check/startup".formatted(this.url)))
-                .GET();
+        var requestBuilder = checkStartupRequestBuilder();
+
         return this.managementApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::ToJsonObject)
@@ -70,9 +63,7 @@ public class ApplicationObservability {
     }
 
     public CompletableFuture<Result<HealthStatus>> checkStartupAsync() {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/check/startup".formatted(this.url)))
-                .GET();
+        var requestBuilder = checkStartupRequestBuilder();
 
         return this.managementApiHttpClient
                 .sendAsync(requestBuilder)
@@ -80,9 +71,7 @@ public class ApplicationObservability {
     }
 
     public Result<HealthStatus> checkLiveness() {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/check/liveness".formatted(this.url)))
-                .GET();
+        var requestBuilder = checkLivenessRequestBuilder();
         return this.managementApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::ToJsonObject)
@@ -90,12 +79,34 @@ public class ApplicationObservability {
     }
 
     public CompletableFuture<Result<HealthStatus>> checkLivenessAsync() {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/check/liveness".formatted(this.url)))
-                .GET();
+        var requestBuilder = checkLivenessRequestBuilder();
         return this.managementApiHttpClient
                 .sendAsync(requestBuilder)
                 .thenApply(result -> result.map(JsonLdUtil::ToJsonObject).map(this::getHealthStatus));
+    }
+
+    private HttpRequest.Builder checkHealthRequestBuilder() {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/check/health".formatted(this.url)))
+                .GET();
+    }
+
+    private HttpRequest.Builder checkReadinessRequestBuilder() {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/check/readiness".formatted(this.url)))
+                .GET();
+    }
+
+    private HttpRequest.Builder checkStartupRequestBuilder() {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/check/startup".formatted(this.url)))
+                .GET();
+    }
+
+    private HttpRequest.Builder checkLivenessRequestBuilder() {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/check/liveness".formatted(this.url)))
+                .GET();
     }
 
     private HealthStatus getHealthStatus(JsonObject content) {
