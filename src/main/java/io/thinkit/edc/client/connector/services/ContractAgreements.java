@@ -19,7 +19,7 @@ public class ContractAgreements {
 
     public ContractAgreements(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
         managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
-        this.url = url;
+        this.url = "%s/v3/contractagreements".formatted(url);
     }
 
     public Result<ContractAgreement> get(String id) {
@@ -69,20 +69,20 @@ public class ContractAgreements {
 
     private HttpRequest.Builder getContractAgreementRequestBuilder(String id) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractagreements/%s".formatted(this.url, id)))
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
                 .GET();
     }
 
     private HttpRequest.Builder getContractNegotiationRequestBuilder(String id) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractagreements/%s/negotiation".formatted(this.url, id)))
+                .uri(URI.create("%s/%s/negotiation".formatted(this.url, id)))
                 .GET();
     }
 
     private HttpRequest.Builder ContractAgreementsRequestBuilder(QuerySpec input) {
         var requestBody = compact(input);
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractagreements/request".formatted(this.url)))
+                .uri(URI.create("%s/request".formatted(this.url)))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
     }
