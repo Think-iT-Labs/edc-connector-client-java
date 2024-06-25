@@ -20,12 +20,12 @@ public class Dataplanes {
 
     public Dataplanes(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
         managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
-        this.url = url;
+        this.url = "%s/v3/dataplanes".formatted(url);
     }
 
     public Result<List<DataPlaneInstance>> get() {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/dataplanes".formatted(this.url)))
+                .uri(URI.create(this.url))
                 .GET();
         return this.managementApiHttpClient
                 .send(requestBuilder)
@@ -35,7 +35,7 @@ public class Dataplanes {
 
     public CompletableFuture<Result<List<DataPlaneInstance>>> getAsync() {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/dataplanes".formatted(this.url)))
+                .uri(URI.create(this.url))
                 .GET();
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getDataPlaneInstances));
@@ -46,7 +46,7 @@ public class Dataplanes {
         var requestBody = compact(input);
 
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/dataplanes".formatted(this.url)))
+                .uri(URI.create(this.url))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
         return this.managementApiHttpClient
@@ -60,7 +60,7 @@ public class Dataplanes {
         var requestBody = compact(input);
 
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/dataplanes".formatted(this.url)))
+                .uri(URI.create(this.url))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
 
@@ -73,7 +73,7 @@ public class Dataplanes {
         var requestBody = compact(selectionRequest);
 
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/dataplanes/select".formatted(this.url)))
+                .uri(URI.create("%s/select".formatted(this.url)))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
         return this.managementApiHttpClient
@@ -87,7 +87,7 @@ public class Dataplanes {
         var requestBody = compact(selectionRequest);
 
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/dataplanes/select".formatted(this.url)))
+                .uri(URI.create("%s/select".formatted(this.url)))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)

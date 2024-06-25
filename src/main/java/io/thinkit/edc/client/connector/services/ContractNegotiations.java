@@ -21,12 +21,12 @@ public class ContractNegotiations {
 
     public ContractNegotiations(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
         managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
-        this.url = url;
+        this.url = "%s/v3/contractnegotiations".formatted(url);
     }
 
     public Result<ContractNegotiation> get(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations/%s".formatted(this.url, id)))
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
                 .GET();
         return this.managementApiHttpClient
                 .send(requestBuilder)
@@ -36,7 +36,7 @@ public class ContractNegotiations {
 
     public CompletableFuture<Result<ContractNegotiation>> getAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations/%s".formatted(this.url, id)))
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
                 .GET();
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getContractNegotiation));
@@ -47,7 +47,7 @@ public class ContractNegotiations {
         var requestBody = compact(input);
 
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations".formatted(this.url)))
+                .uri(URI.create(this.url))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
         return this.managementApiHttpClient
@@ -61,7 +61,7 @@ public class ContractNegotiations {
         var requestBody = compact(input);
 
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations".formatted(this.url)))
+                .uri(URI.create(this.url))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
@@ -70,7 +70,7 @@ public class ContractNegotiations {
 
     public Result<ContractAgreement> getAgreement(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations/%s/agreement".formatted(this.url, id)))
+                .uri(URI.create("%s/%s/agreement".formatted(this.url, id)))
                 .GET();
         return this.managementApiHttpClient
                 .send(requestBuilder)
@@ -80,7 +80,7 @@ public class ContractNegotiations {
 
     public CompletableFuture<Result<ContractAgreement>> getAgreementAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations/%s/agreement".formatted(this.url, id)))
+                .uri(URI.create("%s/%s/agreement".formatted(this.url, id)))
                 .GET();
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getContractAgreement));
@@ -91,7 +91,7 @@ public class ContractNegotiations {
         var requestBody = compact(input);
 
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations/%s/terminate".formatted(this.url, input.id())))
+                .uri(URI.create("%s/%s/terminate".formatted(this.url, input.id())))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
         return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
@@ -102,7 +102,7 @@ public class ContractNegotiations {
         var requestBody = compact(input);
 
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations/%s/terminate".formatted(this.url, input.id())))
+                .uri(URI.create("%s/%s/terminate".formatted(this.url, input.id())))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
 
@@ -116,7 +116,7 @@ public class ContractNegotiations {
         var requestBody = compact(input);
 
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations/request".formatted(this.url)))
+                .uri(URI.create("%s/request".formatted(this.url)))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
         return this.managementApiHttpClient
@@ -130,7 +130,7 @@ public class ContractNegotiations {
         var requestBody = compact(input);
 
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations/request".formatted(this.url)))
+                .uri(URI.create("%s/request".formatted(this.url)))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
@@ -139,7 +139,7 @@ public class ContractNegotiations {
 
     public Result<String> getState(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations/%s/state".formatted(this.url, id)))
+                .uri(URI.create("%s/%s/state".formatted(this.url, id)))
                 .GET();
         return this.managementApiHttpClient
                 .send(requestBuilder)
@@ -149,7 +149,7 @@ public class ContractNegotiations {
 
     public CompletableFuture<Result<String>> getStateAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations/%s/state".formatted(this.url, id)))
+                .uri(URI.create("%s/%s/state".formatted(this.url, id)))
                 .GET();
         return this.managementApiHttpClient
                 .sendAsync(requestBuilder)

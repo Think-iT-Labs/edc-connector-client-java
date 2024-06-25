@@ -1,8 +1,9 @@
-package io.thinkit.edc.client.connector;
+package io.thinkit.edc.client.connector.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import io.thinkit.edc.client.connector.EdcConnectorClient;
 import org.junit.jupiter.api.Test;
 
 public class EdcConnectorClientTest {

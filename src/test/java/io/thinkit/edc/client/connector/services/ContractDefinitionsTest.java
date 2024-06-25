@@ -1,12 +1,14 @@
-package io.thinkit.edc.client.connector;
+package io.thinkit.edc.client.connector.services;
 
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.thinkit.edc.client.connector.ContainerTestBase;
+import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.model.ContractDefinition;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
-import io.thinkit.edc.client.connector.services.ContractDefinitions;
+
 import java.net.http.HttpClient;
 import java.util.List;
 import java.util.concurrent.TimeUnit;

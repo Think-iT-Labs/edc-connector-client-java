@@ -22,120 +22,112 @@ public class Assets {
 
     public Assets(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
         managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
-        this.url = url;
+        this.url = "%s/v3/assets".formatted(url);
     }
 
     public Result<Asset> get(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/%s".formatted(this.url, id)))
-                .GET();
         return this.managementApiHttpClient
-                .send(requestBuilder)
+                .send(getRequest(id))
                 .map(JsonLdUtil::expand)
                 .map(this::getAsset);
     }
 
     public CompletableFuture<Result<Asset>> getAsync(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/%s".formatted(this.url, id)))
-                .GET();
-
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
-                .map(this::getAsset));
+        return this.managementApiHttpClient
+                .sendAsync(getRequest(id))
+                .thenApply(result -> result.map(JsonLdUtil::expand)
+                    .map(this::getAsset)
+                );
     }
 
     public Result<String> create(Asset input) {
-        var requestBody = compact(input);
-
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets".formatted(this.url)))
-                .header("content-type", "application/json")
-                .POST(ofString(requestBody.toString()));
         return this.managementApiHttpClient
-                .send(requestBuilder)
+                .send(createRequest(input))
                 .map(JsonLdUtil::expand)
                 .map(content -> content.getJsonObject(0).getString(ID));
     }
 
     public CompletableFuture<Result<String>> createAsync(Asset input) {
-        var requestBody = compact(input);
-
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets".formatted(this.url)))
-                .header("content-type", "application/json")
-                .POST(ofString(requestBody.toString()));
-
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
-                .map(content -> content.getJsonObject(0).getString(ID)));
+        return this.managementApiHttpClient
+                .sendAsync(createRequest(input))
+                .thenApply(result -> result.map(JsonLdUtil::expand)
+                    .map(content -> content.getJsonObject(0).getString(ID))
+                );
     }
 
     public Result<String> update(Asset input) {
-        var requestBody = compact(input);
-
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets".formatted(this.url)))
-                .header("content-type", "application/json")
-                .PUT(ofString(requestBody.toString()));
-
-        return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
+        return this.managementApiHttpClient
+                .send(updateRequest(input))
+                .map(result -> input.id());
     }
 
     public CompletableFuture<Result<String>> updateAsync(Asset input) {
-
-        var requestBody = compact(input);
-
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets".formatted(this.url)))
-                .header("content-type", "application/json")
-                .PUT(ofString(requestBody.toString()));
-
         return this.managementApiHttpClient
-                .sendAsync(requestBuilder)
+                .sendAsync(updateRequest(input))
                 .thenApply(result -> result.map(content -> input.id()));
     }
 
     public Result<String> delete(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/%s".formatted(this.url, id)))
-                .DELETE();
-
-        return this.managementApiHttpClient.send(requestBuilder).map(result -> id);
+        return this.managementApiHttpClient
+                .send(deleteRequest(id))
+                .map(result -> id);
     }
 
     public CompletableFuture<Result<String>> deleteAsync(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/%s".formatted(this.url, id)))
-                .DELETE();
-
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
+        return this.managementApiHttpClient
+                .sendAsync(deleteRequest(id))
+                .thenApply(result -> result.map(content -> id));
     }
 
     public Result<List<Asset>> request(QuerySpec input) {
-
-        var requestBody = compact(input);
-
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/request".formatted(this.url)))
-                .header("content-type", "application/json")
-                .POST(ofString(requestBody.toString()));
-
         return this.managementApiHttpClient
-                .send(requestBuilder)
+                .send(queryRequest(input))
                 .map(JsonLdUtil::expand)
                 .map(this::getAssets);
     }
 
     public CompletableFuture<Result<List<Asset>>> requestAsync(QuerySpec input) {
+        return this.managementApiHttpClient.sendAsync(queryRequest(input))
+                .thenApply(result -> result.map(JsonLdUtil::expand).map(this::getAssets));
+    }
 
+    private HttpRequest.Builder getRequest(String id) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
+                .GET();
+    }
+
+    private HttpRequest.Builder createRequest(Asset input) {
         var requestBody = compact(input);
 
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/request".formatted(this.url)))
+        return HttpRequest.newBuilder()
+                .uri(URI.create(this.url))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
+    }
 
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
-                .map(this::getAssets));
+    private HttpRequest.Builder updateRequest(Asset input) {
+        var requestBody = compact(input);
+
+        return HttpRequest.newBuilder()
+                .uri(URI.create(this.url))
+                .header("content-type", "application/json")
+                .PUT(ofString(requestBody.toString()));
+    }
+
+    private HttpRequest.Builder deleteRequest(String id) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
+                .DELETE();
+    }
+
+    private HttpRequest.Builder queryRequest(QuerySpec input) {
+        var requestBody = compact(input);
+
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/request".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
     }
 
     private Asset getAsset(JsonArray array) {

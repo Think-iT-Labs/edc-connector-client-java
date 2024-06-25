@@ -36,9 +36,7 @@ public class ManagementApiHttpClient {
 
     protected CompletableFuture<Result<InputStream>> sendAsync(HttpRequest.Builder requestBuilder) {
         var request = interceptor.apply(requestBuilder).build();
-
-        CompletableFuture<HttpResponse<InputStream>> future =
-                httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+        var future = httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
         return future.thenApply(this::toResult);
     }
 

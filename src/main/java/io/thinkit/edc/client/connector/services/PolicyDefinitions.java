@@ -21,12 +21,12 @@ public class PolicyDefinitions {
 
     public PolicyDefinitions(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
         managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
-        this.url = url;
+        this.url = "%s/v3/policydefinitions".formatted(url);
     }
 
     public Result<PolicyDefinition> get(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, id)))
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
                 .GET();
         return this.managementApiHttpClient
                 .send(requestBuilder)
@@ -36,7 +36,7 @@ public class PolicyDefinitions {
 
     public CompletableFuture<Result<PolicyDefinition>> getAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, id)))
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
                 .GET();
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getPolicyDefinition));
@@ -47,7 +47,7 @@ public class PolicyDefinitions {
         var requestBody = compact(input);
 
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions".formatted(this.url)))
+                .uri(URI.create(this.url))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
         return this.managementApiHttpClient
@@ -61,7 +61,7 @@ public class PolicyDefinitions {
         var requestBody = compact(input);
 
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions".formatted(this.url)))
+                .uri(URI.create(this.url))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
 
@@ -74,7 +74,7 @@ public class PolicyDefinitions {
         var requestBody = compact(input);
 
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, input.id())))
+                .uri(URI.create("%s/%s".formatted(this.url, input.id())))
                 .header("content-type", "application/json")
                 .PUT(ofString(requestBody.toString()));
 
@@ -86,7 +86,7 @@ public class PolicyDefinitions {
         var requestBody = compact(input);
 
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, input.id())))
+                .uri(URI.create("%s/%s".formatted(this.url, input.id())))
                 .header("content-type", "application/json")
                 .PUT(ofString(requestBody.toString()));
 
@@ -97,7 +97,7 @@ public class PolicyDefinitions {
 
     public Result<String> delete(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, id)))
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
                 .DELETE();
 
         return this.managementApiHttpClient.send(requestBuilder).map(result -> id);
@@ -105,7 +105,7 @@ public class PolicyDefinitions {
 
     public CompletableFuture<Result<String>> deleteAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/%s".formatted(this.url, id)))
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
                 .DELETE();
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
     }
@@ -115,7 +115,7 @@ public class PolicyDefinitions {
         var requestBody = compact(input);
 
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/request".formatted(this.url)))
+                .uri(URI.create("%s/request".formatted(this.url)))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
         return this.managementApiHttpClient
@@ -128,7 +128,7 @@ public class PolicyDefinitions {
 
         var requestBody = compact(input);
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/policydefinitions/request".formatted(this.url)))
+                .uri(URI.create("%s/request".formatted(this.url)))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
 

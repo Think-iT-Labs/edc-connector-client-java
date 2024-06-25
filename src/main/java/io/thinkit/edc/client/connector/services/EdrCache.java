@@ -18,7 +18,7 @@ public class EdrCache {
 
     public EdrCache(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
         managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
-        this.url = url;
+        this.url = "%s/v3/edrs".formatted(url);
     }
 
     public Result<String> delete(String transferProcessId) {
@@ -68,20 +68,20 @@ public class EdrCache {
 
     private HttpRequest.Builder getDeleteRequestBuilder(String transferProcessId) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v1/edrs/%s".formatted(this.url, transferProcessId)))
+                .uri(URI.create("%s/%s".formatted(this.url, transferProcessId)))
                 .DELETE();
     }
 
     private HttpRequest.Builder getDataAddressRequestBuilder(String transferProcessId) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v1/edrs/%s/dataaddress".formatted(this.url, transferProcessId)))
+                .uri(URI.create("%s/%s/dataaddress".formatted(this.url, transferProcessId)))
                 .GET();
     }
 
     private HttpRequest.Builder getRequestBuilder(QuerySpec input) {
         var requestBody = compact(input);
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v1/edrs/request".formatted(this.url)))
+                .uri(URI.create("%s/request".formatted(this.url)))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
     }

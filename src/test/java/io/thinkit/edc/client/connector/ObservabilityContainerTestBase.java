@@ -6,9 +6,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 public abstract class ObservabilityContainerTestBase {
     @Container
-    static final ApiContainer prism;
+    protected static final ApiContainer prism;
 
-    static final int timeout = 5;
+    protected static final int timeout = 5;
 
     static {
         prism = new ApiContainer("/observability-api.yml");

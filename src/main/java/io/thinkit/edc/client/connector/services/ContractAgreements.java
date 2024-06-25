@@ -19,12 +19,12 @@ public class ContractAgreements {
 
     public ContractAgreements(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
         managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
-        this.url = url;
+        this.url = "%s/v3/contractagreements".formatted(url);
     }
 
     public Result<ContractAgreement> get(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractagreements/%s".formatted(this.url, id)))
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
                 .GET();
         return this.managementApiHttpClient
                 .send(requestBuilder)
@@ -34,7 +34,7 @@ public class ContractAgreements {
 
     public CompletableFuture<Result<ContractAgreement>> getAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractagreements/%s".formatted(this.url, id)))
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
                 .GET();
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getContractAgreement));
@@ -42,7 +42,7 @@ public class ContractAgreements {
 
     public Result<ContractNegotiation> getNegotiation(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractagreements/%s/negotiation".formatted(this.url, id)))
+                .uri(URI.create("%s/%s/negotiation".formatted(this.url, id)))
                 .GET();
         return this.managementApiHttpClient
                 .send(requestBuilder)
@@ -52,7 +52,7 @@ public class ContractAgreements {
 
     public CompletableFuture<Result<ContractNegotiation>> getNegotiationAsync(String id) {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractagreements/%s/negotiation".formatted(this.url, id)))
+                .uri(URI.create("%s/%s/negotiation".formatted(this.url, id)))
                 .GET();
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getContractNegotiation));
@@ -62,7 +62,7 @@ public class ContractAgreements {
         var requestBody = compact(input);
 
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractagreements/request".formatted(this.url)))
+                .uri(URI.create("%s/request".formatted(this.url)))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
         return this.managementApiHttpClient
@@ -75,7 +75,7 @@ public class ContractAgreements {
         var requestBody = compact(input);
 
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractagreements/request".formatted(this.url)))
+                .uri(URI.create("%s/request".formatted(this.url)))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
