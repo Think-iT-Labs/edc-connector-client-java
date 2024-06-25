@@ -21,7 +21,7 @@ public class ContractNegotiations {
 
     public ContractNegotiations(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
         managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
-        this.url = url;
+        this.url = "%s/v3/contractnegotiations".formatted(url);
     }
 
     public Result<ContractNegotiation> get(String id) {
@@ -124,20 +124,20 @@ public class ContractNegotiations {
 
     private HttpRequest.Builder getRequestBuilder(String id) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations/%s".formatted(this.url, id)))
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
                 .GET();
     }
 
     private HttpRequest.Builder getContractAgreementRequestBuilder(String id) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations/%s/agreement".formatted(this.url, id)))
+                .uri(URI.create("%s/%s/agreement".formatted(this.url, id)))
                 .GET();
     }
 
     private HttpRequest.Builder createRequestBuilder(ContractRequest input) {
         var requestBody = compact(input);
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations".formatted(this.url)))
+                .uri(URI.create(this.url))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
     }
@@ -145,7 +145,7 @@ public class ContractNegotiations {
     private HttpRequest.Builder terminateRequestBuilder(TerminateNegotiation input) {
         var requestBody = compact(input);
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations/%s/terminate".formatted(this.url, input.id())))
+                .uri(URI.create("%s/%s/terminate".formatted(this.url, input.id())))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
     }
@@ -153,14 +153,14 @@ public class ContractNegotiations {
     private HttpRequest.Builder getContractNegotiationsRequestBuilder(QuerySpec input) {
         var requestBody = compact(input);
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations/request".formatted(this.url)))
+                .uri(URI.create("%s/request".formatted(this.url)))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
     }
 
     private HttpRequest.Builder getStateRequestBuilder(String id) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractnegotiations/%s/state".formatted(this.url, id)))
+                .uri(URI.create("%s/%s/state".formatted(this.url, id)))
                 .GET();
     }
 

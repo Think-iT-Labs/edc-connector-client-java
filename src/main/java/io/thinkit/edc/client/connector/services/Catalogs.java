@@ -18,7 +18,7 @@ public class Catalogs {
 
     public Catalogs(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
         managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
-        this.url = url;
+        this.url = "%s/v3/catalog".formatted(url);
     }
 
     public Result<Catalog> request(CatalogRequest input) {
@@ -57,7 +57,7 @@ public class Catalogs {
     private HttpRequest.Builder requestDatasetRequestBuilder(DatasetRequest input) {
         var requestBody = compact(input);
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/catalog/dataset/request".formatted(this.url)))
+                .uri(URI.create("%s/dataset/request".formatted(this.url)))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
     }
@@ -65,7 +65,7 @@ public class Catalogs {
     private HttpRequest.Builder getCatalogRequestBuilder(CatalogRequest input) {
         var requestBody = compact(input);
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/catalog/request".formatted(this.url)))
+                .uri(URI.create("%s/request".formatted(this.url)))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
     }

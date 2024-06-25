@@ -19,7 +19,7 @@ public class TransferProcesses {
 
     public TransferProcesses(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
         managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
-        this.url = url;
+        this.url = "%s/v3/transferprocesses".formatted(url);
     }
 
     public Result<TransferProcess> get(String id) {
@@ -98,14 +98,14 @@ public class TransferProcesses {
 
     private HttpRequest.Builder getContractAgreementRequestBuilder(String id) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/transferprocesses/%s".formatted(this.url, id)))
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
                 .GET();
     }
 
     private HttpRequest.Builder createRequestBuilder(TransferRequest input) {
         var requestBody = compact(input);
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/transferprocesses".formatted(this.url)))
+                .uri(URI.create(this.url))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
     }
@@ -113,20 +113,20 @@ public class TransferProcesses {
     private HttpRequest.Builder terminateRequestBuilder(TerminateTransfer input) {
         var requestBody = compact(input);
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/transferprocesses/%s/terminate".formatted(this.url, input.id())))
+                .uri(URI.create("%s/%s/terminate".formatted(this.url, input.id())))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
     }
 
     private HttpRequest.Builder getStateRequestBuilder(String id) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/transferprocesses/%s/state".formatted(this.url, id)))
+                .uri(URI.create("%s/%s/state".formatted(this.url, id)))
                 .GET();
     }
 
     private HttpRequest.Builder deprovisionRequestBuilder(String id) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/transferprocesses/%s/deprovision".formatted(this.url, id)))
+                .uri(URI.create("%s/%s/deprovision".formatted(this.url, id)))
                 .header("content-type", "application/json")
                 .POST(HttpRequest.BodyPublishers.noBody());
     }

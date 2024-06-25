@@ -63,7 +63,7 @@ fun registerDownloadOpenapiSpec(context: String): Task {
         doLast {
             openapiFile?.let { fileSpec ->
                 fileSpec.parentFile.mkdirs()
-                download("https://eclipse-edc.github.io/Connector/openapi/$context-api/${libs.versions.edc.get()}/$context-api.yaml")
+                download("https://eclipse-edc.github.io/Connector/openapi/$context-api/$context-api.yaml")
                     .replace("example: null", "")
                     .let { fileSpec.writeText(it) }
             }

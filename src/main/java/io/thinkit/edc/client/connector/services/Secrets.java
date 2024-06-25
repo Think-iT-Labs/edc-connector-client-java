@@ -20,7 +20,7 @@ public class Secrets {
 
     public Secrets(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
         managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
-        this.url = url;
+        this.url = "%s/v3/secrets".formatted(url);
     }
 
     public Result<Secret> get(String id) {
@@ -83,14 +83,14 @@ public class Secrets {
 
     private HttpRequest.Builder getRequestBuilder(String id) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v1/secrets/%s".formatted(this.url, id)))
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
                 .GET();
     }
 
     private HttpRequest.Builder createRequestBuilder(Secret input) {
         var requestBody = compact(input);
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v1/secrets".formatted(this.url)))
+                .uri(URI.create(this.url))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
     }
@@ -98,14 +98,14 @@ public class Secrets {
     private HttpRequest.Builder updateRequestBuilder(Secret input) {
         var requestBody = compact(input);
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v1/secrets".formatted(this.url)))
+                .uri(URI.create(this.url))
                 .header("content-type", "application/json")
                 .PUT(ofString(requestBody.toString()));
     }
 
     private HttpRequest.Builder deleteRequestBuilder(String id) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v1/secrets/%s".formatted(this.url, id)))
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
                 .DELETE();
     }
 

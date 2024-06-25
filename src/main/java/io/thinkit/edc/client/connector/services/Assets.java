@@ -22,7 +22,7 @@ public class Assets {
 
     public Assets(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
         managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
-        this.url = url;
+        this.url = "%s/v3/assets".formatted(url);
     }
 
     public Result<Asset> get(String id) {
@@ -103,14 +103,14 @@ public class Assets {
 
     private HttpRequest.Builder getRequestBuilder(String id) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/%s".formatted(this.url, id)))
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
                 .GET();
     }
 
     private HttpRequest.Builder createRequestBuilder(Asset input) {
         var requestBody = compact(input);
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets".formatted(this.url)))
+                .uri(URI.create(this.url))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
     }
@@ -118,21 +118,21 @@ public class Assets {
     private HttpRequest.Builder updateRequestBuilder(Asset input) {
         var requestBody = compact(input);
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets".formatted(this.url)))
+                .uri(URI.create(this.url))
                 .header("content-type", "application/json")
                 .PUT(ofString(requestBody.toString()));
     }
 
     private HttpRequest.Builder deleteRequestBuilder(String id) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/%s".formatted(this.url, id)))
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
                 .DELETE();
     }
 
     private HttpRequest.Builder getAssetsRequestBuilder(QuerySpec input) {
         var requestBody = compact(input);
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/request".formatted(this.url)))
+                .uri(URI.create("%s/request".formatted(this.url)))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
     }

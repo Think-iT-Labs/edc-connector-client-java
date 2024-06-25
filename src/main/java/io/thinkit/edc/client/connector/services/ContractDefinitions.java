@@ -20,7 +20,7 @@ public class ContractDefinitions {
 
     public ContractDefinitions(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
         managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
-        this.url = url;
+        this.url = "%s/v3/contractdefinitions".formatted(url);
     }
 
     public Result<ContractDefinition> get(String id) {
@@ -102,14 +102,14 @@ public class ContractDefinitions {
 
     private HttpRequest.Builder getRequestBuilder(String id) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractdefinitions/%s".formatted(this.url, id)))
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
                 .GET();
     }
 
     private HttpRequest.Builder createRequestBuilder(ContractDefinition input) {
         var requestBody = compact(input);
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractdefinitions".formatted(this.url)))
+                .uri(URI.create(this.url))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
     }
@@ -117,21 +117,21 @@ public class ContractDefinitions {
     private HttpRequest.Builder updateRequestBuilder(ContractDefinition input) {
         var requestBody = compact(input);
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractdefinitions".formatted(this.url)))
+                .uri(URI.create(this.url))
                 .header("content-type", "application/json")
                 .PUT(ofString(requestBody.toString()));
     }
 
     private HttpRequest.Builder deleteRequestBuilder(String id) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractdefinitions/%s".formatted(this.url, id)))
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
                 .DELETE();
     }
 
     private HttpRequest.Builder getContractDefinitionsRequestBuilder(QuerySpec input) {
         var requestBody = compact(input);
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/v2/contractdefinitions/request".formatted(this.url)))
+                .uri(URI.create("%s/request".formatted(this.url)))
                 .header("content-type", "application/json")
                 .POST(ofString(requestBody.toString()));
     }
