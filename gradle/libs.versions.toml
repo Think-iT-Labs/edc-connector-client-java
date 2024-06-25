@@ -2,11 +2,9 @@
 format.version = "1.1"
 
 [versions]
-edc = "0.7.1-SNAPSHOT"
 
 [libraries]
-assertj = { module = "org.assertj:assertj-core", version = "3.25.3" }
-edc-runtime-metamodel = { module = "org.eclipse.edc:runtime-metamodel", version.ref = "edc" }
+assertj = { module = "org.assertj:assertj-core", version = "3.26.0" }
 jakarta-json = { module = "org.glassfish:jakarta.json", version = "2.0.1" }
 jakarta-json-api = { module = "jakarta.json:jakarta.json-api", version = "2.1.3" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version = "2.17.1" }

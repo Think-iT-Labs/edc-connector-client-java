@@ -22,13 +22,12 @@ public class Assets {
 
     public Assets(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
         managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
-        this.url = url;
+        this.url = "%s/v3/assets".formatted(url);
     }
 
     public Result<Asset> get(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/%s".formatted(this.url, id)))
-                .GET();
+        var requestBuilder = getRequestBuilder(id);
+
         return this.managementApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
@@ -36,21 +35,15 @@ public class Assets {
     }
 
     public CompletableFuture<Result<Asset>> getAsync(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/%s".formatted(this.url, id)))
-                .GET();
+        var requestBuilder = getRequestBuilder(id);
 
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getAsset));
     }
 
     public Result<String> create(Asset input) {
-        var requestBody = compact(input);
+        var requestBuilder = createRequestBuilder(input);
 
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets".formatted(this.url)))
-                .header("content-type", "application/json")
-                .POST(ofString(requestBody.toString()));
         return this.managementApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
@@ -58,36 +51,21 @@ public class Assets {
     }
 
     public CompletableFuture<Result<String>> createAsync(Asset input) {
-        var requestBody = compact(input);
-
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets".formatted(this.url)))
-                .header("content-type", "application/json")
-                .POST(ofString(requestBody.toString()));
+        var requestBuilder = createRequestBuilder(input);
 
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(content -> content.getJsonObject(0).getString(ID)));
     }
 
     public Result<String> update(Asset input) {
-        var requestBody = compact(input);
-
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets".formatted(this.url)))
-                .header("content-type", "application/json")
-                .PUT(ofString(requestBody.toString()));
+        var requestBuilder = updateRequestBuilder(input);
 
         return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
     }
 
     public CompletableFuture<Result<String>> updateAsync(Asset input) {
 
-        var requestBody = compact(input);
-
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets".formatted(this.url)))
-                .header("content-type", "application/json")
-                .PUT(ofString(requestBody.toString()));
+        var requestBuilder = updateRequestBuilder(input);
 
         return this.managementApiHttpClient
                 .sendAsync(requestBuilder)
@@ -95,29 +73,20 @@ public class Assets {
     }
 
     public Result<String> delete(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/%s".formatted(this.url, id)))
-                .DELETE();
+        var requestBuilder = deleteRequestBuilder(id);
 
         return this.managementApiHttpClient.send(requestBuilder).map(result -> id);
     }
 
     public CompletableFuture<Result<String>> deleteAsync(String id) {
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/%s".formatted(this.url, id)))
-                .DELETE();
+        var requestBuilder = deleteRequestBuilder(id);
 
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
     }
 
     public Result<List<Asset>> request(QuerySpec input) {
 
-        var requestBody = compact(input);
-
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/request".formatted(this.url)))
-                .header("content-type", "application/json")
-                .POST(ofString(requestBody.toString()));
+        var requestBuilder = getAssetsRequestBuilder(input);
 
         return this.managementApiHttpClient
                 .send(requestBuilder)
@@ -126,16 +95,46 @@ public class Assets {
     }
 
     public CompletableFuture<Result<List<Asset>>> requestAsync(QuerySpec input) {
-
-        var requestBody = compact(input);
-
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create("%s/v3/assets/request".formatted(this.url)))
-                .header("content-type", "application/json")
-                .POST(ofString(requestBody.toString()));
+        var requestBuilder = getAssetsRequestBuilder(input);
 
         return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getAssets));
+    }
+
+    private HttpRequest.Builder getRequestBuilder(String id) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
+                .GET();
+    }
+
+    private HttpRequest.Builder createRequestBuilder(Asset input) {
+        var requestBody = compact(input);
+        return HttpRequest.newBuilder()
+                .uri(URI.create(this.url))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+    }
+
+    private HttpRequest.Builder updateRequestBuilder(Asset input) {
+        var requestBody = compact(input);
+        return HttpRequest.newBuilder()
+                .uri(URI.create(this.url))
+                .header("content-type", "application/json")
+                .PUT(ofString(requestBody.toString()));
+    }
+
+    private HttpRequest.Builder deleteRequestBuilder(String id) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/%s".formatted(this.url, id)))
+                .DELETE();
+    }
+
+    private HttpRequest.Builder getAssetsRequestBuilder(QuerySpec input) {
+        var requestBody = compact(input);
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/request".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
     }
 
     private Asset getAsset(JsonArray array) {
