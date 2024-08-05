@@ -13,11 +13,11 @@ import java.net.http.HttpResponse;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.UnaryOperator;
 
-public class ManagementApiHttpClient {
+public class EdcApiHttpClient {
     private final HttpClient httpClient;
     private final UnaryOperator<HttpRequest.Builder> interceptor;
 
-    public ManagementApiHttpClient(HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
+    public EdcApiHttpClient(HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
         this.httpClient = httpClient;
         this.interceptor = interceptor;
     }
@@ -37,9 +37,9 @@ public class ManagementApiHttpClient {
     protected CompletableFuture<Result<InputStream>> sendAsync(HttpRequest.Builder requestBuilder) {
         var request = interceptor.apply(requestBuilder).build();
 
-        CompletableFuture<HttpResponse<InputStream>> future =
-                httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
-        return future.thenApply(this::toResult);
+        return httpClient
+                .sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
+                .thenApply(this::toResult);
     }
 
     protected Result<InputStream> toResult(HttpResponse<InputStream> response) {

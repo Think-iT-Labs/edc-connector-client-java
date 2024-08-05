@@ -9,6 +9,7 @@ public class EdcConnectorClient {
 
     private String managementUrl;
     private String observabilityUrl;
+    private String catalogCacheUrl;
     private HttpClient httpClient = HttpClient.newHttpClient();
     private UnaryOperator<HttpRequest.Builder> interceptor = UnaryOperator.identity();
 
@@ -106,6 +107,13 @@ public class EdcConnectorClient {
         return new Secrets(managementUrl, httpClient, interceptor);
     }
 
+    public CatalogCache catalogCache() {
+        if (catalogCacheUrl == null) {
+            throw new IllegalArgumentException("Cannot instantiate CatalogCache client without the catalog cache url");
+        }
+        return new CatalogCache(catalogCacheUrl, httpClient, interceptor);
+    }
+
     public static class Builder {
 
         private final EdcConnectorClient client = new EdcConnectorClient();
@@ -117,6 +125,11 @@ public class EdcConnectorClient {
 
         public Builder observabilityUrl(String observabilityUrl) {
             client.observabilityUrl = observabilityUrl;
+            return this;
+        }
+
+        public Builder catalogCacheUrl(String catalogCacheUrl) {
+            client.catalogCacheUrl = catalogCacheUrl;
             return this;
         }
 

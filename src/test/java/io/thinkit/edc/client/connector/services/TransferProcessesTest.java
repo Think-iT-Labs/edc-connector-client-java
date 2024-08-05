@@ -1,9 +1,10 @@
-package io.thinkit.edc.client.connector;
+package io.thinkit.edc.client.connector.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.thinkit.edc.client.connector.EdcConnectorClient;
+import io.thinkit.edc.client.connector.ManagementApiTestBase;
 import io.thinkit.edc.client.connector.model.*;
-import io.thinkit.edc.client.connector.services.TransferProcesses;
 import java.net.http.HttpClient;
 import java.util.Arrays;
 import java.util.List;
@@ -13,7 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-class TransferProcessesTest extends ContainerTestBase {
+class TransferProcessesTest extends ManagementApiTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();
     private TransferProcesses transferProcesses;

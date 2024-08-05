@@ -15,16 +15,16 @@ import java.util.function.UnaryOperator;
 
 public class TransferProcesses {
     private final String url;
-    private final ManagementApiHttpClient managementApiHttpClient;
+    private final EdcApiHttpClient edcApiHttpClient;
 
     public TransferProcesses(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
-        managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
+        edcApiHttpClient = new EdcApiHttpClient(httpClient, interceptor);
         this.url = "%s/v3/transferprocesses".formatted(url);
     }
 
     public Result<TransferProcess> get(String id) {
         var requestBuilder = getContractAgreementRequestBuilder(id);
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
                 .map(this::getTransferProcess);
@@ -33,14 +33,14 @@ public class TransferProcesses {
     public CompletableFuture<Result<TransferProcess>> getAsync(String id) {
         var requestBuilder = getContractAgreementRequestBuilder(id);
 
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getTransferProcess));
     }
 
     public Result<String> create(TransferRequest input) {
         var requestBuilder = createRequestBuilder(input);
 
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
                 .map(content -> content.getJsonObject(0).getString(ID));
@@ -50,14 +50,14 @@ public class TransferProcesses {
 
         var requestBuilder = createRequestBuilder(input);
 
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(content -> content.getJsonObject(0).getString(ID)));
     }
 
     public Result<TransferState> getState(String id) {
         var requestBuilder = getStateRequestBuilder(id);
 
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
                 .map(this::getTransferState);
@@ -65,7 +65,7 @@ public class TransferProcesses {
 
     public CompletableFuture<Result<TransferState>> getStateAsync(String id) {
         var requestBuilder = getStateRequestBuilder(id);
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getTransferState));
     }
 
@@ -73,27 +73,25 @@ public class TransferProcesses {
 
         var requestBuilder = terminateRequestBuilder(input);
 
-        return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
+        return this.edcApiHttpClient.send(requestBuilder).map(result -> input.id());
     }
 
     public CompletableFuture<Result<String>> terminateAsync(TerminateTransfer input) {
 
         var requestBuilder = terminateRequestBuilder(input);
 
-        return this.managementApiHttpClient
-                .sendAsync(requestBuilder)
-                .thenApply(result -> result.map(content -> input.id()));
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> input.id()));
     }
 
     public Result<String> deprovision(String id) {
         var requestBuilder = deprovisionRequestBuilder(id);
 
-        return this.managementApiHttpClient.send(requestBuilder).map(result -> id);
+        return this.edcApiHttpClient.send(requestBuilder).map(result -> id);
     }
 
     public CompletableFuture<Result<String>> deprovisionAsync(String id) {
         var requestBuilder = deprovisionRequestBuilder(id);
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
     }
 
     private HttpRequest.Builder getContractAgreementRequestBuilder(String id) {

@@ -16,16 +16,16 @@ import java.util.function.UnaryOperator;
 
 public class Secrets {
     private final String url;
-    private final ManagementApiHttpClient managementApiHttpClient;
+    private final EdcApiHttpClient edcApiHttpClient;
 
     public Secrets(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
-        managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
+        edcApiHttpClient = new EdcApiHttpClient(httpClient, interceptor);
         this.url = "%s/v3/secrets".formatted(url);
     }
 
     public Result<Secret> get(String id) {
         var requestBuilder = getRequestBuilder(id);
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
                 .map(this::getSecret);
@@ -34,14 +34,14 @@ public class Secrets {
     public CompletableFuture<Result<Secret>> getAsync(String id) {
         var requestBuilder = getRequestBuilder(id);
 
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getSecret));
     }
 
     public Result<String> create(Secret input) {
         var requestBuilder = createRequestBuilder(input);
 
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
                 .map(content -> content.getJsonObject(0).getString(ID));
@@ -50,35 +50,33 @@ public class Secrets {
     public CompletableFuture<Result<String>> createAsync(Secret input) {
         var requestBuilder = createRequestBuilder(input);
 
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(content -> content.getJsonObject(0).getString(ID)));
     }
 
     public Result<String> update(Secret input) {
         var requestBuilder = updateRequestBuilder(input);
 
-        return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
+        return this.edcApiHttpClient.send(requestBuilder).map(result -> input.id());
     }
 
     public CompletableFuture<Result<String>> updateAsync(Secret input) {
 
         var requestBuilder = updateRequestBuilder(input);
 
-        return this.managementApiHttpClient
-                .sendAsync(requestBuilder)
-                .thenApply(result -> result.map(content -> input.id()));
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> input.id()));
     }
 
     public Result<String> delete(String id) {
         var requestBuilder = deleteRequestBuilder(id);
 
-        return this.managementApiHttpClient.send(requestBuilder).map(result -> id);
+        return this.edcApiHttpClient.send(requestBuilder).map(result -> id);
     }
 
     public CompletableFuture<Result<String>> deleteAsync(String id) {
         var requestBuilder = deleteRequestBuilder(id);
 
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
     }
 
     private HttpRequest.Builder getRequestBuilder(String id) {

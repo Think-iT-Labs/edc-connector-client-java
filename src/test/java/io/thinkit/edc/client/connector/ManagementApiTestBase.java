@@ -4,13 +4,13 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
-public abstract class ObservabilityContainerTestBase {
+public abstract class ManagementApiTestBase {
     @Container
-    static final ApiContainer prism;
+    protected static final ApiContainer prism;
 
-    static final int timeout = 5;
+    protected static final int timeout = 5;
 
     static {
-        prism = new ApiContainer("/observability-api.yml");
+        prism = new ApiContainer("/management-api.yml");
     }
 }
