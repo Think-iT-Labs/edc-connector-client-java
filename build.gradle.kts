@@ -50,11 +50,12 @@ allprojects {
 }
 
 val downloadOpenapiSpecTasks = listOf(
-    registerDownloadOpenapiSpec("management"),
-    registerDownloadOpenapiSpec("observability")
+    registerDownloadOpenapiSpec("Connector", "management"),
+    registerDownloadOpenapiSpec("Connector", "observability"),
+    registerDownloadOpenapiSpec("FederatedCatalog", "catalog")
 )
 
-fun registerDownloadOpenapiSpec(context: String): Task {
+fun registerDownloadOpenapiSpec(repository: String, context: String): Task {
     val uppercasedContext = context.replaceFirstChar { c -> c.uppercase() }
     val downloadOpenapiSpec by tasks.register("download${uppercasedContext}OpenapiSpec") {
         dependsOn(tasks.findByName("processTestResources"))
@@ -63,7 +64,7 @@ fun registerDownloadOpenapiSpec(context: String): Task {
         doLast {
             openapiFile?.let { fileSpec ->
                 fileSpec.parentFile.mkdirs()
-                download("https://eclipse-edc.github.io/Connector/openapi/$context-api/$context-api.yaml")
+                download("https://eclipse-edc.github.io/$repository/openapi/$context-api/$context-api.yaml")
                     .replace("example: null", "")
                     .let { fileSpec.writeText(it) }
             }

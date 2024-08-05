@@ -17,17 +17,17 @@ import java.util.function.UnaryOperator;
 public class PolicyDefinitions {
 
     private final String url;
-    private final ManagementApiHttpClient managementApiHttpClient;
+    private final EdcApiHttpClient edcApiHttpClient;
 
     public PolicyDefinitions(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
-        managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
+        edcApiHttpClient = new EdcApiHttpClient(httpClient, interceptor);
         this.url = "%s/v3/policydefinitions".formatted(url);
     }
 
     public Result<PolicyDefinition> get(String id) {
         var requestBuilder = getRequestBuilder(id);
 
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
                 .map(this::getPolicyDefinition);
@@ -35,7 +35,7 @@ public class PolicyDefinitions {
 
     public CompletableFuture<Result<PolicyDefinition>> getAsync(String id) {
         var requestBuilder = getRequestBuilder(id);
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getPolicyDefinition));
     }
 
@@ -43,7 +43,7 @@ public class PolicyDefinitions {
 
         var requestBuilder = createRequestBuilder(input);
 
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
                 .map(content -> content.getJsonObject(0).getString(ID));
@@ -53,7 +53,7 @@ public class PolicyDefinitions {
 
         var requestBuilder = createRequestBuilder(input);
 
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(content -> content.getJsonObject(0).getString(ID)));
     }
 
@@ -61,35 +61,33 @@ public class PolicyDefinitions {
 
         var requestBuilder = updateRequestBuilder(input);
 
-        return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
+        return this.edcApiHttpClient.send(requestBuilder).map(result -> input.id());
     }
 
     public CompletableFuture<Result<String>> updateAsync(PolicyDefinition input) {
 
         var requestBuilder = updateRequestBuilder(input);
 
-        return this.managementApiHttpClient
-                .sendAsync(requestBuilder)
-                .thenApply(result -> result.map(content -> input.id()));
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> input.id()));
     }
 
     public Result<String> delete(String id) {
         var requestBuilder = deleteRequestBuilder(id);
 
-        return this.managementApiHttpClient.send(requestBuilder).map(result -> id);
+        return this.edcApiHttpClient.send(requestBuilder).map(result -> id);
     }
 
     public CompletableFuture<Result<String>> deleteAsync(String id) {
         var requestBuilder = deleteRequestBuilder(id);
 
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
     }
 
     public Result<List<PolicyDefinition>> request(QuerySpec input) {
 
         var requestBuilder = getPolicyDefinitionsRequestBuilder(input);
 
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
                 .map(this::getPolicyDefinitions);
@@ -99,7 +97,7 @@ public class PolicyDefinitions {
 
         var requestBuilder = getPolicyDefinitionsRequestBuilder(input);
 
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getPolicyDefinitions));
     }
 

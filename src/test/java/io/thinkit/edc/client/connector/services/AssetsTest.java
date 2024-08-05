@@ -1,13 +1,14 @@
-package io.thinkit.edc.client.connector;
+package io.thinkit.edc.client.connector.services;
 
 import static io.thinkit.edc.client.connector.utils.Constants.EDC_NAMESPACE;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.thinkit.edc.client.connector.EdcConnectorClient;
+import io.thinkit.edc.client.connector.ManagementApiTestBase;
 import io.thinkit.edc.client.connector.model.Asset;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
-import io.thinkit.edc.client.connector.services.Assets;
 import java.net.http.HttpClient;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-class AssetsTest extends ContainerTestBase {
+class AssetsTest extends ManagementApiTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();
     private Assets assets;
