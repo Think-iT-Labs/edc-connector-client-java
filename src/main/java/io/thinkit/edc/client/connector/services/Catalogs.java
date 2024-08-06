@@ -14,17 +14,17 @@ import java.util.function.UnaryOperator;
 
 public class Catalogs {
     private final String url;
-    private final ManagementApiHttpClient managementApiHttpClient;
+    private final EdcApiHttpClient edcApiHttpClient;
 
     public Catalogs(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
-        managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
+        edcApiHttpClient = new EdcApiHttpClient(httpClient, interceptor);
         this.url = "%s/v3/catalog".formatted(url);
     }
 
     public Result<Catalog> request(CatalogRequest input) {
         var requestBuilder = getCatalogRequestBuilder(input);
 
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
                 .map(this::getCatalog);
@@ -32,7 +32,7 @@ public class Catalogs {
 
     public CompletableFuture<Result<Catalog>> requestAsync(CatalogRequest input) {
         var requestBuilder = getCatalogRequestBuilder(input);
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getCatalog));
     }
 
@@ -40,7 +40,7 @@ public class Catalogs {
 
         var requestBuilder = requestDatasetRequestBuilder(input);
 
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
                 .map(this::getDataset);
@@ -50,7 +50,7 @@ public class Catalogs {
 
         var requestBuilder = requestDatasetRequestBuilder(input);
 
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getDataset));
     }
 

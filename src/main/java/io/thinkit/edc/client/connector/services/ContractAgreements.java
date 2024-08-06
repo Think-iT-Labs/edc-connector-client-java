@@ -15,17 +15,17 @@ import java.util.function.UnaryOperator;
 
 public class ContractAgreements {
     private final String url;
-    private final ManagementApiHttpClient managementApiHttpClient;
+    private final EdcApiHttpClient edcApiHttpClient;
 
     public ContractAgreements(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
-        managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
+        edcApiHttpClient = new EdcApiHttpClient(httpClient, interceptor);
         this.url = "%s/v3/contractagreements".formatted(url);
     }
 
     public Result<ContractAgreement> get(String id) {
         var requestBuilder = getContractAgreementRequestBuilder(id);
 
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
                 .map(this::getContractAgreement);
@@ -33,14 +33,14 @@ public class ContractAgreements {
 
     public CompletableFuture<Result<ContractAgreement>> getAsync(String id) {
         var requestBuilder = getContractAgreementRequestBuilder(id);
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getContractAgreement));
     }
 
     public Result<ContractNegotiation> getNegotiation(String id) {
         var requestBuilder = getContractNegotiationRequestBuilder(id);
 
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
                 .map(this::getContractNegotiation);
@@ -48,13 +48,13 @@ public class ContractAgreements {
 
     public CompletableFuture<Result<ContractNegotiation>> getNegotiationAsync(String id) {
         var requestBuilder = getContractNegotiationRequestBuilder(id);
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getContractNegotiation));
     }
 
     public Result<List<ContractAgreement>> request(QuerySpec input) {
         var requestBuilder = ContractAgreementsRequestBuilder(input);
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
                 .map(this::getContractAgreements);
@@ -63,7 +63,7 @@ public class ContractAgreements {
     public CompletableFuture<Result<List<ContractAgreement>>> requestAsync(QuerySpec input) {
         var requestBuilder = ContractAgreementsRequestBuilder(input);
 
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getContractAgreements));
     }
 

@@ -1,17 +1,18 @@
-package io.thinkit.edc.client.connector;
+package io.thinkit.edc.client.connector.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.thinkit.edc.client.connector.EdcConnectorClient;
+import io.thinkit.edc.client.connector.ObservabilityApiTestBase;
 import io.thinkit.edc.client.connector.model.HealthStatus;
 import io.thinkit.edc.client.connector.model.Result;
-import io.thinkit.edc.client.connector.services.ApplicationObservability;
 import java.net.http.HttpClient;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-class ApplicationObservabilityTest extends ObservabilityContainerTestBase {
+class ApplicationObservabilityTest extends ObservabilityApiTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();
     private ApplicationObservability applicationObservability;

@@ -16,16 +16,16 @@ import java.util.function.UnaryOperator;
 
 public class ContractDefinitions {
     private final String url;
-    private final ManagementApiHttpClient managementApiHttpClient;
+    private final EdcApiHttpClient edcApiHttpClient;
 
     public ContractDefinitions(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
-        managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
+        edcApiHttpClient = new EdcApiHttpClient(httpClient, interceptor);
         this.url = "%s/v3/contractdefinitions".formatted(url);
     }
 
     public Result<ContractDefinition> get(String id) {
         var requestBuilder = getRequestBuilder(id);
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
                 .map(this::getContractDefinition);
@@ -34,7 +34,7 @@ public class ContractDefinitions {
     public CompletableFuture<Result<ContractDefinition>> getAsync(String id) {
         var requestBuilder = getRequestBuilder(id);
 
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getContractDefinition));
     }
 
@@ -42,7 +42,7 @@ public class ContractDefinitions {
 
         var requestBuilder = createRequestBuilder(input);
 
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
                 .map(content -> content.getJsonObject(0).getString(ID));
@@ -52,25 +52,25 @@ public class ContractDefinitions {
 
         var requestBuilder = createRequestBuilder(input);
 
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(content -> content.getJsonObject(0).getString(ID)));
     }
 
     public Result<String> delete(String id) {
         var requestBuilder = deleteRequestBuilder(id);
-        return this.managementApiHttpClient.send(requestBuilder).map(result -> id);
+        return this.edcApiHttpClient.send(requestBuilder).map(result -> id);
     }
 
     public CompletableFuture<Result<String>> deleteAsync(String id) {
         var requestBuilder = deleteRequestBuilder(id);
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
     }
 
     public Result<List<ContractDefinition>> request(QuerySpec input) {
 
         var requestBuilder = getContractDefinitionsRequestBuilder(input);
 
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
                 .map(this::getContractDefinitions);
@@ -80,7 +80,7 @@ public class ContractDefinitions {
 
         var requestBuilder = getContractDefinitionsRequestBuilder(input);
 
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getContractDefinitions));
     }
 
@@ -88,16 +88,14 @@ public class ContractDefinitions {
 
         var requestBuilder = updateRequestBuilder(input);
 
-        return this.managementApiHttpClient.send(requestBuilder).map(result -> input.id());
+        return this.edcApiHttpClient.send(requestBuilder).map(result -> input.id());
     }
 
     public CompletableFuture<Result<String>> updateAsync(ContractDefinition input) {
 
         var requestBuilder = updateRequestBuilder(input);
 
-        return this.managementApiHttpClient
-                .sendAsync(requestBuilder)
-                .thenApply(result -> result.map(content -> input.id()));
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> input.id()));
     }
 
     private HttpRequest.Builder getRequestBuilder(String id) {

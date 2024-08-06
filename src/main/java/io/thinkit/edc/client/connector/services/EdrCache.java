@@ -14,30 +14,30 @@ import java.util.function.UnaryOperator;
 
 public class EdrCache {
     private final String url;
-    private final ManagementApiHttpClient managementApiHttpClient;
+    private final EdcApiHttpClient edcApiHttpClient;
 
     public EdrCache(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
-        managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
+        edcApiHttpClient = new EdcApiHttpClient(httpClient, interceptor);
         this.url = "%s/v3/edrs".formatted(url);
     }
 
     public Result<String> delete(String transferProcessId) {
         var requestBuilder = getDeleteRequestBuilder(transferProcessId);
 
-        return this.managementApiHttpClient.send(requestBuilder).map(result -> transferProcessId);
+        return this.edcApiHttpClient.send(requestBuilder).map(result -> transferProcessId);
     }
 
     public CompletableFuture<Result<String>> deleteAsync(String transferProcessId) {
         var requestBuilder = getDeleteRequestBuilder(transferProcessId);
 
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .sendAsync(requestBuilder)
                 .thenApply(result -> result.map(content -> transferProcessId));
     }
 
     public Result<DataAddress> dataAddress(String transferProcessId) {
         var requestBuilder = getDataAddressRequestBuilder(transferProcessId);
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
                 .map(this::getDataAddress);
@@ -46,14 +46,14 @@ public class EdrCache {
     public CompletableFuture<Result<DataAddress>> dataAddressAsync(String transferProcessId) {
         var requestBuilder = getDataAddressRequestBuilder(transferProcessId);
 
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getDataAddress));
     }
 
     public Result<Edr> request(QuerySpec input) {
         var requestBuilder = getRequestBuilder(input);
 
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
                 .map(this::getEDR);
@@ -62,7 +62,7 @@ public class EdrCache {
     public CompletableFuture<Result<Edr>> requestAsync(QuerySpec input) {
         var requestBuilder = getRequestBuilder(input);
 
-        return this.managementApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getEDR));
     }
 

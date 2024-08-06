@@ -12,17 +12,17 @@ import java.util.function.UnaryOperator;
 
 public class ApplicationObservability {
     private final String url;
-    private final ManagementApiHttpClient managementApiHttpClient;
+    private final EdcApiHttpClient edcApiHttpClient;
 
     public ApplicationObservability(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
-        managementApiHttpClient = new ManagementApiHttpClient(httpClient, interceptor);
+        edcApiHttpClient = new EdcApiHttpClient(httpClient, interceptor);
         this.url = url;
     }
 
     public Result<HealthStatus> checkHealth() {
         var requestBuilder = checkHealthRequestBuilder();
 
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::ToJsonObject)
                 .map(this::getHealthStatus);
@@ -31,15 +31,14 @@ public class ApplicationObservability {
     public CompletableFuture<Result<HealthStatus>> checkHealthAsync() {
         var requestBuilder = checkHealthRequestBuilder();
 
-        return this.managementApiHttpClient
-                .sendAsync(requestBuilder)
-                .thenApply(result -> result.map(JsonLdUtil::ToJsonObject).map(this::getHealthStatus));
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::ToJsonObject)
+                .map(this::getHealthStatus));
     }
 
     public Result<HealthStatus> checkReadiness() {
         var requestBuilder = checkReadinessRequestBuilder();
 
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::ToJsonObject)
                 .map(this::getHealthStatus);
@@ -48,15 +47,14 @@ public class ApplicationObservability {
     public CompletableFuture<Result<HealthStatus>> checkReadinessAsync() {
         var requestBuilder = checkReadinessRequestBuilder();
 
-        return this.managementApiHttpClient
-                .sendAsync(requestBuilder)
-                .thenApply(result -> result.map(JsonLdUtil::ToJsonObject).map(this::getHealthStatus));
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::ToJsonObject)
+                .map(this::getHealthStatus));
     }
 
     public Result<HealthStatus> checkStartup() {
         var requestBuilder = checkStartupRequestBuilder();
 
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::ToJsonObject)
                 .map(this::getHealthStatus);
@@ -65,14 +63,13 @@ public class ApplicationObservability {
     public CompletableFuture<Result<HealthStatus>> checkStartupAsync() {
         var requestBuilder = checkStartupRequestBuilder();
 
-        return this.managementApiHttpClient
-                .sendAsync(requestBuilder)
-                .thenApply(result -> result.map(JsonLdUtil::ToJsonObject).map(this::getHealthStatus));
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::ToJsonObject)
+                .map(this::getHealthStatus));
     }
 
     public Result<HealthStatus> checkLiveness() {
         var requestBuilder = checkLivenessRequestBuilder();
-        return this.managementApiHttpClient
+        return this.edcApiHttpClient
                 .send(requestBuilder)
                 .map(JsonLdUtil::ToJsonObject)
                 .map(this::getHealthStatus);
@@ -80,9 +77,8 @@ public class ApplicationObservability {
 
     public CompletableFuture<Result<HealthStatus>> checkLivenessAsync() {
         var requestBuilder = checkLivenessRequestBuilder();
-        return this.managementApiHttpClient
-                .sendAsync(requestBuilder)
-                .thenApply(result -> result.map(JsonLdUtil::ToJsonObject).map(this::getHealthStatus));
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::ToJsonObject)
+                .map(this::getHealthStatus));
     }
 
     private HttpRequest.Builder checkHealthRequestBuilder() {
