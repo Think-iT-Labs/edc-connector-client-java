@@ -52,7 +52,8 @@ allprojects {
 val downloadOpenapiSpecTasks = listOf(
     registerDownloadOpenapiSpec("Connector", "management"),
     registerDownloadOpenapiSpec("Connector", "observability"),
-    registerDownloadOpenapiSpec("FederatedCatalog", "catalog")
+    registerDownloadOpenapiSpec("FederatedCatalog", "catalog"),
+    registerDownloadOpenapiSpec("IdentityHub", "identity")
 )
 
 fun registerDownloadOpenapiSpec(repository: String, context: String): Task {
