@@ -1,8 +1,10 @@
 package io.thinkit.edc.client.connector.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.model.VerifiableCredentialManifest;
 import io.thinkit.edc.client.connector.model.VerifiableCredentialResource;
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,6 +67,18 @@ public class VerifiableCredentials {
                 .thenApply(result -> result.map(this::getVerifiableCredentials));
     }
 
+    public Result<String> create(VerifiableCredentialManifest input, String participantId) {
+        var requestBuilder = createRequestBuilder(input, participantId);
+
+        return this.edcApiHttpClient.send(requestBuilder).map(result -> input.id());
+    }
+
+    public CompletableFuture<Result<String>> createAsync(VerifiableCredentialManifest input, String participantId) {
+        var requestBuilder = createRequestBuilder(input, participantId);
+
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> input.id()));
+    }
+
     private HttpRequest.Builder getRequestBuilder(String participantId, String credentialId) {
         return HttpRequest.newBuilder()
                 .uri(URI.create("%s/participants/%s/credentials/%s".formatted(this.url, participantId, credentialId)))
@@ -83,10 +97,36 @@ public class VerifiableCredentials {
                 .GET();
     }
 
+    private HttpRequest.Builder createRequestBuilder(VerifiableCredentialManifest input, String participantId) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestBody = null;
+        try {
+            requestBody = objectMapper.writeValueAsString(input);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/participants/%s/credentials".formatted(this.url, participantId)))
+                .header("content-type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody));
+    }
+
     private VerifiableCredentialResource getVerifiableCredential(InputStream body) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.readValue(body, VerifiableCredentialResource.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String getVerifiableCredential2(InputStream body) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+
+            var res = objectMapper.readValue(body, Object.class);
+            System.out.println(res);
+            return "ok";
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

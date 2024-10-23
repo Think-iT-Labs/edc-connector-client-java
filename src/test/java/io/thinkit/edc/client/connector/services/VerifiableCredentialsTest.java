@@ -6,7 +6,10 @@ import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.IdentityApiTestBase;
 import io.thinkit.edc.client.connector.model.*;
 import java.net.http.HttpClient;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -57,6 +60,20 @@ class VerifiableCredentialsTest extends IdentityApiTestBase {
             var result = verifiableCredentials.getAll(0, 50);
             assertThat(result).satisfies(VerifiableCredentialsTest.this::shouldGetVerifiableCredentialsResponse);
         }
+
+        @Test
+        void should_add_a_verifiable_credential() {
+
+            var result = verifiableCredentials.create(shouldCreateAVerifiableCredentialRequest(), "id");
+            assertThat(result.isSucceeded()).isTrue();
+        }
+
+        @Test
+        void should_not_add_a_verifiable_credential() {
+
+            var result = verifiableCredentials.create(null, "");
+            assertThat(result).satisfies(VerifiableCredentialsTest.this::errorResponse);
+        }
     }
 
     @Nested
@@ -77,7 +94,7 @@ class VerifiableCredentialsTest extends IdentityApiTestBase {
                     .satisfies(VerifiableCredentialsTest.this::errorResponse);
         }
 
-        /*  @Test
+        @Test
         void should_get_verifiable_credentials_async() {
             var result = verifiableCredentials.getListAsync("participantId", "type");
             assertThat(result)
@@ -99,7 +116,24 @@ class VerifiableCredentialsTest extends IdentityApiTestBase {
             assertThat(result)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
                     .satisfies(VerifiableCredentialsTest.this::shouldGetVerifiableCredentialsResponse);
-        }*/
+        }
+
+        @Test
+        void should_add_a_verifiable_credential_async() {
+
+            var created = verifiableCredentials.createAsync(shouldCreateAVerifiableCredentialRequest(), "id");
+            assertThat(created)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(result -> assertThat(result.isSucceeded()).isTrue());
+        }
+
+        @Test
+        void should_not_add_a_verifiable_credential_async() {
+            var result = verifiableCredentials.createAsync(null, "");
+            assertThat(result)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(VerifiableCredentialsTest.this::errorResponse);
+        }
     }
 
     private <T> void errorResponse(Result<T> error) {
@@ -160,5 +194,31 @@ class VerifiableCredentialsTest extends IdentityApiTestBase {
                 });
             });
         });
+    }
+
+    private VerifiableCredentialManifest shouldCreateAVerifiableCredentialRequest() {
+        Map<String, Object> additionalProperties = Map.of("additionalProperties", Map.of());
+        CredentialStatus credentialStatus = new CredentialStatus("string", "string", additionalProperties);
+
+        CredentialSubject credentialSubject = new CredentialSubject("string");
+        Issuer issuer = new Issuer("string", additionalProperties);
+        VerifiableCredential verifiableCredential = new VerifiableCredential(
+                "string",
+                Collections.singletonList(credentialStatus),
+                Collections.singletonList(credentialSubject),
+                "description",
+                "2024-10-02T13:09:06.963Z",
+                "2024-10-02T13:09:06.963Z",
+                issuer,
+                "name",
+                List.of("string"));
+
+        VerifiableCredentialContainer verifiableCredentialContainer =
+                new VerifiableCredentialContainer(verifiableCredential, "JSON_LD", "string");
+        Map<String, Object> policy = new HashMap<>();
+        policy.put("@type", "SET");
+        policy.put("assignee", "string");
+        policy.put("assigner", "assigner");
+        return new VerifiableCredentialManifest("id", policy, "participantId", policy, verifiableCredentialContainer);
     }
 }
