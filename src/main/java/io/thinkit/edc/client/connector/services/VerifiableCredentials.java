@@ -1,11 +1,11 @@
 package io.thinkit.edc.client.connector.services;
 
-import com.apicatalog.jsonld.JsonLdError;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.thinkit.edc.client.connector.model.Result;
 import io.thinkit.edc.client.connector.model.VerifiableCredentialResource;
-import io.thinkit.edc.client.connector.utils.JsonLdUtil;
-import jakarta.json.JsonArray;
-import jakarta.json.JsonObject;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -25,74 +25,44 @@ public class VerifiableCredentials {
     public Result<VerifiableCredentialResource> get(String participantId, String credentialId) {
         var requestBuilder = getRequestBuilder(participantId, credentialId);
 
-        return this.edcApiHttpClient
-                .send(requestBuilder)
-                .map(JsonLdUtil::ToJsonObject)
-                .map(this::getVerifiableCredential);
+        return this.edcApiHttpClient.send(requestBuilder).map(this::getVerifiableCredential);
     }
 
     public CompletableFuture<Result<VerifiableCredentialResource>> getAsync(String participantId, String credentialId) {
         var requestBuilder = getRequestBuilder(participantId, credentialId);
 
-        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::ToJsonObject)
-                .map(this::getVerifiableCredential));
+        return this.edcApiHttpClient
+                .sendAsync(requestBuilder)
+                .thenApply(result -> result.map(this::getVerifiableCredential));
     }
 
     public Result<List<VerifiableCredentialResource>> getList(String participantId, String type) {
         var requestBuilder = getListRequestBuilder(participantId, type);
 
-        return this.edcApiHttpClient
-                .send(requestBuilder)
-                .map(body -> {
-                    try {
-                        return JsonLdUtil.deserializeToArray(body);
-                    } catch (JsonLdError e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .map(this::getVerifiableCredentials);
+        return this.edcApiHttpClient.send(requestBuilder).map(this::getVerifiableCredentials);
     }
 
     public CompletableFuture<Result<List<VerifiableCredentialResource>>> getListAsync(
             String participantId, String type) {
         var requestBuilder = getListRequestBuilder(participantId, type);
 
-        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(body -> {
-                    try {
-                        return JsonLdUtil.deserializeToArray(body);
-                    } catch (JsonLdError e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .map(this::getVerifiableCredentials));
+        return this.edcApiHttpClient
+                .sendAsync(requestBuilder)
+                .thenApply(result -> result.map(this::getVerifiableCredentials));
     }
 
     public Result<List<VerifiableCredentialResource>> getAll(int offset, int limit) {
         var requestBuilder = getAllRequestBuilder(offset, limit);
 
-        return this.edcApiHttpClient
-                .send(requestBuilder)
-                .map(body -> {
-                    try {
-                        return JsonLdUtil.deserializeToArray(body);
-                    } catch (JsonLdError e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .map(this::getVerifiableCredentials);
+        return this.edcApiHttpClient.send(requestBuilder).map(this::getVerifiableCredentials);
     }
 
     public CompletableFuture<Result<List<VerifiableCredentialResource>>> getAllAsync(int offset, int limit) {
         var requestBuilder = getAllRequestBuilder(offset, limit);
 
-        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(body -> {
-                    try {
-                        return JsonLdUtil.deserializeToArray(body);
-                    } catch (JsonLdError e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .map(this::getVerifiableCredentials));
+        return this.edcApiHttpClient
+                .sendAsync(requestBuilder)
+                .thenApply(result -> result.map(this::getVerifiableCredentials));
     }
 
     private HttpRequest.Builder getRequestBuilder(String participantId, String credentialId) {
@@ -113,13 +83,21 @@ public class VerifiableCredentials {
                 .GET();
     }
 
-    private VerifiableCredentialResource getVerifiableCredential(JsonObject array) {
-        return new VerifiableCredentialResource(array);
+    private VerifiableCredentialResource getVerifiableCredential(InputStream body) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readValue(body, VerifiableCredentialResource.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private List<VerifiableCredentialResource> getVerifiableCredentials(JsonArray array) {
-        return array.stream()
-                .map(s -> new VerifiableCredentialResource(s.asJsonObject()))
-                .toList();
+    private List<VerifiableCredentialResource> getVerifiableCredentials(InputStream body) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readValue(body, new TypeReference<List<VerifiableCredentialResource>>() {});
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

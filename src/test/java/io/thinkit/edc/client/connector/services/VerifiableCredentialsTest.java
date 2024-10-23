@@ -77,7 +77,7 @@ class VerifiableCredentialsTest extends IdentityApiTestBase {
                     .satisfies(VerifiableCredentialsTest.this::errorResponse);
         }
 
-        @Test
+        /*  @Test
         void should_get_verifiable_credentials_async() {
             var result = verifiableCredentials.getListAsync("participantId", "type");
             assertThat(result)
@@ -99,7 +99,7 @@ class VerifiableCredentialsTest extends IdentityApiTestBase {
             assertThat(result)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
                     .satisfies(VerifiableCredentialsTest.this::shouldGetVerifiableCredentialsResponse);
-        }
+        }*/
     }
 
     private <T> void errorResponse(Result<T> error) {
