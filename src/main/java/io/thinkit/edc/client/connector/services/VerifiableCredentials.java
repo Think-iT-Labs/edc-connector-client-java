@@ -19,6 +19,8 @@ public class VerifiableCredentials {
     private final String url;
     private final EdcApiHttpClient edcApiHttpClient;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     public VerifiableCredentials(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
         edcApiHttpClient = new EdcApiHttpClient(httpClient, interceptor);
         this.url = "%s/v1alpha".formatted(url);
@@ -79,6 +81,32 @@ public class VerifiableCredentials {
         return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> input.id()));
     }
 
+    public Result<String> update(VerifiableCredentialManifest input, String participantId) {
+        var requestBuilder = updateRequestBuilder(input, participantId);
+
+        return this.edcApiHttpClient.send(requestBuilder).map(result -> input.id());
+    }
+
+    public CompletableFuture<Result<String>> updateAsync(VerifiableCredentialManifest input, String participantId) {
+        var requestBuilder = updateRequestBuilder(input, participantId);
+
+        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(content -> input.id()));
+    }
+
+    public Result<String> delete(String participantId, String credentialId) {
+        var requestBuilder = deleteRequestBuilder(participantId, credentialId);
+
+        return this.edcApiHttpClient.send(requestBuilder).map(result -> credentialId);
+    }
+
+    public CompletableFuture<Result<String>> deleteAsync(String participantId, String credentialId) {
+        var requestBuilder = deleteRequestBuilder(participantId, credentialId);
+
+        return this.edcApiHttpClient
+                .sendAsync(requestBuilder)
+                .thenApply(result -> result.map(content -> participantId));
+    }
+
     private HttpRequest.Builder getRequestBuilder(String participantId, String credentialId) {
         return HttpRequest.newBuilder()
                 .uri(URI.create("%s/participants/%s/credentials/%s".formatted(this.url, participantId, credentialId)))
@@ -98,7 +126,6 @@ public class VerifiableCredentials {
     }
 
     private HttpRequest.Builder createRequestBuilder(VerifiableCredentialManifest input, String participantId) {
-        ObjectMapper objectMapper = new ObjectMapper();
         String requestBody = null;
         try {
             requestBody = objectMapper.writeValueAsString(input);
@@ -111,8 +138,26 @@ public class VerifiableCredentials {
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody));
     }
 
+    private HttpRequest.Builder updateRequestBuilder(VerifiableCredentialManifest input, String participantId) {
+        String requestBody = null;
+        try {
+            requestBody = objectMapper.writeValueAsString(input);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/participants/%s/credentials".formatted(this.url, participantId)))
+                .header("content-type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(requestBody));
+    }
+
+    private HttpRequest.Builder deleteRequestBuilder(String participantId, String credentialId) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/participants/%s/credentials/%s".formatted(this.url, participantId, credentialId)))
+                .DELETE();
+    }
+
     private VerifiableCredentialResource getVerifiableCredential(InputStream body) {
-        ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.readValue(body, VerifiableCredentialResource.class);
         } catch (IOException e) {
@@ -120,20 +165,7 @@ public class VerifiableCredentials {
         }
     }
 
-    private String getVerifiableCredential2(InputStream body) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-
-            var res = objectMapper.readValue(body, Object.class);
-            System.out.println(res);
-            return "ok";
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private List<VerifiableCredentialResource> getVerifiableCredentials(InputStream body) {
-        ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.readValue(body, new TypeReference<List<VerifiableCredentialResource>>() {});
         } catch (IOException e) {

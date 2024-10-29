@@ -74,6 +74,34 @@ class VerifiableCredentialsTest extends IdentityApiTestBase {
             var result = verifiableCredentials.create(null, "");
             assertThat(result).satisfies(VerifiableCredentialsTest.this::errorResponse);
         }
+
+        @Test
+        void should_update_a_verifiable_credential() {
+
+            var result = verifiableCredentials.update(shouldCreateAVerifiableCredentialRequest(), "id");
+            assertThat(result.isSucceeded()).isTrue();
+        }
+
+        @Test
+        void should_not_update_a_verifiable_credential() {
+
+            var result = verifiableCredentials.update(null, "");
+            assertThat(result).satisfies(VerifiableCredentialsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_delete_a_verifiable_credential() {
+
+            var result = verifiableCredentials.delete("participantId", "credentialId");
+            assertThat(result.isSucceeded()).isTrue();
+        }
+
+        @Test
+        void should_not_delete_a_verifiable_credential() {
+
+            var result = verifiableCredentials.delete("", "");
+            assertThat(result).satisfies(VerifiableCredentialsTest.this::errorResponse);
+        }
     }
 
     @Nested
@@ -130,6 +158,40 @@ class VerifiableCredentialsTest extends IdentityApiTestBase {
         @Test
         void should_not_add_a_verifiable_credential_async() {
             var result = verifiableCredentials.createAsync(null, "");
+            assertThat(result)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(VerifiableCredentialsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_update_a_verifiable_credential_async() {
+
+            var updated = verifiableCredentials.updateAsync(shouldCreateAVerifiableCredentialRequest(), "id");
+            assertThat(updated)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(result -> assertThat(result.isSucceeded()).isTrue());
+        }
+
+        @Test
+        void should_not_update_a_verifiable_credential_async() {
+            var result = verifiableCredentials.updateAsync(null, "");
+            assertThat(result)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(VerifiableCredentialsTest.this::errorResponse);
+        }
+
+        @Test
+        void should_delete_a_verifiable_credential_async() {
+
+            var deleted = verifiableCredentials.deleteAsync("participantId", "credentialId");
+            assertThat(deleted)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(result -> assertThat(result.isSucceeded()).isTrue());
+        }
+
+        @Test
+        void should_not_delete_a_verifiable_credential_async() {
+            var result = verifiableCredentials.deleteAsync("", "");
             assertThat(result)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
                     .satisfies(VerifiableCredentialsTest.this::errorResponse);
