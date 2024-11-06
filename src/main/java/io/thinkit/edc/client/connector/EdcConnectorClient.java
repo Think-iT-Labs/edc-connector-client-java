@@ -1,5 +1,6 @@
 package io.thinkit.edc.client.connector;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.thinkit.edc.client.connector.services.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -12,6 +13,8 @@ public class EdcConnectorClient {
     private String catalogCacheUrl;
     private String identityUrl;
     private HttpClient httpClient = HttpClient.newHttpClient();
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private UnaryOperator<HttpRequest.Builder> interceptor = UnaryOperator.identity();
 
     public static EdcConnectorClient newInstance() {
@@ -120,7 +123,7 @@ public class EdcConnectorClient {
             throw new IllegalArgumentException(
                     "Cannot instantiate verifiableCredentials client without the identity url");
         }
-        return new VerifiableCredentials(identityUrl, httpClient, interceptor);
+        return new VerifiableCredentials(identityUrl, httpClient, interceptor, objectMapper);
     }
 
     public static class Builder {

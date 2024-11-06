@@ -19,10 +19,15 @@ public class VerifiableCredentials {
     private final String url;
     private final EdcApiHttpClient edcApiHttpClient;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
-    public VerifiableCredentials(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
+    public VerifiableCredentials(
+            String url,
+            HttpClient httpClient,
+            UnaryOperator<HttpRequest.Builder> interceptor,
+            ObjectMapper objectMapper) {
         edcApiHttpClient = new EdcApiHttpClient(httpClient, interceptor);
+        this.objectMapper = objectMapper;
         this.url = "%s/v1alpha".formatted(url);
     }
 
