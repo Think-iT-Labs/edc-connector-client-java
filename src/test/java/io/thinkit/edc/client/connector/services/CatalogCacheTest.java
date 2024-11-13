@@ -1,13 +1,13 @@
 package io.thinkit.edc.client.connector.services;
 
 import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
-import static java.util.Collections.emptyList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.thinkit.edc.client.connector.CatalogApiTestBase;
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.model.Catalog;
+import io.thinkit.edc.client.connector.model.CriterionInput;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
 import java.net.http.HttpClient;
@@ -35,13 +35,7 @@ class CatalogCacheTest extends CatalogApiTestBase {
 
         @Test
         void should_query_catalogs() {
-            var query = QuerySpec.Builder.newInstance()
-                    .offset(0)
-                    .limit(50)
-                    .sortOrder("DESC")
-                    .sortField("fieldName")
-                    .filterExpression(emptyList())
-                    .build();
+            var query = new QuerySpec(5, 10, "DESC", "fieldName", new CriterionInput[] {});
 
             var result = catalogCache.query(query);
 
@@ -53,13 +47,7 @@ class CatalogCacheTest extends CatalogApiTestBase {
     class Async {
         @Test
         void should_query_catalogs() {
-            var query = QuerySpec.Builder.newInstance()
-                    .offset(0)
-                    .limit(50)
-                    .sortOrder("DESC")
-                    .sortField("fieldName")
-                    .filterExpression(emptyList())
-                    .build();
+            var query = new QuerySpec(5, 10, "DESC", "fieldName", new CriterionInput[] {});
 
             var result = catalogCache.queryAsync(query);
 

@@ -4,6 +4,8 @@ import static io.thinkit.edc.client.connector.utils.Constants.ID;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.thinkit.edc.client.connector.model.*;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
@@ -18,9 +20,15 @@ import java.util.function.UnaryOperator;
 public class ContractNegotiations {
     private final String url;
     private final EdcApiHttpClient edcApiHttpClient;
+    private final ObjectMapper objectMapper;
 
-    public ContractNegotiations(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
+    public ContractNegotiations(
+            String url,
+            HttpClient httpClient,
+            UnaryOperator<HttpRequest.Builder> interceptor,
+            ObjectMapper objectMapper) {
         edcApiHttpClient = new EdcApiHttpClient(httpClient, interceptor);
+        this.objectMapper = objectMapper;
         this.url = "%s/v3/contractnegotiations".formatted(url);
     }
 
@@ -148,11 +156,16 @@ public class ContractNegotiations {
     }
 
     private HttpRequest.Builder getContractNegotiationsRequestBuilder(QuerySpec input) {
-        var requestBody = compact(input);
+        String requestBody = null;
+        try {
+            requestBody = this.objectMapper.writeValueAsString(input);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         return HttpRequest.newBuilder()
                 .uri(URI.create("%s/request".formatted(this.url)))
                 .header("content-type", "application/json")
-                .POST(ofString(requestBody.toString()));
+                .POST(ofString(requestBody));
     }
 
     private HttpRequest.Builder getStateRequestBuilder(String id) {

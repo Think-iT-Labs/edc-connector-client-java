@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.ManagementApiTestBase;
 import io.thinkit.edc.client.connector.model.ContractAgreement;
+import io.thinkit.edc.client.connector.model.CriterionInput;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
 import java.net.http.HttpClient;
@@ -64,7 +65,7 @@ public class ContractAgreementsTest extends ManagementApiTestBase {
 
         @Test
         void should_not_get_contract_agreements() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = new QuerySpec(0, 0, "wrong", "", new CriterionInput[] {});
 
             var result = contractAgreements.request(input);
             assertThat(result).satisfies(ContractAgreementsTest.this::errorResponse);
@@ -117,7 +118,7 @@ public class ContractAgreementsTest extends ManagementApiTestBase {
 
         @Test
         void should_not_get_contract_agreements_async() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = new QuerySpec(0, 0, "wrong", "", new CriterionInput[] {});
             var result = contractAgreements.requestAsync(input);
             assertThat(result)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
@@ -149,12 +150,7 @@ public class ContractAgreementsTest extends ManagementApiTestBase {
     }
 
     private QuerySpec shouldGetAContractAgreementsQuery() {
-        return QuerySpec.Builder.newInstance()
-                .offset(5)
-                .limit(10)
-                .sortOrder("DESC")
-                .sortField("fieldName")
-                .build();
+        return new QuerySpec(5, 10, "DESC", "fieldName", new CriterionInput[] {});
     }
 
     private void shouldGetAContractAgreementsResponse(Result<List<ContractAgreement>> contractAgreementList) {

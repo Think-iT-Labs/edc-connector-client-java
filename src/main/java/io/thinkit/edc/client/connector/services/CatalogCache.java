@@ -1,8 +1,9 @@
 package io.thinkit.edc.client.connector.services;
 
-import static io.thinkit.edc.client.connector.utils.JsonLdUtil.compact;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.thinkit.edc.client.connector.model.Catalog;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
@@ -19,9 +20,15 @@ import java.util.function.UnaryOperator;
 public class CatalogCache {
     private final EdcApiHttpClient edcApiHttpClient;
     private final String url;
+    private final ObjectMapper objectMapper;
 
-    public CatalogCache(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
+    public CatalogCache(
+            String url,
+            HttpClient httpClient,
+            UnaryOperator<HttpRequest.Builder> interceptor,
+            ObjectMapper objectMapper) {
         edcApiHttpClient = new EdcApiHttpClient(httpClient, interceptor);
+        this.objectMapper = objectMapper;
         this.url = "%s/v1alpha/catalog".formatted(url);
     }
 
@@ -45,11 +52,16 @@ public class CatalogCache {
     }
 
     private HttpRequest.Builder queryCatalogsRequestBuilder(QuerySpec query) {
-        var requestBody = compact(query);
+        String requestBody = null;
+        try {
+            requestBody = this.objectMapper.writeValueAsString(query);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
         return HttpRequest.newBuilder()
                 .uri(URI.create("%s/query".formatted(this.url)))
                 .header("content-type", "application/json")
-                .POST(ofString(requestBody.toString()));
+                .POST(ofString(requestBody));
     }
 }

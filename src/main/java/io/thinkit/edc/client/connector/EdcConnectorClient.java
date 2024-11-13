@@ -31,7 +31,7 @@ public class EdcConnectorClient {
         if (managementUrl == null) {
             throw new IllegalArgumentException("Cannot instantiate Assets client without the management url");
         }
-        return new Assets(managementUrl, httpClient, interceptor);
+        return new Assets(managementUrl, httpClient, interceptor, objectMapper);
     }
 
     public PolicyDefinitions policyDefinitions() {
@@ -39,7 +39,7 @@ public class EdcConnectorClient {
             throw new IllegalArgumentException(
                     "Cannot instantiate PolicyDefinitions client without the management url");
         }
-        return new PolicyDefinitions(managementUrl, httpClient, interceptor);
+        return new PolicyDefinitions(managementUrl, httpClient, interceptor, objectMapper);
     }
 
     public ContractDefinitions contractDefinitions() {
@@ -47,7 +47,7 @@ public class EdcConnectorClient {
             throw new IllegalArgumentException(
                     "Cannot instantiate ContractDefinitions client without the management url");
         }
-        return new ContractDefinitions(managementUrl, httpClient, interceptor);
+        return new ContractDefinitions(managementUrl, httpClient, interceptor, objectMapper);
     }
 
     public ContractNegotiations contractNegotiations() {
@@ -55,7 +55,7 @@ public class EdcConnectorClient {
             throw new IllegalArgumentException(
                     "Cannot instantiate ContractNegotiations client without the management url");
         }
-        return new ContractNegotiations(managementUrl, httpClient, interceptor);
+        return new ContractNegotiations(managementUrl, httpClient, interceptor, objectMapper);
     }
 
     public ContractAgreements contractAgreements() {
@@ -63,7 +63,7 @@ public class EdcConnectorClient {
             throw new IllegalArgumentException(
                     "Cannot instantiate ContractAgreements client without the management url");
         }
-        return new ContractAgreements(managementUrl, httpClient, interceptor);
+        return new ContractAgreements(managementUrl, httpClient, interceptor, objectMapper);
     }
 
     public TransferProcesses transferProcesses() {
@@ -94,14 +94,14 @@ public class EdcConnectorClient {
             throw new IllegalArgumentException(
                     "Cannot instantiate ApplicationObservability client without the management url");
         }
-        return new Catalogs(managementUrl, httpClient, interceptor);
+        return new Catalogs(managementUrl, httpClient, interceptor, objectMapper);
     }
 
     public EdrCache edrCache() {
         if (managementUrl == null) {
             throw new IllegalArgumentException("Cannot instantiate EdrCache client without the management url");
         }
-        return new EdrCache(managementUrl, httpClient, interceptor);
+        return new EdrCache(managementUrl, httpClient, interceptor, objectMapper);
     }
 
     public Secrets secrets() {
@@ -115,7 +115,7 @@ public class EdcConnectorClient {
         if (catalogCacheUrl == null) {
             throw new IllegalArgumentException("Cannot instantiate CatalogCache client without the catalog cache url");
         }
-        return new CatalogCache(catalogCacheUrl, httpClient, interceptor);
+        return new CatalogCache(catalogCacheUrl, httpClient, interceptor, objectMapper);
     }
 
     public VerifiableCredentials verifiableCredentials() {

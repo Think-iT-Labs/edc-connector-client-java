@@ -85,7 +85,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
 
         @Test
         void should_not_get_contract_negotiations() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = new QuerySpec(0, 0, "wrong", "", new CriterionInput[] {});
 
             var result = contractNegotiations.request(input);
             assertThat(result).satisfies(ContractNegotiationsTest.this::errorResponse);
@@ -182,7 +182,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
 
         @Test
         void should_not_get_contract_negotiations_async() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = new QuerySpec(0, 0, "wrong", "", new CriterionInput[] {});
 
             var result = contractNegotiations.requestAsync(input);
             assertThat(result)
@@ -301,12 +301,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
     }
 
     private QuerySpec shouldGetContractNegotiationsQuery() {
-        return QuerySpec.Builder.newInstance()
-                .offset(5)
-                .limit(10)
-                .sortOrder("DESC")
-                .sortField("fieldName")
-                .build();
+        return new QuerySpec(5, 10, "DESC", "fieldName", new CriterionInput[] {});
     }
 
     private void shouldGetContractNegotiationsResponse(Result<List<ContractNegotiation>> ContractNegotiationList) {
