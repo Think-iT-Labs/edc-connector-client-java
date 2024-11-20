@@ -126,6 +126,13 @@ public class EdcConnectorClient {
         return new VerifiableCredentials(identityUrl, httpClient, interceptor, objectMapper);
     }
 
+    public Did did() {
+        if (identityUrl == null) {
+            throw new IllegalArgumentException("Cannot instantiate Did client without the identity url");
+        }
+        return new Did(identityUrl, httpClient, interceptor, objectMapper);
+    }
+
     public static class Builder {
 
         private final EdcConnectorClient client = new EdcConnectorClient();
