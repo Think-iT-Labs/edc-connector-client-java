@@ -98,13 +98,13 @@ public class Did {
                 .thenApply(result -> result.map(content -> participantId));
     }
 
-    public Result<List<DidDocument>> query(QuerySpec input, String participantId) {
+    public Result<List<DidDocument>> query(QuerySpecInput input, String participantId) {
         var requestBuilder = queryRequestBuilder(input, participantId);
 
         return this.edcApiHttpClient.send(requestBuilder).map(this::getDidDocuments);
     }
 
-    public CompletableFuture<Result<List<DidDocument>>> queryAsync(QuerySpec input, String participantId) {
+    public CompletableFuture<Result<List<DidDocument>>> queryAsync(QuerySpecInput input, String participantId) {
         var requestBuilder = queryRequestBuilder(input, participantId);
 
         return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(this::getDidDocuments));
@@ -146,7 +146,7 @@ public class Did {
                 .GET();
     }
 
-    private HttpRequest.Builder queryRequestBuilder(QuerySpec input, String participantId) {
+    private HttpRequest.Builder queryRequestBuilder(QuerySpecInput input, String participantId) {
         String requestBody = null;
         try {
             requestBody = objectMapper.writeValueAsString(input);

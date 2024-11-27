@@ -65,14 +65,14 @@ class DidTest extends IdentityApiTestBase {
 
         @Test
         void should_query_did() {
-            var input = new QuerySpec(5, 10, "DESC", "fieldName", new CriterionInput[] {});
+            var input = new QuerySpecInput(5, 10, "DESC", "fieldName", new CriterionInput[] {});
             var result = did.query(input, "id");
             assertThat(result.isSucceeded()).isTrue();
         }
 
         @Test
         void should_not_query_did() {
-            var input = new QuerySpec(0, 0, "wrong", "", new CriterionInput[] {});
+            var input = new QuerySpecInput(0, 0, "wrong", "", new CriterionInput[] {});
             var result = did.query(input, "id");
             assertThat(result).satisfies(DidTest.this::errorResponse);
         }
@@ -146,7 +146,7 @@ class DidTest extends IdentityApiTestBase {
 
         @Test
         void should_query_dids_async() {
-            var input = new QuerySpec(5, 10, "DESC", "fieldName", new CriterionInput[] {});
+            var input = new QuerySpecInput(5, 10, "DESC", "fieldName", new CriterionInput[] {});
             var created = did.queryAsync(input, "id");
             assertThat(created)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
@@ -155,7 +155,7 @@ class DidTest extends IdentityApiTestBase {
 
         @Test
         void should_not_query_dids_async() {
-            var input = new QuerySpec(0, 0, "wrong", "", new CriterionInput[] {});
+            var input = new QuerySpecInput(0, 0, "wrong", "", new CriterionInput[] {});
             var result = did.queryAsync(input, "id");
             assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(DidTest.this::errorResponse);
         }
@@ -203,9 +203,7 @@ class DidTest extends IdentityApiTestBase {
                 assertThat(service.serviceEndpoint()).isEqualTo("string");
                 assertThat(service.type()).isEqualTo("string");
             });
-            assertThat(did.authentication()).isNotNull().first().satisfies(service -> {
-                assertThat(service).isEqualTo("string");
-            });
+            assertThat(did.authentication()).isNotNull().first().satisfies(service -> assertThat(service).isEqualTo("string"));
             assertThat(did.verificationMethod()).isNotNull().first().satisfies(verificationMethod -> {
                 assertThat(verificationMethod.controller()).isEqualTo("string");
                 assertThat(verificationMethod.controller()).isEqualTo("string");
