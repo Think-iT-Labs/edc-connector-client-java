@@ -6,10 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.ManagementApiTestBase;
-import io.thinkit.edc.client.connector.model.Policy;
-import io.thinkit.edc.client.connector.model.PolicyDefinition;
-import io.thinkit.edc.client.connector.model.QuerySpec;
-import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.model.*;
 import jakarta.json.Json;
 import java.net.http.HttpClient;
 import java.util.List;
@@ -105,7 +102,7 @@ public class PolicyDefinitionsTest extends ManagementApiTestBase {
 
         @Test
         void should_not_get_policy_definitions() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = new QuerySpec(0, 0, "wrong", "", new CriterionInput[] {});
             var result = policyDefinitions.request(input);
             assertThat(result).satisfies(PolicyDefinitionsTest.this::errorResponse);
         }
@@ -195,7 +192,7 @@ public class PolicyDefinitionsTest extends ManagementApiTestBase {
 
         @Test
         void should_not_get_policy_definitions_async() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = new QuerySpec(0, 0, "wrong", "", new CriterionInput[] {});
 
             var result = policyDefinitions.requestAsync(input);
 
@@ -250,12 +247,7 @@ public class PolicyDefinitionsTest extends ManagementApiTestBase {
     }
 
     private QuerySpec shouldGetPolicyDefinitionsRequest() {
-        return QuerySpec.Builder.newInstance()
-                .offset(0)
-                .limit(10)
-                .sortOrder("DESC")
-                .sortField("fieldName")
-                .build();
+        return new QuerySpec(5, 10, "DESC", "fieldName", new CriterionInput[] {});
     }
 
     private void shouldGetPolicyDefinitionsResponse(Result<List<PolicyDefinition>> PolicyDefinitionList) {

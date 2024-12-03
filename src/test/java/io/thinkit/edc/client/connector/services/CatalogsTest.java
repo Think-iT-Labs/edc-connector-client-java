@@ -1,7 +1,6 @@
 package io.thinkit.edc.client.connector.services;
 
 import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
-import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.thinkit.edc.client.connector.EdcConnectorClient;
@@ -64,18 +63,8 @@ class CatalogsTest extends ManagementApiTestBase {
     }
 
     private CatalogRequest shouldGetCatalogRequest() {
-        var query = QuerySpec.Builder.newInstance()
-                .offset(0)
-                .limit(50)
-                .sortOrder("DESC")
-                .sortField("fieldName")
-                .filterExpression(emptyList())
-                .build();
-        return CatalogRequest.Builder.newInstance()
-                .protocol("dataspace-protocol-http")
-                .counterPartyAddress("http://provider-address")
-                .querySpec(query)
-                .build();
+        var query = new QuerySpec(5, 10, "DESC", "fieldName", new CriterionInput[] {});
+        return new CatalogRequest("dataspace-protocol-http", "http://provider-address", query);
     }
 
     private void shouldGetCatalogResponse(Result<Catalog> result) {
