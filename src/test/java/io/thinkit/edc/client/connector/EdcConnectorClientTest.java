@@ -24,4 +24,26 @@ public class EdcConnectorClientTest {
 
         assertThatThrownBy(client::assets).isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    void should_register_extension_resources() {
+        var client = EdcConnectorClient.newBuilder()
+                .extendWith(ExtensionService.class, ExtensionService::new)
+                .build();
+
+        var extensionService = client.service(ExtensionService.class);
+
+        assertThat(extensionService.doStuff()).isEqualTo("done");
+    }
+
+    private static class ExtensionService extends EdcResource {
+
+        protected ExtensionService(EdcClientContext context) {
+            super(context);
+        }
+
+        public String doStuff() {
+            return "done";
+        }
+    }
 }
