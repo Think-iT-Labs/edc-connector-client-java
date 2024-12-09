@@ -203,7 +203,8 @@ class DidTest extends IdentityApiTestBase {
                 assertThat(service.serviceEndpoint()).isEqualTo("string");
                 assertThat(service.type()).isEqualTo("string");
             });
-            assertThat(did.authentication()).isNotNull().first().satisfies(service -> assertThat(service).isEqualTo("string"));
+            assertThat(did.authentication()).isNotNull().first().satisfies(service -> assertThat(service)
+                    .isEqualTo("string"));
             assertThat(did.verificationMethod()).isNotNull().first().satisfies(verificationMethod -> {
                 assertThat(verificationMethod.controller()).isEqualTo("string");
                 assertThat(verificationMethod.controller()).isEqualTo("string");
