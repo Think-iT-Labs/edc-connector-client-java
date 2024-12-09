@@ -140,14 +140,14 @@ public class EdcConnectorClient {
     public VerifiableCredentials verifiableCredentials() {
         if (identityUrl == null) {
             throw new IllegalArgumentException(
-                    "Cannot instantiate verifiableCredentials client without the identityUrl url");
+                    "Cannot instantiate verifiableCredentials client without the identity url");
         }
         return new VerifiableCredentials(identityUrl, httpClient, interceptor, objectMapper);
     }
 
     public Did did() {
         if (identityUrl == null) {
-            throw new IllegalArgumentException("Cannot instantiate Did client without the identityUrl url");
+            throw new IllegalArgumentException("Cannot instantiate Did client without the identity url");
         }
         return new Did(identityUrl, httpClient, interceptor, objectMapper);
     }
