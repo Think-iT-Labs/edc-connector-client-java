@@ -1,10 +1,10 @@
 package io.thinkit.edc.client.connector.services;
 
-import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.ManagementApiTestBase;
+import io.thinkit.edc.client.connector.model.CriterionInput;
 import io.thinkit.edc.client.connector.model.Edr;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
@@ -38,7 +38,7 @@ class EdrCacheTest extends ManagementApiTestBase {
 
         @Test
         void should__not_request_an_edr() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = new QuerySpec(0, 0, "wrong", "", new CriterionInput[] {});
 
             var result = edrCache.request(input);
             assertThat(result).satisfies(EdrCacheTest.this::errorResponse);
@@ -75,7 +75,7 @@ class EdrCacheTest extends ManagementApiTestBase {
 
         @Test
         void should__not_request_an_edr_async() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = new QuerySpec(0, 0, "wrong", "", new CriterionInput[] {});
 
             var result = edrCache.requestAsync(input);
             assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(EdrCacheTest.this::errorResponse);
@@ -128,12 +128,6 @@ class EdrCacheTest extends ManagementApiTestBase {
     }
 
     private QuerySpec shouldRequestQuery() {
-        return QuerySpec.Builder.newInstance()
-                .offset(5)
-                .limit(10)
-                .sortOrder("DESC")
-                .sortField("fieldName")
-                .filterExpression(emptyList())
-                .build();
+        return new QuerySpec(5, 10, "DESC", "fieldName", new CriterionInput[] {});
     }
 }

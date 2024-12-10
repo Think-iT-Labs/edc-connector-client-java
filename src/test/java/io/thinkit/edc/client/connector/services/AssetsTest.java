@@ -1,14 +1,11 @@
 package io.thinkit.edc.client.connector.services;
 
 import static io.thinkit.edc.client.connector.utils.Constants.EDC_NAMESPACE;
-import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.ManagementApiTestBase;
-import io.thinkit.edc.client.connector.model.Asset;
-import io.thinkit.edc.client.connector.model.QuerySpec;
-import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.model.*;
 import java.net.http.HttpClient;
 import java.util.List;
 import java.util.Map;
@@ -91,7 +88,7 @@ class AssetsTest extends ManagementApiTestBase {
 
         @Test
         void should_not_get_assets_when_sort_schema_is_not_as_expected() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = new QuerySpec(0, 0, "wrong", "", new CriterionInput[] {});
 
             var assetsList = assets.request(input);
             assertThat(assetsList).satisfies(AssetsTest.this::errorResponse);
@@ -161,7 +158,7 @@ class AssetsTest extends ManagementApiTestBase {
 
         @Test
         void should_not_get_assets_when_sort_schema_is_not_as_expected_async() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = new QuerySpec(0, 0, "wrong", "", new CriterionInput[] {});
             var result = assets.requestAsync(input);
             assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(AssetsTest.this::errorResponse);
         }
@@ -249,12 +246,6 @@ class AssetsTest extends ManagementApiTestBase {
     }
 
     private QuerySpec shouldGetAssetsQuery() {
-        return QuerySpec.Builder.newInstance()
-                .offset(5)
-                .limit(10)
-                .sortOrder("DESC")
-                .sortField("fieldName")
-                .filterExpression(emptyList())
-                .build();
+        return new QuerySpec(5, 10, "DESC", "fieldName", new CriterionInput[] {});
     }
 }
