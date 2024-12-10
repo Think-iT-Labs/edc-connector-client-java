@@ -11,6 +11,7 @@ import io.thinkit.edc.client.connector.services.ContractNegotiations;
 import io.thinkit.edc.client.connector.services.Dataplanes;
 import io.thinkit.edc.client.connector.services.Did;
 import io.thinkit.edc.client.connector.services.EdrCache;
+import io.thinkit.edc.client.connector.services.KeyPairs;
 import io.thinkit.edc.client.connector.services.PolicyDefinitions;
 import io.thinkit.edc.client.connector.services.Secrets;
 import io.thinkit.edc.client.connector.services.TransferProcesses;
@@ -157,7 +158,7 @@ public class EdcConnectorClient {
         return new KeyPairs(identityUrl, httpClient, interceptor, objectMapper);
     }
 
-    public <T extends EdcResource> T service(Class<T> resourceClass) {
+    public <T extends EdcResource> T resource(Class<T> resourceClass) {
         var resourceCreator = resourceCreators.get(resourceClass);
         if (resourceCreator == null) {
             throw new IllegalArgumentException("No resource creator of type %s is registered on the client"
@@ -212,7 +213,7 @@ public class EdcConnectorClient {
             return this;
         }
 
-        public Builder extendWith(Class<? extends EdcResource> resourceClass, ResourceCreator resourceCreator) {
+        public Builder with(Class<? extends EdcResource> resourceClass, ResourceCreator resourceCreator) {
             client.resourceCreators.put(resourceClass, resourceCreator);
             return this;
         }

@@ -1,9 +1,9 @@
 package io.thinkit.edc.client.connector;
 
+import org.junit.jupiter.api.Test;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import org.junit.jupiter.api.Test;
 
 public class EdcConnectorClientTest {
 
@@ -28,17 +28,17 @@ public class EdcConnectorClientTest {
     @Test
     void should_register_extension_resources() {
         var client = EdcConnectorClient.newBuilder()
-                .extendWith(ExtensionService.class, ExtensionService::new)
+                .with(ExtensionResource.class, ExtensionResource::new)
                 .build();
 
-        var extensionService = client.service(ExtensionService.class);
+        var extension = client.resource(ExtensionResource.class);
 
-        assertThat(extensionService.doStuff()).isEqualTo("done");
+        assertThat(extension.doStuff()).isEqualTo("done");
     }
 
-    private static class ExtensionService extends EdcResource {
+    private static class ExtensionResource extends EdcResource {
 
-        protected ExtensionService(EdcClientContext context) {
+        protected ExtensionResource(EdcClientContext context) {
             super(context);
         }
 
