@@ -166,7 +166,7 @@ public class EdcConnectorClient {
         return new Participants(identityUrl, httpClient, interceptor, objectMapper);
     }
 
-    public <T extends EdcResource> T service(Class<T> resourceClass) {
+    public <T extends EdcResource> T resource(Class<T> resourceClass) {
         var resourceCreator = resourceCreators.get(resourceClass);
         if (resourceCreator == null) {
             throw new IllegalArgumentException("No resource creator of type %s is registered on the client"
@@ -221,7 +221,7 @@ public class EdcConnectorClient {
             return this;
         }
 
-        public Builder extendWith(Class<? extends EdcResource> resourceClass, ResourceCreator resourceCreator) {
+        public Builder with(Class<? extends EdcResource> resourceClass, ResourceCreator resourceCreator) {
             client.resourceCreators.put(resourceClass, resourceCreator);
             return this;
         }
