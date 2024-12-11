@@ -7,5 +7,5 @@ public record DidDocument(
         @JsonProperty("@context") List<Object> context,
         String id,
         List<String> authentication,
-        List<DidService> service,
+        List<ServiceInput> service,
         List<VerificationMethod> verificationMethod) {}

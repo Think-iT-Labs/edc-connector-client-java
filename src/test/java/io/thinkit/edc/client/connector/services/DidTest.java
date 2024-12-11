@@ -58,7 +58,7 @@ class DidTest extends IdentityApiTestBase {
 
         @Test
         void should_add_a_service_endpoint() {
-            var input = new DidService("string", "string", "string");
+            var input = new ServiceInput("string", "string", "string");
             var result = did.addServiceEndpoint(input, "id", "did", false);
             assertThat(result.isSucceeded()).isTrue();
         }
@@ -93,7 +93,7 @@ class DidTest extends IdentityApiTestBase {
 
         @Test
         void should_update() {
-            var input = new DidService("string", "string", "string");
+            var input = new ServiceInput("string", "string", "string");
             var result = did.update(input, "id", "did", false);
             assertThat(result.isSucceeded()).isTrue();
         }
@@ -137,7 +137,7 @@ class DidTest extends IdentityApiTestBase {
 
         @Test
         void should_add_a_service_endpoint_async() {
-            var input = new DidService("string", "string", "string");
+            var input = new ServiceInput("string", "string", "string");
             var created = did.addServiceEndpointAsync(input, "id", "did", false);
             assertThat(created)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
@@ -177,7 +177,7 @@ class DidTest extends IdentityApiTestBase {
 
         @Test
         void should_update_async() {
-            var input = new DidService("string", "string", "string");
+            var input = new ServiceInput("string", "string", "string");
             var created = did.updateAsync(input, "id", "did", false);
             assertThat(created)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)

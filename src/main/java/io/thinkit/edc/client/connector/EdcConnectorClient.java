@@ -140,6 +140,13 @@ public class EdcConnectorClient {
         return new KeyPairs(identityUrl, httpClient, interceptor, objectMapper);
     }
 
+    public Participants participants() {
+        if (identityUrl == null) {
+            throw new IllegalArgumentException("Cannot instantiate Did client without the identity url");
+        }
+        return new Participants(identityUrl, httpClient, interceptor, objectMapper);
+    }
+
     public static class Builder {
 
         private final EdcConnectorClient client = new EdcConnectorClient();
