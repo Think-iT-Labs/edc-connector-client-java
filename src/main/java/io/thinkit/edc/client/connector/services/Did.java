@@ -83,14 +83,15 @@ public class Did {
                 .thenApply(result -> result.map(content -> participantId));
     }
 
-    public Result<String> addServiceEndpoint(DidService input, String participantId, String did, Boolean autoPublish) {
+    public Result<String> addServiceEndpoint(
+            ServiceInput input, String participantId, String did, Boolean autoPublish) {
         var requestBuilder = addServiceEndpointRequestBuilder(input, participantId, did, autoPublish);
 
         return this.edcApiHttpClient.send(requestBuilder).map(result -> participantId);
     }
 
     public CompletableFuture<Result<String>> addServiceEndpointAsync(
-            DidService input, String participantId, String did, Boolean autoPublish) {
+            ServiceInput input, String participantId, String did, Boolean autoPublish) {
         var requestBuilder = addServiceEndpointRequestBuilder(input, participantId, did, autoPublish);
 
         return this.edcApiHttpClient
@@ -125,14 +126,14 @@ public class Did {
                 .thenApply(result -> result.map(content -> participantId));
     }
 
-    public Result<String> update(DidService input, String participantId, String did, Boolean autoPublish) {
+    public Result<String> update(ServiceInput input, String participantId, String did, Boolean autoPublish) {
         var requestBuilder = updateRequestBuilder(input, participantId, did, autoPublish);
 
         return this.edcApiHttpClient.send(requestBuilder).map(result -> participantId);
     }
 
     public CompletableFuture<Result<String>> updateAsync(
-            DidService input, String participantId, String did, Boolean autoPublish) {
+            ServiceInput input, String participantId, String did, Boolean autoPublish) {
         var requestBuilder = updateRequestBuilder(input, participantId, did, autoPublish);
 
         return this.edcApiHttpClient
@@ -168,7 +169,7 @@ public class Did {
     }
 
     private HttpRequest.Builder updateRequestBuilder(
-            DidService input, String participantId, String did, Boolean autoPublish) {
+            ServiceInput input, String participantId, String did, Boolean autoPublish) {
         String requestBody = null;
         try {
             requestBody = objectMapper.writeValueAsString(input);
@@ -222,7 +223,7 @@ public class Did {
     }
 
     private HttpRequest.Builder addServiceEndpointRequestBuilder(
-            DidService input, String participantId, String did, Boolean autoPublish) {
+            ServiceInput input, String participantId, String did, Boolean autoPublish) {
         String requestBody = null;
         try {
             requestBody = objectMapper.writeValueAsString(input);
