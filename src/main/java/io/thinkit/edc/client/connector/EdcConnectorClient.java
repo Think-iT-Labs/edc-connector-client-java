@@ -1,9 +1,27 @@
 package io.thinkit.edc.client.connector;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.thinkit.edc.client.connector.services.*;
+import io.thinkit.edc.client.connector.services.ApplicationObservability;
+import io.thinkit.edc.client.connector.services.Assets;
+import io.thinkit.edc.client.connector.services.CatalogCache;
+import io.thinkit.edc.client.connector.services.Catalogs;
+import io.thinkit.edc.client.connector.services.ContractAgreements;
+import io.thinkit.edc.client.connector.services.ContractDefinitions;
+import io.thinkit.edc.client.connector.services.ContractNegotiations;
+import io.thinkit.edc.client.connector.services.Dataplanes;
+import io.thinkit.edc.client.connector.services.Did;
+import io.thinkit.edc.client.connector.services.EdrCache;
+import io.thinkit.edc.client.connector.services.KeyPairs;
+import io.thinkit.edc.client.connector.services.Participants;
+import io.thinkit.edc.client.connector.services.PolicyDefinitions;
+import io.thinkit.edc.client.connector.services.Secrets;
+import io.thinkit.edc.client.connector.services.TransferProcesses;
+import io.thinkit.edc.client.connector.services.VerifiableCredentials;
+
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.UnaryOperator;
 
 public class EdcConnectorClient {
@@ -16,6 +34,7 @@ public class EdcConnectorClient {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private UnaryOperator<HttpRequest.Builder> interceptor = UnaryOperator.identity();
+    private final Map<Class<? extends EdcResource>, ResourceCreator> resourceCreators = new HashMap<>();
 
     public static EdcConnectorClient newInstance() {
         return newBuilder().build();
@@ -147,6 +166,27 @@ public class EdcConnectorClient {
         return new Participants(identityUrl, httpClient, interceptor, objectMapper);
     }
 
+    public <T extends EdcResource> T resource(Class<T> resourceClass) {
+        var resourceCreator = resourceCreators.get(resourceClass);
+        if (resourceCreator == null) {
+            throw new IllegalArgumentException("No resource creator of type %s is registered on the client"
+                    .formatted(resourceClass.getSimpleName()));
+        }
+        var resource = resourceCreator.create(createContext());
+        if (!resourceClass.isInstance(resource)) {
+            throw new IllegalArgumentException("Resource %s cannot be cast to %s".formatted(resource, resourceClass));
+        }
+        return resourceClass.cast(resource);
+    }
+
+    private EdcClientContext createContext() {
+        return new EdcClientContext(
+                new EdcClientUrls(managementUrl, observabilityUrl, catalogCacheUrl, identityUrl),
+                objectMapper,
+                httpClient,
+                interceptor);
+    }
+
     public static class Builder {
 
         private final EdcConnectorClient client = new EdcConnectorClient();
@@ -178,6 +218,11 @@ public class EdcConnectorClient {
 
         public Builder interceptor(UnaryOperator<HttpRequest.Builder> interceptor) {
             client.interceptor = interceptor;
+            return this;
+        }
+
+        public Builder with(Class<? extends EdcResource> resourceClass, ResourceCreator resourceCreator) {
+            client.resourceCreators.put(resourceClass, resourceCreator);
             return this;
         }
 
