@@ -1,6 +1,7 @@
 package io.thinkit.edc.client.connector;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.thinkit.edc.client.connector.resource.EdcResource;
 import io.thinkit.edc.client.connector.services.ApplicationObservability;
 import io.thinkit.edc.client.connector.services.Assets;
 import io.thinkit.edc.client.connector.services.CatalogCache;
@@ -10,6 +11,7 @@ import io.thinkit.edc.client.connector.services.ContractDefinitions;
 import io.thinkit.edc.client.connector.services.ContractNegotiations;
 import io.thinkit.edc.client.connector.services.Dataplanes;
 import io.thinkit.edc.client.connector.services.Did;
+import io.thinkit.edc.client.connector.services.EdcApiHttpClient;
 import io.thinkit.edc.client.connector.services.EdrCache;
 import io.thinkit.edc.client.connector.services.KeyPairs;
 import io.thinkit.edc.client.connector.services.Participants;
@@ -17,7 +19,6 @@ import io.thinkit.edc.client.connector.services.PolicyDefinitions;
 import io.thinkit.edc.client.connector.services.Secrets;
 import io.thinkit.edc.client.connector.services.TransferProcesses;
 import io.thinkit.edc.client.connector.services.VerifiableCredentials;
-
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ public class EdcConnectorClient {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private UnaryOperator<HttpRequest.Builder> interceptor = UnaryOperator.identity();
     private final Map<Class<? extends EdcResource>, ResourceCreator> resourceCreators = new HashMap<>();
+    private EdcApiHttpClient edcClientHttpClient;
 
     public static EdcConnectorClient newInstance() {
         return newBuilder().build();
@@ -47,57 +49,31 @@ public class EdcConnectorClient {
     private EdcConnectorClient() {}
 
     public Assets assets() {
-        if (managementUrl == null) {
-            throw new IllegalArgumentException("Cannot instantiate Assets client without the management url");
-        }
-        return new Assets(managementUrl, httpClient, interceptor);
+        return resource(Assets.class);
     }
 
     public PolicyDefinitions policyDefinitions() {
-        if (managementUrl == null) {
-            throw new IllegalArgumentException(
-                    "Cannot instantiate PolicyDefinitions client without the management url");
-        }
-        return new PolicyDefinitions(managementUrl, httpClient, interceptor);
+        return resource(PolicyDefinitions.class);
     }
 
     public ContractDefinitions contractDefinitions() {
-        if (managementUrl == null) {
-            throw new IllegalArgumentException(
-                    "Cannot instantiate ContractDefinitions client without the management url");
-        }
-        return new ContractDefinitions(managementUrl, httpClient, interceptor);
+        return resource(ContractDefinitions.class);
     }
 
     public ContractNegotiations contractNegotiations() {
-        if (managementUrl == null) {
-            throw new IllegalArgumentException(
-                    "Cannot instantiate ContractNegotiations client without the management url");
-        }
-        return new ContractNegotiations(managementUrl, httpClient, interceptor);
+        return resource(ContractNegotiations.class);
     }
 
     public ContractAgreements contractAgreements() {
-        if (managementUrl == null) {
-            throw new IllegalArgumentException(
-                    "Cannot instantiate ContractAgreements client without the management url");
-        }
-        return new ContractAgreements(managementUrl, httpClient, interceptor);
+        return resource(ContractAgreements.class);
     }
 
     public TransferProcesses transferProcesses() {
-        if (managementUrl == null) {
-            throw new IllegalArgumentException(
-                    "Cannot instantiate transferProcesses client without the management url");
-        }
-        return new TransferProcesses(managementUrl, httpClient, interceptor);
+        return resource(TransferProcesses.class);
     }
 
     public Dataplanes dataplanes() {
-        if (managementUrl == null) {
-            throw new IllegalArgumentException("Cannot instantiate dataplanes client without the management url");
-        }
-        return new Dataplanes(managementUrl, httpClient, interceptor);
+        return resource(Dataplanes.class);
     }
 
     public ApplicationObservability applicationObservability() {
@@ -109,25 +85,15 @@ public class EdcConnectorClient {
     }
 
     public Catalogs catalogs() {
-        if (managementUrl == null) {
-            throw new IllegalArgumentException(
-                    "Cannot instantiate ApplicationObservability client without the management url");
-        }
-        return new Catalogs(managementUrl, httpClient, interceptor);
+        return resource(Catalogs.class);
     }
 
     public EdrCache edrCache() {
-        if (managementUrl == null) {
-            throw new IllegalArgumentException("Cannot instantiate EdrCache client without the management url");
-        }
-        return new EdrCache(managementUrl, httpClient, interceptor);
+        return resource(EdrCache.class);
     }
 
     public Secrets secrets() {
-        if (managementUrl == null) {
-            throw new IllegalArgumentException("Cannot instantiate Secrets client without the management url");
-        }
-        return new Secrets(managementUrl, httpClient, interceptor);
+        return resource(Secrets.class);
     }
 
     public CatalogCache catalogCache() {
@@ -183,8 +149,7 @@ public class EdcConnectorClient {
         return new EdcClientContext(
                 new EdcClientUrls(managementUrl, observabilityUrl, catalogCacheUrl, identityUrl),
                 objectMapper,
-                httpClient,
-                interceptor);
+                edcClientHttpClient);
     }
 
     public static class Builder {
@@ -221,12 +186,30 @@ public class EdcConnectorClient {
             return this;
         }
 
+        /**
+         * Register an additional {@link EdcResource}
+         *
+         * @param resourceClass the class of the concrete {@link EdcResource} implementation
+         * @param resourceCreator a function that instantiates an `{@link EdcResource} when needed.
+         * @return the {@link Builder}
+         */
         public Builder with(Class<? extends EdcResource> resourceClass, ResourceCreator resourceCreator) {
             client.resourceCreators.put(resourceClass, resourceCreator);
             return this;
         }
 
         public EdcConnectorClient build() {
+            client.edcClientHttpClient = new EdcApiHttpClient(client.httpClient, client.interceptor);
+            with(Assets.class, Assets::new);
+            with(PolicyDefinitions.class, PolicyDefinitions::new);
+            with(ContractDefinitions.class, ContractDefinitions::new);
+            with(ContractNegotiations.class, ContractNegotiations::new);
+            with(ContractAgreements.class, ContractAgreements::new);
+            with(TransferProcesses.class, TransferProcesses::new);
+            with(Dataplanes.class, Dataplanes::new);
+            with(Catalogs.class, Catalogs::new);
+            with(EdrCache.class, EdrCache::new);
+            with(Secrets.class, Secrets::new);
             return client;
         }
     }
