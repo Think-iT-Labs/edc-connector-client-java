@@ -3,66 +3,62 @@ package io.thinkit.edc.client.connector.services;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.compact;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
-import io.thinkit.edc.client.connector.model.*;
+import io.thinkit.edc.client.connector.EdcClientContext;
+import io.thinkit.edc.client.connector.model.DataAddress;
+import io.thinkit.edc.client.connector.model.Edr;
+import io.thinkit.edc.client.connector.model.QuerySpec;
+import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.resource.management.ManagementResource;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.UnaryOperator;
 
-public class EdrCache {
+public class EdrCache extends ManagementResource {
     private final String url;
-    private final EdcApiHttpClient edcApiHttpClient;
 
-    public EdrCache(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
-        edcApiHttpClient = new EdcApiHttpClient(httpClient, interceptor);
-        this.url = "%s/v3/edrs".formatted(url);
+    public EdrCache(EdcClientContext context) {
+        super(context);
+        url = "%s/v3/edrs".formatted(managementUrl);
     }
 
     public Result<String> delete(String transferProcessId) {
         var requestBuilder = getDeleteRequestBuilder(transferProcessId);
 
-        return this.edcApiHttpClient.send(requestBuilder).map(result -> transferProcessId);
+        return context.httpClient().send(requestBuilder).map(result -> transferProcessId);
     }
 
     public CompletableFuture<Result<String>> deleteAsync(String transferProcessId) {
         var requestBuilder = getDeleteRequestBuilder(transferProcessId);
 
-        return this.edcApiHttpClient
+        return context.httpClient()
                 .sendAsync(requestBuilder)
                 .thenApply(result -> result.map(content -> transferProcessId));
     }
 
     public Result<DataAddress> dataAddress(String transferProcessId) {
         var requestBuilder = getDataAddressRequestBuilder(transferProcessId);
-        return this.edcApiHttpClient
-                .send(requestBuilder)
-                .map(JsonLdUtil::expand)
-                .map(this::getDataAddress);
+        return context.httpClient().send(requestBuilder).map(JsonLdUtil::expand).map(this::getDataAddress);
     }
 
     public CompletableFuture<Result<DataAddress>> dataAddressAsync(String transferProcessId) {
         var requestBuilder = getDataAddressRequestBuilder(transferProcessId);
 
-        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getDataAddress));
     }
 
     public Result<Edr> request(QuerySpec input) {
         var requestBuilder = getRequestBuilder(input);
 
-        return this.edcApiHttpClient
-                .send(requestBuilder)
-                .map(JsonLdUtil::expand)
-                .map(this::getEDR);
+        return context.httpClient().send(requestBuilder).map(JsonLdUtil::expand).map(this::getEDR);
     }
 
     public CompletableFuture<Result<Edr>> requestAsync(QuerySpec input) {
         var requestBuilder = getRequestBuilder(input);
 
-        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getEDR));
     }
 

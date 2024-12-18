@@ -1,4 +1,6 @@
-package io.thinkit.edc.client.connector;
+package io.thinkit.edc.client.connector.resource;
+
+import io.thinkit.edc.client.connector.EdcClientContext;
 
 /**
  * Represent an EDC endpoint resource

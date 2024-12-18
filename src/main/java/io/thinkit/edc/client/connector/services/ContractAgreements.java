@@ -1,69 +1,62 @@
 package io.thinkit.edc.client.connector.services;
 
-import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
+import static io.thinkit.edc.client.connector.utils.JsonLdUtil.compact;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
-import io.thinkit.edc.client.connector.model.*;
+import io.thinkit.edc.client.connector.EdcClientContext;
+import io.thinkit.edc.client.connector.model.ContractAgreement;
+import io.thinkit.edc.client.connector.model.ContractNegotiation;
+import io.thinkit.edc.client.connector.model.QuerySpec;
+import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.resource.management.ManagementResource;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.UnaryOperator;
 
-public class ContractAgreements {
+public class ContractAgreements extends ManagementResource {
     private final String url;
-    private final EdcApiHttpClient edcApiHttpClient;
 
-    public ContractAgreements(String url, HttpClient httpClient, UnaryOperator<HttpRequest.Builder> interceptor) {
-        edcApiHttpClient = new EdcApiHttpClient(httpClient, interceptor);
-        this.url = "%s/v3/contractagreements".formatted(url);
+    public ContractAgreements(EdcClientContext context) {
+        super(context);
+        url = "%s/v3/contractagreements".formatted(managementUrl);
     }
 
     public Result<ContractAgreement> get(String id) {
         var requestBuilder = getContractAgreementRequestBuilder(id);
 
-        return this.edcApiHttpClient
-                .send(requestBuilder)
-                .map(JsonLdUtil::expand)
-                .map(this::getContractAgreement);
+        return context.httpClient().send(requestBuilder).map(JsonLdUtil::expand).map(this::getContractAgreement);
     }
 
     public CompletableFuture<Result<ContractAgreement>> getAsync(String id) {
         var requestBuilder = getContractAgreementRequestBuilder(id);
-        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getContractAgreement));
     }
 
     public Result<ContractNegotiation> getNegotiation(String id) {
         var requestBuilder = getContractNegotiationRequestBuilder(id);
 
-        return this.edcApiHttpClient
-                .send(requestBuilder)
-                .map(JsonLdUtil::expand)
-                .map(this::getContractNegotiation);
+        return context.httpClient().send(requestBuilder).map(JsonLdUtil::expand).map(this::getContractNegotiation);
     }
 
     public CompletableFuture<Result<ContractNegotiation>> getNegotiationAsync(String id) {
         var requestBuilder = getContractNegotiationRequestBuilder(id);
-        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getContractNegotiation));
     }
 
     public Result<List<ContractAgreement>> request(QuerySpec input) {
         var requestBuilder = ContractAgreementsRequestBuilder(input);
-        return this.edcApiHttpClient
-                .send(requestBuilder)
-                .map(JsonLdUtil::expand)
-                .map(this::getContractAgreements);
+        return context.httpClient().send(requestBuilder).map(JsonLdUtil::expand).map(this::getContractAgreements);
     }
 
     public CompletableFuture<Result<List<ContractAgreement>>> requestAsync(QuerySpec input) {
         var requestBuilder = ContractAgreementsRequestBuilder(input);
 
-        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getContractAgreements));
     }
 
