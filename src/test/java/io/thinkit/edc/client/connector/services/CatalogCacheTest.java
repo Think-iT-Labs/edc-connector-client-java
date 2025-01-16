@@ -1,20 +1,21 @@
 package io.thinkit.edc.client.connector.services;
 
-import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
-import static java.util.Collections.emptyList;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.thinkit.edc.client.connector.CatalogApiTestBase;
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.model.Catalog;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
-import java.net.http.HttpClient;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.net.http.HttpClient;
+import java.util.List;
+
+import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
+import static java.util.Collections.emptyList;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class CatalogCacheTest extends CatalogApiTestBase {
 
@@ -23,7 +24,7 @@ class CatalogCacheTest extends CatalogApiTestBase {
 
     @BeforeEach
     void setUp() {
-        var client = new EdcConnectorClient.Builder()
+        var client = EdcConnectorClient.newBuilder()
                 .httpClient(http)
                 .catalogCacheUrl(prism.getUrl())
                 .build();

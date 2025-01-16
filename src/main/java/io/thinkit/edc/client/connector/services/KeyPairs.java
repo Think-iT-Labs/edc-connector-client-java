@@ -2,126 +2,109 @@ package io.thinkit.edc.client.connector.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.thinkit.edc.client.connector.model.*;
+import io.thinkit.edc.client.connector.EdcClientContext;
+import io.thinkit.edc.client.connector.model.KeyDescriptor;
+import io.thinkit.edc.client.connector.model.KeyPairResource;
+import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.resource.identity.IdentityResource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.UnaryOperator;
 
-public class KeyPairs {
+public class KeyPairs extends IdentityResource {
     private final String url;
-    private final EdcApiHttpClient edcApiHttpClient;
 
-    private final ObjectMapper objectMapper;
-
-    public KeyPairs(
-            String url,
-            HttpClient httpClient,
-            UnaryOperator<HttpRequest.Builder> interceptor,
-            ObjectMapper objectMapper) {
-        edcApiHttpClient = new EdcApiHttpClient(httpClient, interceptor);
-        this.objectMapper = objectMapper;
-        this.url = "%s/v1alpha".formatted(url);
+    public KeyPairs(EdcClientContext context) {
+        super(context);
+        url = "%s/v1alpha".formatted(identityUrl);
     }
 
     public Result<List<KeyPairResource>> getAll(int offset, int limit) {
         var requestBuilder = getAllRequestBuilder(offset, limit);
 
-        return this.edcApiHttpClient.send(requestBuilder).map(this::getKeyPairs);
+        return context.httpClient().send(requestBuilder).map(this::getKeyPairs);
     }
 
     public CompletableFuture<Result<List<KeyPairResource>>> getAllAsync(int offset, int limit) {
         var requestBuilder = getAllRequestBuilder(offset, limit);
 
-        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(this::getKeyPairs));
+        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(this::getKeyPairs));
     }
 
     public Result<List<KeyPairResource>> get(String participantId) {
         var requestBuilder = getRequestBuilder(participantId);
 
-        return this.edcApiHttpClient.send(requestBuilder).map(this::getKeyPairs);
+        return context.httpClient().send(requestBuilder).map(this::getKeyPairs);
     }
 
     public CompletableFuture<Result<List<KeyPairResource>>> getAsync(String participantId) {
         var requestBuilder = getRequestBuilder(participantId);
 
-        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(this::getKeyPairs));
+        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(this::getKeyPairs));
     }
 
     public Result<String> add(KeyDescriptor input, String participantId, Boolean makeDefault) {
         var requestBuilder = addRequestBuilder(input, participantId, makeDefault);
 
-        return this.edcApiHttpClient.send(requestBuilder).map(result -> participantId);
+        return context.httpClient().send(requestBuilder).map(result -> participantId);
     }
 
     public CompletableFuture<Result<String>> addAsync(KeyDescriptor input, String participantId, Boolean makeDefault) {
         var requestBuilder = addRequestBuilder(input, participantId, makeDefault);
 
-        return this.edcApiHttpClient
-                .sendAsync(requestBuilder)
-                .thenApply(result -> result.map(content -> participantId));
+        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> participantId));
     }
 
     public Result<KeyPairResource> getOne(String participantId, String keyPairId) {
         var requestBuilder = getOneRequestBuilder(participantId, keyPairId);
 
-        return this.edcApiHttpClient.send(requestBuilder).map(this::getKeyPairResource);
+        return context.httpClient().send(requestBuilder).map(this::getKeyPairResource);
     }
 
     public CompletableFuture<Result<KeyPairResource>> getOneAsync(String participantId, String keyPairId) {
         var requestBuilder = getOneRequestBuilder(participantId, keyPairId);
 
-        return this.edcApiHttpClient
-                .sendAsync(requestBuilder)
-                .thenApply(result -> result.map(this::getKeyPairResource));
+        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(this::getKeyPairResource));
     }
 
     public Result<String> activate(String participantId, String keyPairId) {
         var requestBuilder = activateRequestBuilder(participantId, keyPairId);
 
-        return this.edcApiHttpClient.send(requestBuilder).map(result -> participantId);
+        return context.httpClient().send(requestBuilder).map(result -> participantId);
     }
 
     public CompletableFuture<Result<String>> activateAsync(String participantId, String keyPairId) {
         var requestBuilder = activateRequestBuilder(participantId, keyPairId);
 
-        return this.edcApiHttpClient
-                .sendAsync(requestBuilder)
-                .thenApply(result -> result.map(content -> participantId));
+        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> participantId));
     }
 
     public Result<String> revoke(String participantId, String keyPairId, KeyDescriptor input) {
         var requestBuilder = revokeRequestBuilder(participantId, keyPairId, input);
 
-        return this.edcApiHttpClient.send(requestBuilder).map(result -> participantId);
+        return context.httpClient().send(requestBuilder).map(result -> participantId);
     }
 
     public CompletableFuture<Result<String>> revokeAsync(String participantId, String keyPairId, KeyDescriptor input) {
         var requestBuilder = revokeRequestBuilder(participantId, keyPairId, input);
 
-        return this.edcApiHttpClient
-                .sendAsync(requestBuilder)
-                .thenApply(result -> result.map(content -> participantId));
+        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> participantId));
     }
 
     public Result<String> rotate(String participantId, String keyPairId, KeyDescriptor input, int duration) {
         var requestBuilder = rotateRequestBuilder(participantId, keyPairId, input, duration);
 
-        return this.edcApiHttpClient.send(requestBuilder).map(result -> participantId);
+        return context.httpClient().send(requestBuilder).map(result -> participantId);
     }
 
     public CompletableFuture<Result<String>> rotateAsync(
             String participantId, String keyPairId, KeyDescriptor input, int duration) {
         var requestBuilder = rotateRequestBuilder(participantId, keyPairId, input, duration);
 
-        return this.edcApiHttpClient
-                .sendAsync(requestBuilder)
-                .thenApply(result -> result.map(content -> participantId));
+        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> participantId));
     }
 
     private HttpRequest.Builder getAllRequestBuilder(int offset, int limit) {
@@ -143,9 +126,9 @@ public class KeyPairs {
     }
 
     private HttpRequest.Builder addRequestBuilder(KeyDescriptor input, String participantId, Boolean makeDefault) {
-        String requestBody = null;
+        String requestBody;
         try {
-            requestBody = objectMapper.writeValueAsString(input);
+            requestBody = context.objectMapper().writeValueAsString(input);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -166,9 +149,9 @@ public class KeyPairs {
     }
 
     private HttpRequest.Builder revokeRequestBuilder(String participantId, String keyPairId, KeyDescriptor input) {
-        String requestBody = null;
+        String requestBody;
         try {
-            requestBody = objectMapper.writeValueAsString(input);
+            requestBody = context.objectMapper().writeValueAsString(input);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -180,9 +163,9 @@ public class KeyPairs {
 
     private HttpRequest.Builder rotateRequestBuilder(
             String participantId, String keyPairId, KeyDescriptor input, int duration) {
-        String requestBody = null;
+        String requestBody;
         try {
-            requestBody = objectMapper.writeValueAsString(input);
+            requestBody = context.objectMapper().writeValueAsString(input);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -195,7 +178,7 @@ public class KeyPairs {
 
     private List<KeyPairResource> getKeyPairs(InputStream body) {
         try {
-            return objectMapper.readValue(body, new TypeReference<List<KeyPairResource>>() {});
+            return context.objectMapper().readValue(body, new TypeReference<List<KeyPairResource>>() {});
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -203,7 +186,7 @@ public class KeyPairs {
 
     private KeyPairResource getKeyPairResource(InputStream body) {
         try {
-            return objectMapper.readValue(body, KeyPairResource.class);
+            return context.objectMapper().readValue(body, KeyPairResource.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
