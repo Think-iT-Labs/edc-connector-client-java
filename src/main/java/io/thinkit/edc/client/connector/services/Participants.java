@@ -2,55 +2,49 @@ package io.thinkit.edc.client.connector.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.thinkit.edc.client.connector.model.*;
+import io.thinkit.edc.client.connector.EdcClientContext;
+import io.thinkit.edc.client.connector.model.ParticipantContext;
+import io.thinkit.edc.client.connector.model.ParticipantManifest;
+import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.resource.identity.IdentityResource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.UnaryOperator;
 
-public class Participants {
+public class Participants extends IdentityResource {
+
     private final String url;
-    private final EdcApiHttpClient edcApiHttpClient;
 
-    private final ObjectMapper objectMapper;
-
-    public Participants(
-            String url,
-            HttpClient httpClient,
-            UnaryOperator<HttpRequest.Builder> interceptor,
-            ObjectMapper objectMapper) {
-        edcApiHttpClient = new EdcApiHttpClient(httpClient, interceptor);
-        this.objectMapper = objectMapper;
-        this.url = "%s/v1alpha/participants".formatted(url);
+    public Participants(EdcClientContext context) {
+        super(context);
+        url = "%s/v1alpha/participants".formatted(identityUrl);
     }
 
     public Result<List<ParticipantContext>> getAll(int offset, int limit) {
         var requestBuilder = getAllRequestBuilder(offset, limit);
 
-        return this.edcApiHttpClient.send(requestBuilder).map(this::getParticipants);
+        return context.httpClient().send(requestBuilder).map(this::getParticipants);
     }
 
     public CompletableFuture<Result<List<ParticipantContext>>> getAllAsync(int offset, int limit) {
         var requestBuilder = getAllRequestBuilder(offset, limit);
 
-        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(this::getParticipants));
+        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(this::getParticipants));
     }
 
     public Result<String> create(ParticipantManifest input) {
         var requestBuilder = createRequestBuilder(input);
 
-        return this.edcApiHttpClient.send(requestBuilder).map(result -> input.participantId());
+        return context.httpClient().send(requestBuilder).map(result -> input.participantId());
     }
 
     public CompletableFuture<Result<String>> createAsync(ParticipantManifest input) {
         var requestBuilder = createRequestBuilder(input);
 
-        return this.edcApiHttpClient
+        return context.httpClient()
                 .sendAsync(requestBuilder)
                 .thenApply(result -> result.map(content -> input.participantId()));
     }
@@ -58,54 +52,50 @@ public class Participants {
     public Result<ParticipantContext> get(String participantId) {
         var requestBuilder = getRequestBuilder(participantId);
 
-        return this.edcApiHttpClient.send(requestBuilder).map(this::getParticipant);
+        return context.httpClient().send(requestBuilder).map(this::getParticipant);
     }
 
     public CompletableFuture<Result<ParticipantContext>> getAsync(String participantId) {
         var requestBuilder = getRequestBuilder(participantId);
 
-        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(this::getParticipant));
+        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(this::getParticipant));
     }
 
     public Result<String> delete(String participantId) {
         var requestBuilder = deleteRequestBuilder(participantId);
 
-        return this.edcApiHttpClient.send(requestBuilder).map(result -> participantId);
+        return context.httpClient().send(requestBuilder).map(result -> participantId);
     }
 
     public CompletableFuture<Result<String>> deleteAsync(String participantId) {
         var requestBuilder = deleteRequestBuilder(participantId);
 
-        return this.edcApiHttpClient
-                .sendAsync(requestBuilder)
-                .thenApply(result -> result.map(content -> participantId));
+        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> participantId));
     }
 
     public Result<String> update(List<String> input, String participantId) {
         var requestBuilder = updateRequestBuilder(input, participantId);
 
-        return this.edcApiHttpClient.send(requestBuilder).map(result -> participantId);
+        return context.httpClient().send(requestBuilder).map(result -> participantId);
     }
 
     public CompletableFuture<Result<String>> updateAsync(List<String> input, String participantId) {
         var requestBuilder = updateRequestBuilder(input, participantId);
 
-        return this.edcApiHttpClient
-                .sendAsync(requestBuilder)
-                .thenApply(result -> result.map(content -> participantId));
+        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> participantId));
     }
 
     public Result<String> activate(ParticipantManifest input, String participantId, Boolean isActive) {
         var requestBuilder = activateRequestBuilder(input, participantId, isActive);
 
-        return this.edcApiHttpClient.send(requestBuilder).map(result -> input.participantId());
+        return context.httpClient().send(requestBuilder).map(result -> input.participantId());
     }
 
     public CompletableFuture<Result<String>> activateAsync(
             ParticipantManifest input, String participantId, Boolean isActive) {
         var requestBuilder = activateRequestBuilder(input, participantId, isActive);
 
-        return this.edcApiHttpClient
+        return context.httpClient()
                 .sendAsync(requestBuilder)
                 .thenApply(result -> result.map(content -> input.participantId()));
     }
@@ -113,13 +103,13 @@ public class Participants {
     public Result<String> generateToken(ParticipantManifest input, String participantId) {
         var requestBuilder = generateTokenRequestBuilder(input, participantId);
 
-        return this.edcApiHttpClient.send(requestBuilder).map(result -> input.participantId());
+        return context.httpClient().send(requestBuilder).map(result -> input.participantId());
     }
 
     public CompletableFuture<Result<String>> generateTokenAsync(ParticipantManifest input, String participantId) {
         var requestBuilder = generateTokenRequestBuilder(input, participantId);
 
-        return this.edcApiHttpClient
+        return context.httpClient()
                 .sendAsync(requestBuilder)
                 .thenApply(result -> result.map(content -> input.participantId()));
     }
@@ -137,9 +127,9 @@ public class Participants {
     }
 
     private HttpRequest.Builder createRequestBuilder(ParticipantManifest input) {
-        String requestBody = null;
+        String requestBody;
         try {
-            requestBody = objectMapper.writeValueAsString(input);
+            requestBody = context.objectMapper().writeValueAsString(input);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -150,9 +140,9 @@ public class Participants {
     }
 
     private HttpRequest.Builder updateRequestBuilder(List<String> input, String participantId) {
-        String requestBody = null;
+        String requestBody;
         try {
-            requestBody = objectMapper.writeValueAsString(input);
+            requestBody = context.objectMapper().writeValueAsString(input);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -170,9 +160,9 @@ public class Participants {
 
     private HttpRequest.Builder activateRequestBuilder(
             ParticipantManifest input, String participantId, Boolean isActive) {
-        String requestBody = null;
+        String requestBody;
         try {
-            requestBody = objectMapper.writeValueAsString(input);
+            requestBody = context.objectMapper().writeValueAsString(input);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -183,9 +173,9 @@ public class Participants {
     }
 
     private HttpRequest.Builder generateTokenRequestBuilder(ParticipantManifest input, String participantId) {
-        String requestBody = null;
+        String requestBody;
         try {
-            requestBody = objectMapper.writeValueAsString(input);
+            requestBody = context.objectMapper().writeValueAsString(input);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -197,7 +187,7 @@ public class Participants {
 
     private ParticipantContext getParticipant(InputStream body) {
         try {
-            return objectMapper.readValue(body, ParticipantContext.class);
+            return context.objectMapper().readValue(body, ParticipantContext.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -205,7 +195,7 @@ public class Participants {
 
     private List<ParticipantContext> getParticipants(InputStream body) {
         try {
-            return objectMapper.readValue(body, new TypeReference<List<ParticipantContext>>() {});
+            return context.objectMapper().readValue(body, new TypeReference<List<ParticipantContext>>() {});
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
