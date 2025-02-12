@@ -1,5 +1,6 @@
 package io.thinkit.edc.client.connector;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.thinkit.edc.client.connector.resource.EdcResource;
 import io.thinkit.edc.client.connector.services.*;
@@ -62,11 +63,7 @@ public class EdcConnectorClient {
     }
 
     public ApplicationObservability applicationObservability() {
-        if (observabilityUrl == null) {
-            throw new IllegalArgumentException(
-                    "Cannot instantiate ApplicationObservability client without the observability url");
-        }
-        return new ApplicationObservability(observabilityUrl, httpClient, interceptor);
+        return resource(ApplicationObservability.class);
     }
 
     public Catalogs catalogs() {
@@ -82,39 +79,23 @@ public class EdcConnectorClient {
     }
 
     public CatalogCache catalogCache() {
-        if (catalogCacheUrl == null) {
-            throw new IllegalArgumentException("Cannot instantiate CatalogCache client without the catalog cache url");
-        }
-        return new CatalogCache(catalogCacheUrl, httpClient, interceptor);
+        return resource(CatalogCache.class);
     }
 
     public VerifiableCredentials verifiableCredentials() {
-        if (identityUrl == null) {
-            throw new IllegalArgumentException(
-                    "Cannot instantiate verifiableCredentials client without the identity url");
-        }
-        return new VerifiableCredentials(identityUrl, httpClient, interceptor, objectMapper);
+        return resource(VerifiableCredentials.class);
     }
 
     public Did did() {
-        if (identityUrl == null) {
-            throw new IllegalArgumentException("Cannot instantiate Did client without the identity url");
-        }
-        return new Did(identityUrl, httpClient, interceptor, objectMapper);
+        return resource(Did.class);
     }
 
     public KeyPairs keyPairs() {
-        if (identityUrl == null) {
-            throw new IllegalArgumentException("Cannot instantiate Did client without the identity url");
-        }
-        return new KeyPairs(identityUrl, httpClient, interceptor, objectMapper);
+        return resource(KeyPairs.class);
     }
 
     public Participants participants() {
-        if (identityUrl == null) {
-            throw new IllegalArgumentException("Cannot instantiate Did client without the identity url");
-        }
-        return new Participants(identityUrl, httpClient, interceptor, objectMapper);
+        return resource(Participants.class);
     }
 
     public Presentations presentations() {
@@ -147,6 +128,10 @@ public class EdcConnectorClient {
     public static class Builder {
 
         private final EdcConnectorClient client = new EdcConnectorClient();
+
+        public Builder() {
+            client.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        }
 
         public Builder managementUrl(String managementUrl) {
             client.managementUrl = managementUrl;
@@ -207,6 +192,12 @@ public class EdcConnectorClient {
             with(Catalogs.class, Catalogs::new);
             with(EdrCache.class, EdrCache::new);
             with(Secrets.class, Secrets::new);
+            with(ApplicationObservability.class, ApplicationObservability::new);
+            with(CatalogCache.class, CatalogCache::new);
+            with(VerifiableCredentials.class, VerifiableCredentials::new);
+            with(Did.class, Did::new);
+            with(KeyPairs.class, KeyPairs::new);
+            with(Participants.class, Participants::new);
             return client;
         }
     }
