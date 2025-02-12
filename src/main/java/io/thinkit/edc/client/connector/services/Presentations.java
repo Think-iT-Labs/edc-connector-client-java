@@ -3,40 +3,32 @@ package io.thinkit.edc.client.connector.services;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.compact;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.thinkit.edc.client.connector.EdcClientContext;
 import io.thinkit.edc.client.connector.model.PresentationQueryMessage;
 import io.thinkit.edc.client.connector.model.PresentationResponseMessage;
 import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.resource.presentation.PresentationResource;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.UnaryOperator;
 
-public class Presentations {
+public class Presentations extends PresentationResource {
     private final String url;
-    private final EdcApiHttpClient edcApiHttpClient;
 
-    private final ObjectMapper objectMapper;
-
-    public Presentations(
-            String url,
-            HttpClient httpClient,
-            UnaryOperator<HttpRequest.Builder> interceptor,
-            ObjectMapper objectMapper) {
-        edcApiHttpClient = new EdcApiHttpClient(httpClient, interceptor);
-        this.objectMapper = objectMapper;
-        this.url = "%s/v1".formatted(url);
+    public Presentations(EdcClientContext context) {
+        super(context);
+        url = "%s/v1".formatted(presentationUrl);
     }
 
     public Result<PresentationResponseMessage> create(
             PresentationQueryMessage input, String participantId, String authorization) {
         var requestBuilder = createRequestBuilder(input, participantId, authorization);
 
-        return this.edcApiHttpClient
+        return this.context
+                .httpClient()
                 .send(requestBuilder)
                 .map(JsonLdUtil::expand)
                 .map(this::getResponse);
@@ -46,7 +38,7 @@ public class Presentations {
             PresentationQueryMessage input, String participantId, String authorization) {
         var requestBuilder = createRequestBuilder(input, participantId, authorization);
 
-        return this.edcApiHttpClient.sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
+        return this.context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
                 .map(this::getResponse));
     }
 

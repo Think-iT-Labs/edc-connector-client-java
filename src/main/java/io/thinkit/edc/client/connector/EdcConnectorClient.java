@@ -99,10 +99,7 @@ public class EdcConnectorClient {
     }
 
     public Presentations presentations() {
-        if (presentation == null) {
-            throw new IllegalArgumentException("Cannot instantiate presentation client without the presentation url");
-        }
-        return new Presentations(presentation, httpClient, interceptor, objectMapper);
+        return resource(Presentations.class);
     }
 
     public <T extends EdcResource> T resource(Class<T> resourceClass) {
