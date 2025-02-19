@@ -37,7 +37,7 @@ class KeyPairsTest extends IdentityApiTestBase {
 
         @Test
         void should_get_keyPairs() {
-            var result = keypairs.get("participantId");
+            var result = keypairs.get("participantContextId");
             assertThat(result).satisfies(KeyPairsTest.this::shouldGetKeyPairsResponse);
         }
 
@@ -49,7 +49,7 @@ class KeyPairsTest extends IdentityApiTestBase {
 
         @Test
         void should_get_a_keyPair() {
-            var result = keypairs.getOne("participantId", "keyPairId");
+            var result = keypairs.getOne("participantContextId", "keyPairId");
             assertThat(result).satisfies(KeyPairsTest.this::shouldGetAKeyPairResponse);
         }
 
@@ -76,7 +76,7 @@ class KeyPairsTest extends IdentityApiTestBase {
         @Test
         void should_activate_a_keyPair() {
 
-            var result = keypairs.activate("participantId", "keyPairId");
+            var result = keypairs.activate("participantContextId", "keyPairId");
             assertThat(result.isSucceeded()).isTrue();
         }
 
@@ -90,7 +90,7 @@ class KeyPairsTest extends IdentityApiTestBase {
         @Test
         void should_revoke_a_keyPair() {
 
-            var result = keypairs.revoke("participantId", "keyPairId", shouldCreateAKeyDescriptor());
+            var result = keypairs.revoke("participantContextId", "keyPairId", shouldCreateAKeyDescriptor());
             assertThat(result.isSucceeded()).isTrue();
         }
 
@@ -104,7 +104,7 @@ class KeyPairsTest extends IdentityApiTestBase {
         @Test
         void should_rotate_a_keyPair() {
 
-            var result = keypairs.rotate("participantId", "keyPairId", shouldCreateAKeyDescriptor(), 0);
+            var result = keypairs.rotate("participantContextId", "keyPairId", shouldCreateAKeyDescriptor(), 0);
             assertThat(result.isSucceeded()).isTrue();
         }
 
@@ -128,7 +128,7 @@ class KeyPairsTest extends IdentityApiTestBase {
 
         @Test
         void should_get_keyPairs_async() {
-            var result = keypairs.getAsync("participantId");
+            var result = keypairs.getAsync("participantContextId");
             assertThat(result)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
                     .satisfies(KeyPairsTest.this::shouldGetKeyPairsResponse);
@@ -142,7 +142,7 @@ class KeyPairsTest extends IdentityApiTestBase {
 
         @Test
         void should_get_a_keyPair_async() {
-            var result = keypairs.getOneAsync("participantId", "keyPairId");
+            var result = keypairs.getOneAsync("participantContextId", "keyPairId");
             assertThat(result)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
                     .satisfies(KeyPairsTest.this::shouldGetAKeyPairResponse);
@@ -172,7 +172,7 @@ class KeyPairsTest extends IdentityApiTestBase {
         @Test
         void should_activate_a_keyPair_async() {
 
-            var created = keypairs.activateAsync("participantId", "keyPairId");
+            var created = keypairs.activateAsync("participantContextId", "keyPairId");
             assertThat(created)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
                     .satisfies(result -> assertThat(result.isSucceeded()).isTrue());
@@ -187,7 +187,7 @@ class KeyPairsTest extends IdentityApiTestBase {
         @Test
         void should_revoke_a_keyPair_async() {
 
-            var created = keypairs.revokeAsync("participantId", "keyPairId", shouldCreateAKeyDescriptor());
+            var created = keypairs.revokeAsync("participantContextId", "keyPairId", shouldCreateAKeyDescriptor());
             assertThat(created)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
                     .satisfies(result -> assertThat(result.isSucceeded()).isTrue());
@@ -202,7 +202,7 @@ class KeyPairsTest extends IdentityApiTestBase {
         @Test
         void should_rotate_a_keyPair_async() {
 
-            var created = keypairs.rotateAsync("participantId", "keyPairId", shouldCreateAKeyDescriptor(), 0);
+            var created = keypairs.rotateAsync("participantContextId", "keyPairId", shouldCreateAKeyDescriptor(), 0);
             assertThat(created)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
                     .satisfies(result -> assertThat(result.isSucceeded()).isTrue());
@@ -231,7 +231,7 @@ class KeyPairsTest extends IdentityApiTestBase {
         assertThat(keyPair.getContent().id()).isEqualTo("string");
         assertThat(keyPair.getContent().keyContext()).isEqualTo("string");
         assertThat(keyPair.getContent().keyId()).isEqualTo("string");
-        assertThat(keyPair.getContent().participantId()).isEqualTo("string");
+        assertThat(keyPair.getContent().participantContextId()).isEqualTo("string");
         assertThat(keyPair.getContent().privateKeyAlias()).isEqualTo("string");
         assertThat(keyPair.getContent().serializedPublicKey()).isEqualTo("string");
         assertThat(keyPair.getContent().rotationDuration()).isNotNull();
@@ -248,7 +248,7 @@ class KeyPairsTest extends IdentityApiTestBase {
             assertThat(keyPair.id()).isEqualTo("string");
             assertThat(keyPair.keyContext()).isEqualTo("string");
             assertThat(keyPair.keyId()).isEqualTo("string");
-            assertThat(keyPair.participantId()).isEqualTo("string");
+            assertThat(keyPair.participantContextId()).isEqualTo("string");
             assertThat(keyPair.privateKeyAlias()).isEqualTo("string");
             assertThat(keyPair.serializedPublicKey()).isEqualTo("string");
             assertThat(keyPair.rotationDuration()).isNotNull();

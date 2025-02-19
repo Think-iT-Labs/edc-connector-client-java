@@ -38,7 +38,7 @@ public class Participants extends IdentityResource {
     public Result<String> create(ParticipantManifest input) {
         var requestBuilder = createRequestBuilder(input);
 
-        return context.httpClient().send(requestBuilder).map(result -> input.participantId());
+        return context.httpClient().send(requestBuilder).map(result -> input.participantContextId());
     }
 
     public CompletableFuture<Result<String>> createAsync(ParticipantManifest input) {
@@ -46,77 +46,82 @@ public class Participants extends IdentityResource {
 
         return context.httpClient()
                 .sendAsync(requestBuilder)
-                .thenApply(result -> result.map(content -> input.participantId()));
+                .thenApply(result -> result.map(content -> input.participantContextId()));
     }
 
-    public Result<ParticipantContext> get(String participantId) {
-        var requestBuilder = getRequestBuilder(participantId);
+    public Result<ParticipantContext> get(String participantContextId) {
+        var requestBuilder = getRequestBuilder(participantContextId);
 
         return context.httpClient().send(requestBuilder).map(this::getParticipant);
     }
 
-    public CompletableFuture<Result<ParticipantContext>> getAsync(String participantId) {
-        var requestBuilder = getRequestBuilder(participantId);
+    public CompletableFuture<Result<ParticipantContext>> getAsync(String participantContextId) {
+        var requestBuilder = getRequestBuilder(participantContextId);
 
         return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(this::getParticipant));
     }
 
-    public Result<String> delete(String participantId) {
-        var requestBuilder = deleteRequestBuilder(participantId);
+    public Result<String> delete(String participantContextId) {
+        var requestBuilder = deleteRequestBuilder(participantContextId);
 
-        return context.httpClient().send(requestBuilder).map(result -> participantId);
+        return context.httpClient().send(requestBuilder).map(result -> participantContextId);
     }
 
-    public CompletableFuture<Result<String>> deleteAsync(String participantId) {
-        var requestBuilder = deleteRequestBuilder(participantId);
+    public CompletableFuture<Result<String>> deleteAsync(String participantContextId) {
+        var requestBuilder = deleteRequestBuilder(participantContextId);
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> participantId));
+        return context.httpClient()
+                .sendAsync(requestBuilder)
+                .thenApply(result -> result.map(content -> participantContextId));
     }
 
-    public Result<String> update(List<String> input, String participantId) {
-        var requestBuilder = updateRequestBuilder(input, participantId);
+    public Result<String> update(List<String> input, String participantContextId) {
+        var requestBuilder = updateRequestBuilder(input, participantContextId);
 
-        return context.httpClient().send(requestBuilder).map(result -> participantId);
+        return context.httpClient().send(requestBuilder).map(result -> participantContextId);
     }
 
-    public CompletableFuture<Result<String>> updateAsync(List<String> input, String participantId) {
-        var requestBuilder = updateRequestBuilder(input, participantId);
+    public CompletableFuture<Result<String>> updateAsync(List<String> input, String participantContextId) {
+        var requestBuilder = updateRequestBuilder(input, participantContextId);
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> participantId));
+        return context.httpClient()
+                .sendAsync(requestBuilder)
+                .thenApply(result -> result.map(content -> participantContextId));
     }
 
-    public Result<String> activate(ParticipantManifest input, String participantId, Boolean isActive) {
-        var requestBuilder = activateRequestBuilder(input, participantId, isActive);
+    public Result<String> activate(ParticipantManifest input, String participantContextId, Boolean isActive) {
+        var requestBuilder = activateRequestBuilder(input, participantContextId, isActive);
 
-        return context.httpClient().send(requestBuilder).map(result -> input.participantId());
+        return context.httpClient().send(requestBuilder).map(result -> input.participantContextId());
     }
 
     public CompletableFuture<Result<String>> activateAsync(
-            ParticipantManifest input, String participantId, Boolean isActive) {
-        var requestBuilder = activateRequestBuilder(input, participantId, isActive);
+            ParticipantManifest input, String participantContextId, Boolean isActive) {
+        var requestBuilder = activateRequestBuilder(input, participantContextId, isActive);
 
         return context.httpClient()
                 .sendAsync(requestBuilder)
-                .thenApply(result -> result.map(content -> input.participantId()));
+                .thenApply(result -> result.map(content -> input.participantContextId()));
     }
 
-    public Result<String> generateToken(ParticipantManifest input, String participantId) {
-        var requestBuilder = generateTokenRequestBuilder(input, participantId);
+    public Result<String> generateToken(ParticipantManifest input, String participantContextId) {
+        var requestBuilder = generateTokenRequestBuilder(input, participantContextId);
 
-        return context.httpClient().send(requestBuilder).map(result -> input.participantId());
+        return context.httpClient().send(requestBuilder).map(result -> input.participantContextId());
     }
 
-    public CompletableFuture<Result<String>> generateTokenAsync(ParticipantManifest input, String participantId) {
-        var requestBuilder = generateTokenRequestBuilder(input, participantId);
+    public CompletableFuture<Result<String>> generateTokenAsync(
+            ParticipantManifest input, String participantContextId) {
+        var requestBuilder = generateTokenRequestBuilder(input, participantContextId);
 
         return context.httpClient()
                 .sendAsync(requestBuilder)
-                .thenApply(result -> result.map(content -> input.participantId()));
+                .thenApply(result -> result.map(content -> input.participantContextId()));
     }
 
-    private HttpRequest.Builder getRequestBuilder(String participantId) {
+    private HttpRequest.Builder getRequestBuilder(String participantContextId) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/%s".formatted(this.url, participantId)))
+                .uri(URI.create("%s/%s".formatted(this.url, participantContextId)))
                 .GET();
     }
 
