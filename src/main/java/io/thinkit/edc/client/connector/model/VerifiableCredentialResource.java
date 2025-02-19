@@ -10,7 +10,7 @@ public record VerifiableCredentialResource(
         String holderId,
         Map<String, Object> issuancePolicy,
         String issuerId,
-        String participantId,
+        String participantContextId,
         Map<String, Object> reissuancePolicy,
         int state,
         String timeOfLastStatusUpdate,

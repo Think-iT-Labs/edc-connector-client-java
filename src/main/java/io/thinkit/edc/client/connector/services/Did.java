@@ -37,92 +37,104 @@ public class Did extends IdentityResource {
         return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(this::getDidDocuments));
     }
 
-    public Result<String> publish(DidRequestPayload input, String participantId) {
-        var requestBuilder = publishRequestBuilder(input, participantId);
+    public Result<String> publish(DidRequestPayload input, String participantContextId) {
+        var requestBuilder = publishRequestBuilder(input, participantContextId);
 
-        return context.httpClient().send(requestBuilder).map(result -> participantId);
+        return context.httpClient().send(requestBuilder).map(result -> participantContextId);
     }
 
-    public CompletableFuture<Result<String>> publishAsync(DidRequestPayload input, String participantId) {
-        var requestBuilder = publishRequestBuilder(input, participantId);
+    public CompletableFuture<Result<String>> publishAsync(DidRequestPayload input, String participantContextId) {
+        var requestBuilder = publishRequestBuilder(input, participantContextId);
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> participantId));
+        return context.httpClient()
+                .sendAsync(requestBuilder)
+                .thenApply(result -> result.map(content -> participantContextId));
     }
 
-    public Result<String> unpublish(DidRequestPayload input, String participantId) {
-        var requestBuilder = unpublishRequestBuilder(input, participantId);
+    public Result<String> unpublish(DidRequestPayload input, String participantContextId) {
+        var requestBuilder = unpublishRequestBuilder(input, participantContextId);
 
-        return context.httpClient().send(requestBuilder).map(result -> participantId);
+        return context.httpClient().send(requestBuilder).map(result -> participantContextId);
     }
 
-    public CompletableFuture<Result<String>> unpublishAsync(DidRequestPayload input, String participantId) {
-        var requestBuilder = unpublishRequestBuilder(input, participantId);
+    public CompletableFuture<Result<String>> unpublishAsync(DidRequestPayload input, String participantContextId) {
+        var requestBuilder = unpublishRequestBuilder(input, participantContextId);
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> participantId));
+        return context.httpClient()
+                .sendAsync(requestBuilder)
+                .thenApply(result -> result.map(content -> participantContextId));
     }
 
-    public Result<String> getState(DidRequestPayload input, String participantId) {
-        var requestBuilder = getStateRequestBuilder(input, participantId);
+    public Result<String> getState(DidRequestPayload input, String participantContextId) {
+        var requestBuilder = getStateRequestBuilder(input, participantContextId);
 
-        return context.httpClient().send(requestBuilder).map(result -> participantId);
+        return context.httpClient().send(requestBuilder).map(result -> participantContextId);
     }
 
-    public CompletableFuture<Result<String>> getStateAsync(DidRequestPayload input, String participantId) {
-        var requestBuilder = getStateRequestBuilder(input, participantId);
+    public CompletableFuture<Result<String>> getStateAsync(DidRequestPayload input, String participantContextId) {
+        var requestBuilder = getStateRequestBuilder(input, participantContextId);
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> participantId));
+        return context.httpClient()
+                .sendAsync(requestBuilder)
+                .thenApply(result -> result.map(content -> participantContextId));
     }
 
     public Result<String> addServiceEndpoint(
-            ServiceInput input, String participantId, String did, Boolean autoPublish) {
-        var requestBuilder = addServiceEndpointRequestBuilder(input, participantId, did, autoPublish);
+            ServiceInput input, String participantContextId, String did, Boolean autoPublish) {
+        var requestBuilder = addServiceEndpointRequestBuilder(input, participantContextId, did, autoPublish);
 
-        return context.httpClient().send(requestBuilder).map(result -> participantId);
+        return context.httpClient().send(requestBuilder).map(result -> participantContextId);
     }
 
     public CompletableFuture<Result<String>> addServiceEndpointAsync(
-            ServiceInput input, String participantId, String did, Boolean autoPublish) {
-        var requestBuilder = addServiceEndpointRequestBuilder(input, participantId, did, autoPublish);
+            ServiceInput input, String participantContextId, String did, Boolean autoPublish) {
+        var requestBuilder = addServiceEndpointRequestBuilder(input, participantContextId, did, autoPublish);
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> participantId));
+        return context.httpClient()
+                .sendAsync(requestBuilder)
+                .thenApply(result -> result.map(content -> participantContextId));
     }
 
-    public Result<List<DidDocument>> query(QuerySpecInput input, String participantId) {
-        var requestBuilder = queryRequestBuilder(input, participantId);
+    public Result<List<DidDocument>> query(QuerySpecInput input, String participantContextId) {
+        var requestBuilder = queryRequestBuilder(input, participantContextId);
 
         return context.httpClient().send(requestBuilder).map(this::getDidDocuments);
     }
 
-    public CompletableFuture<Result<List<DidDocument>>> queryAsync(QuerySpecInput input, String participantId) {
-        var requestBuilder = queryRequestBuilder(input, participantId);
+    public CompletableFuture<Result<List<DidDocument>>> queryAsync(QuerySpecInput input, String participantContextId) {
+        var requestBuilder = queryRequestBuilder(input, participantContextId);
 
         return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(this::getDidDocuments));
     }
 
-    public Result<String> delete(String participantId, String did, String serviceId, Boolean autoPublish) {
-        var requestBuilder = deleteRequestBuilder(participantId, did, serviceId, autoPublish);
+    public Result<String> delete(String participantContextId, String did, String serviceId, Boolean autoPublish) {
+        var requestBuilder = deleteRequestBuilder(participantContextId, did, serviceId, autoPublish);
 
-        return context.httpClient().send(requestBuilder).map(result -> participantId);
+        return context.httpClient().send(requestBuilder).map(result -> participantContextId);
     }
 
     public CompletableFuture<Result<String>> deleteAsync(
-            String participantId, String did, String serviceId, Boolean autoPublish) {
-        var requestBuilder = deleteRequestBuilder(participantId, did, serviceId, autoPublish);
+            String participantContextId, String did, String serviceId, Boolean autoPublish) {
+        var requestBuilder = deleteRequestBuilder(participantContextId, did, serviceId, autoPublish);
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> participantId));
+        return context.httpClient()
+                .sendAsync(requestBuilder)
+                .thenApply(result -> result.map(content -> participantContextId));
     }
 
-    public Result<String> update(ServiceInput input, String participantId, String did, Boolean autoPublish) {
-        var requestBuilder = updateRequestBuilder(input, participantId, did, autoPublish);
+    public Result<String> update(ServiceInput input, String participantContextId, String did, Boolean autoPublish) {
+        var requestBuilder = updateRequestBuilder(input, participantContextId, did, autoPublish);
 
-        return context.httpClient().send(requestBuilder).map(result -> participantId);
+        return context.httpClient().send(requestBuilder).map(result -> participantContextId);
     }
 
     public CompletableFuture<Result<String>> updateAsync(
-            ServiceInput input, String participantId, String did, Boolean autoPublish) {
-        var requestBuilder = updateRequestBuilder(input, participantId, did, autoPublish);
+            ServiceInput input, String participantContextId, String did, Boolean autoPublish) {
+        var requestBuilder = updateRequestBuilder(input, participantContextId, did, autoPublish);
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> participantId));
+        return context.httpClient()
+                .sendAsync(requestBuilder)
+                .thenApply(result -> result.map(content -> participantContextId));
     }
 
     private HttpRequest.Builder getRequestBuilder(int offset, int limit) {
@@ -131,7 +143,7 @@ public class Did extends IdentityResource {
                 .GET();
     }
 
-    private HttpRequest.Builder queryRequestBuilder(QuerySpecInput input, String participantId) {
+    private HttpRequest.Builder queryRequestBuilder(QuerySpecInput input, String participantContextId) {
         String requestBody;
         try {
             requestBody = context.objectMapper().writeValueAsString(input);
@@ -139,21 +151,21 @@ public class Did extends IdentityResource {
             throw new RuntimeException(e);
         }
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/participants/%s/dids/query".formatted(this.url, participantId)))
+                .uri(URI.create("%s/participants/%s/dids/query".formatted(this.url, participantContextId)))
                 .header("content-type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody));
     }
 
     private HttpRequest.Builder deleteRequestBuilder(
-            String participantId, String did, String serviceId, Boolean autoPublish) {
+            String participantContextId, String did, String serviceId, Boolean autoPublish) {
         return HttpRequest.newBuilder()
                 .uri(URI.create("%s/participants/%s/dids/%s/endpoints?serviceId=%s&autoPublish=%s"
-                        .formatted(this.url, participantId, did, serviceId, autoPublish)))
+                        .formatted(this.url, participantContextId, did, serviceId, autoPublish)))
                 .DELETE();
     }
 
     private HttpRequest.Builder updateRequestBuilder(
-            ServiceInput input, String participantId, String did, Boolean autoPublish) {
+            ServiceInput input, String participantContextId, String did, Boolean autoPublish) {
         String requestBody;
         try {
             requestBody = context.objectMapper().writeValueAsString(input);
@@ -162,12 +174,12 @@ public class Did extends IdentityResource {
         }
         return HttpRequest.newBuilder()
                 .uri(URI.create("%s/participants/%s/dids/%s/endpoints?autoPublish=%s"
-                        .formatted(this.url, participantId, did, autoPublish)))
+                        .formatted(this.url, participantContextId, did, autoPublish)))
                 .header("content-type", "application/json")
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(requestBody));
     }
 
-    private HttpRequest.Builder publishRequestBuilder(DidRequestPayload input, String participantId) {
+    private HttpRequest.Builder publishRequestBuilder(DidRequestPayload input, String participantContextId) {
         String requestBody;
         try {
             requestBody = context.objectMapper().writeValueAsString(input);
@@ -175,12 +187,12 @@ public class Did extends IdentityResource {
             throw new RuntimeException(e);
         }
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/participants/%s/dids/publish".formatted(this.url, participantId)))
+                .uri(URI.create("%s/participants/%s/dids/publish".formatted(this.url, participantContextId)))
                 .header("content-type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody));
     }
 
-    private HttpRequest.Builder unpublishRequestBuilder(DidRequestPayload input, String participantId) {
+    private HttpRequest.Builder unpublishRequestBuilder(DidRequestPayload input, String participantContextId) {
         String requestBody;
         try {
             requestBody = context.objectMapper().writeValueAsString(input);
@@ -188,12 +200,12 @@ public class Did extends IdentityResource {
             throw new RuntimeException(e);
         }
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/participants/%s/dids/unpublish".formatted(this.url, participantId)))
+                .uri(URI.create("%s/participants/%s/dids/unpublish".formatted(this.url, participantContextId)))
                 .header("content-type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody));
     }
 
-    private HttpRequest.Builder getStateRequestBuilder(DidRequestPayload input, String participantId) {
+    private HttpRequest.Builder getStateRequestBuilder(DidRequestPayload input, String participantContextId) {
         String requestBody;
         try {
             requestBody = context.objectMapper().writeValueAsString(input);
@@ -201,13 +213,13 @@ public class Did extends IdentityResource {
             throw new RuntimeException(e);
         }
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/participants/%s/dids/state".formatted(this.url, participantId)))
+                .uri(URI.create("%s/participants/%s/dids/state".formatted(this.url, participantContextId)))
                 .header("content-type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody));
     }
 
     private HttpRequest.Builder addServiceEndpointRequestBuilder(
-            ServiceInput input, String participantId, String did, Boolean autoPublish) {
+            ServiceInput input, String participantContextId, String did, Boolean autoPublish) {
         String requestBody;
         try {
             requestBody = context.objectMapper().writeValueAsString(input);
@@ -216,7 +228,7 @@ public class Did extends IdentityResource {
         }
         return HttpRequest.newBuilder()
                 .uri(URI.create("%s/participants/%s/dids/%s/endpoints?autoPublish=%s"
-                        .formatted(this.url, participantId, did, autoPublish)))
+                        .formatted(this.url, participantContextId, did, autoPublish)))
                 .header("content-type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody));
     }
