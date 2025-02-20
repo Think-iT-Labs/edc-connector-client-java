@@ -23,6 +23,7 @@ class DidTest extends IdentityApiTestBase {
                 .httpClient(http)
                 .identityUrl(prism.getUrl())
                 .build();
+        System.out.println(prism.getUrl());
         did = client.did();
     }
 

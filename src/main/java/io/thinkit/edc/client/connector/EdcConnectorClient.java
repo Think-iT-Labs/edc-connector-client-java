@@ -3,23 +3,7 @@ package io.thinkit.edc.client.connector;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.thinkit.edc.client.connector.resource.EdcResource;
-import io.thinkit.edc.client.connector.services.ApplicationObservability;
-import io.thinkit.edc.client.connector.services.Assets;
-import io.thinkit.edc.client.connector.services.CatalogCache;
-import io.thinkit.edc.client.connector.services.Catalogs;
-import io.thinkit.edc.client.connector.services.ContractAgreements;
-import io.thinkit.edc.client.connector.services.ContractDefinitions;
-import io.thinkit.edc.client.connector.services.ContractNegotiations;
-import io.thinkit.edc.client.connector.services.Dataplanes;
-import io.thinkit.edc.client.connector.services.Did;
-import io.thinkit.edc.client.connector.services.EdcApiHttpClient;
-import io.thinkit.edc.client.connector.services.EdrCache;
-import io.thinkit.edc.client.connector.services.KeyPairs;
-import io.thinkit.edc.client.connector.services.Participants;
-import io.thinkit.edc.client.connector.services.PolicyDefinitions;
-import io.thinkit.edc.client.connector.services.Secrets;
-import io.thinkit.edc.client.connector.services.TransferProcesses;
-import io.thinkit.edc.client.connector.services.VerifiableCredentials;
+import io.thinkit.edc.client.connector.services.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.util.HashMap;
@@ -32,6 +16,7 @@ public class EdcConnectorClient {
     private String observabilityUrl;
     private String catalogCacheUrl;
     private String identityUrl;
+    private String presentation;
     private HttpClient httpClient = HttpClient.newHttpClient();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -113,6 +98,10 @@ public class EdcConnectorClient {
         return resource(Participants.class);
     }
 
+    public Presentations presentations() {
+        return resource(Presentations.class);
+    }
+
     public <T extends EdcResource> T resource(Class<T> resourceClass) {
         var resourceCreator = resourceCreators.get(resourceClass);
         if (resourceCreator == null) {
@@ -128,7 +117,7 @@ public class EdcConnectorClient {
 
     private EdcClientContext createContext() {
         return new EdcClientContext(
-                new EdcClientUrls(managementUrl, observabilityUrl, catalogCacheUrl, identityUrl),
+                new EdcClientUrls(managementUrl, observabilityUrl, catalogCacheUrl, identityUrl, presentation),
                 objectMapper,
                 edcClientHttpClient);
     }
@@ -158,6 +147,11 @@ public class EdcConnectorClient {
 
         public Builder identityUrl(String identityUrl) {
             client.identityUrl = identityUrl;
+            return this;
+        }
+
+        public Builder presentation(String presentation) {
+            client.presentation = presentation;
             return this;
         }
 
