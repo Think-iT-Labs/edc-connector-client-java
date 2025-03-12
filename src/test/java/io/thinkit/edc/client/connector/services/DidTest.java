@@ -81,7 +81,7 @@ class DidTest extends IdentityApiTestBase {
         @Test
         void should_delete() {
 
-            var result = did.delete("participantId", "did", "serviceId", true);
+            var result = did.delete("participantContextId", "did", "serviceId", true);
             assertThat(result.isSucceeded()).isTrue();
         }
 
@@ -164,7 +164,7 @@ class DidTest extends IdentityApiTestBase {
         @Test
         void should_delete_async() {
 
-            var deleted = did.deleteAsync("participantId", "did", "serviceID", true);
+            var deleted = did.deleteAsync("participantContextId", "did", "serviceID", true);
             assertThat(deleted)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
                     .satisfies(result -> assertThat(result.isSucceeded()).isTrue());

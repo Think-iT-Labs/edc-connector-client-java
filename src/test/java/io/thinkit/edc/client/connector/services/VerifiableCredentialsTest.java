@@ -33,7 +33,7 @@ class VerifiableCredentialsTest extends IdentityApiTestBase {
     class Sync {
         @Test
         void should_get_a_verifiable_credential() {
-            var result = verifiableCredentials.get("participantId", "credentialId");
+            var result = verifiableCredentials.get("participantContextId", "credentialId");
             assertThat(result).satisfies(VerifiableCredentialsTest.this::shouldGetAVerifiableCredentialResponse);
         }
 
@@ -45,7 +45,7 @@ class VerifiableCredentialsTest extends IdentityApiTestBase {
 
         @Test
         void should_get_verifiable_credentials() {
-            var result = verifiableCredentials.getList("participantId", "type");
+            var result = verifiableCredentials.getList("participantContextId", "type");
             assertThat(result).satisfies(VerifiableCredentialsTest.this::shouldGetVerifiableCredentialsResponse);
         }
 
@@ -92,7 +92,7 @@ class VerifiableCredentialsTest extends IdentityApiTestBase {
         @Test
         void should_delete_a_verifiable_credential() {
 
-            var result = verifiableCredentials.delete("participantId", "credentialId");
+            var result = verifiableCredentials.delete("participantContextId", "credentialId");
             assertThat(result.isSucceeded()).isTrue();
         }
 
@@ -108,7 +108,7 @@ class VerifiableCredentialsTest extends IdentityApiTestBase {
     class Async {
         @Test
         void should_get_a_verifiable_credential_async() {
-            var result = verifiableCredentials.getAsync("participantId", "credentialId");
+            var result = verifiableCredentials.getAsync("participantContextId", "credentialId");
             assertThat(result)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
                     .satisfies(VerifiableCredentialsTest.this::shouldGetAVerifiableCredentialResponse);
@@ -124,7 +124,7 @@ class VerifiableCredentialsTest extends IdentityApiTestBase {
 
         @Test
         void should_get_verifiable_credentials_async() {
-            var result = verifiableCredentials.getListAsync("participantId", "type");
+            var result = verifiableCredentials.getListAsync("participantContextId", "type");
             assertThat(result)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
                     .satisfies(VerifiableCredentialsTest.this::shouldGetVerifiableCredentialsResponse);
@@ -183,7 +183,7 @@ class VerifiableCredentialsTest extends IdentityApiTestBase {
         @Test
         void should_delete_a_verifiable_credential_async() {
 
-            var deleted = verifiableCredentials.deleteAsync("participantId", "credentialId");
+            var deleted = verifiableCredentials.deleteAsync("participantContextId", "credentialId");
             assertThat(deleted)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
                     .satisfies(result -> assertThat(result.isSucceeded()).isTrue());
@@ -212,7 +212,7 @@ class VerifiableCredentialsTest extends IdentityApiTestBase {
         assertThat(verifiableCredentials.getContent().credentialStatus()).isEqualTo("INITIAL");
         assertThat(verifiableCredentials.getContent().holderId()).isEqualTo("string");
         assertThat(verifiableCredentials.getContent().issuerId()).isEqualTo("string");
-        assertThat(verifiableCredentials.getContent().participantId()).isEqualTo("string");
+        assertThat(verifiableCredentials.getContent().participantContextId()).isEqualTo("string");
         assertThat(verifiableCredentials.getContent().state()).isEqualTo(-2147483648);
         assertThat(verifiableCredentials.getContent().timeOfLastStatusUpdate()).isEqualTo("2019-08-24T14:15:22Z");
         assertThat(verifiableCredentials.getContent().issuancePolicy()).isNotNull();
@@ -239,7 +239,7 @@ class VerifiableCredentialsTest extends IdentityApiTestBase {
             assertThat(verifiable.credentialStatus()).isEqualTo("INITIAL");
             assertThat(verifiable.holderId()).isEqualTo("string");
             assertThat(verifiable.issuerId()).isEqualTo("string");
-            assertThat(verifiable.participantId()).isEqualTo("string");
+            assertThat(verifiable.participantContextId()).isEqualTo("string");
             assertThat(verifiable.state()).isEqualTo(-2147483648);
             assertThat(verifiable.timeOfLastStatusUpdate()).isEqualTo("2019-08-24T14:15:22Z");
             assertThat(verifiable.issuancePolicy()).isNotNull();
@@ -281,6 +281,7 @@ class VerifiableCredentialsTest extends IdentityApiTestBase {
         policy.put("@type", "SET");
         policy.put("assignee", "string");
         policy.put("assigner", "assigner");
-        return new VerifiableCredentialManifest("id", policy, "participantId", policy, verifiableCredentialContainer);
+        return new VerifiableCredentialManifest(
+                "id", policy, "participantContextId", policy, verifiableCredentialContainer);
     }
 }

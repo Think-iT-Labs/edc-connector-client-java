@@ -34,77 +34,87 @@ public class KeyPairs extends IdentityResource {
         return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(this::getKeyPairs));
     }
 
-    public Result<List<KeyPairResource>> get(String participantId) {
-        var requestBuilder = getRequestBuilder(participantId);
+    public Result<List<KeyPairResource>> get(String participantContextId) {
+        var requestBuilder = getRequestBuilder(participantContextId);
 
         return context.httpClient().send(requestBuilder).map(this::getKeyPairs);
     }
 
-    public CompletableFuture<Result<List<KeyPairResource>>> getAsync(String participantId) {
-        var requestBuilder = getRequestBuilder(participantId);
+    public CompletableFuture<Result<List<KeyPairResource>>> getAsync(String participantContextId) {
+        var requestBuilder = getRequestBuilder(participantContextId);
 
         return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(this::getKeyPairs));
     }
 
-    public Result<String> add(KeyDescriptor input, String participantId, Boolean makeDefault) {
-        var requestBuilder = addRequestBuilder(input, participantId, makeDefault);
+    public Result<String> add(KeyDescriptor input, String participantContextId, Boolean makeDefault) {
+        var requestBuilder = addRequestBuilder(input, participantContextId, makeDefault);
 
-        return context.httpClient().send(requestBuilder).map(result -> participantId);
+        return context.httpClient().send(requestBuilder).map(result -> participantContextId);
     }
 
-    public CompletableFuture<Result<String>> addAsync(KeyDescriptor input, String participantId, Boolean makeDefault) {
-        var requestBuilder = addRequestBuilder(input, participantId, makeDefault);
+    public CompletableFuture<Result<String>> addAsync(
+            KeyDescriptor input, String participantContextId, Boolean makeDefault) {
+        var requestBuilder = addRequestBuilder(input, participantContextId, makeDefault);
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> participantId));
+        return context.httpClient()
+                .sendAsync(requestBuilder)
+                .thenApply(result -> result.map(content -> participantContextId));
     }
 
-    public Result<KeyPairResource> getOne(String participantId, String keyPairId) {
-        var requestBuilder = getOneRequestBuilder(participantId, keyPairId);
+    public Result<KeyPairResource> getOne(String participantContextId, String keyPairId) {
+        var requestBuilder = getOneRequestBuilder(participantContextId, keyPairId);
 
         return context.httpClient().send(requestBuilder).map(this::getKeyPairResource);
     }
 
-    public CompletableFuture<Result<KeyPairResource>> getOneAsync(String participantId, String keyPairId) {
-        var requestBuilder = getOneRequestBuilder(participantId, keyPairId);
+    public CompletableFuture<Result<KeyPairResource>> getOneAsync(String participantContextId, String keyPairId) {
+        var requestBuilder = getOneRequestBuilder(participantContextId, keyPairId);
 
         return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(this::getKeyPairResource));
     }
 
-    public Result<String> activate(String participantId, String keyPairId) {
-        var requestBuilder = activateRequestBuilder(participantId, keyPairId);
+    public Result<String> activate(String participantContextId, String keyPairId) {
+        var requestBuilder = activateRequestBuilder(participantContextId, keyPairId);
 
-        return context.httpClient().send(requestBuilder).map(result -> participantId);
+        return context.httpClient().send(requestBuilder).map(result -> participantContextId);
     }
 
-    public CompletableFuture<Result<String>> activateAsync(String participantId, String keyPairId) {
-        var requestBuilder = activateRequestBuilder(participantId, keyPairId);
+    public CompletableFuture<Result<String>> activateAsync(String participantContextId, String keyPairId) {
+        var requestBuilder = activateRequestBuilder(participantContextId, keyPairId);
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> participantId));
+        return context.httpClient()
+                .sendAsync(requestBuilder)
+                .thenApply(result -> result.map(content -> participantContextId));
     }
 
-    public Result<String> revoke(String participantId, String keyPairId, KeyDescriptor input) {
-        var requestBuilder = revokeRequestBuilder(participantId, keyPairId, input);
+    public Result<String> revoke(String participantContextId, String keyPairId, KeyDescriptor input) {
+        var requestBuilder = revokeRequestBuilder(participantContextId, keyPairId, input);
 
-        return context.httpClient().send(requestBuilder).map(result -> participantId);
+        return context.httpClient().send(requestBuilder).map(result -> participantContextId);
     }
 
-    public CompletableFuture<Result<String>> revokeAsync(String participantId, String keyPairId, KeyDescriptor input) {
-        var requestBuilder = revokeRequestBuilder(participantId, keyPairId, input);
+    public CompletableFuture<Result<String>> revokeAsync(
+            String participantContextId, String keyPairId, KeyDescriptor input) {
+        var requestBuilder = revokeRequestBuilder(participantContextId, keyPairId, input);
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> participantId));
+        return context.httpClient()
+                .sendAsync(requestBuilder)
+                .thenApply(result -> result.map(content -> participantContextId));
     }
 
-    public Result<String> rotate(String participantId, String keyPairId, KeyDescriptor input, int duration) {
-        var requestBuilder = rotateRequestBuilder(participantId, keyPairId, input, duration);
+    public Result<String> rotate(String participantContextId, String keyPairId, KeyDescriptor input, int duration) {
+        var requestBuilder = rotateRequestBuilder(participantContextId, keyPairId, input, duration);
 
-        return context.httpClient().send(requestBuilder).map(result -> participantId);
+        return context.httpClient().send(requestBuilder).map(result -> participantContextId);
     }
 
     public CompletableFuture<Result<String>> rotateAsync(
-            String participantId, String keyPairId, KeyDescriptor input, int duration) {
-        var requestBuilder = rotateRequestBuilder(participantId, keyPairId, input, duration);
+            String participantContextId, String keyPairId, KeyDescriptor input, int duration) {
+        var requestBuilder = rotateRequestBuilder(participantContextId, keyPairId, input, duration);
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> participantId));
+        return context.httpClient()
+                .sendAsync(requestBuilder)
+                .thenApply(result -> result.map(content -> participantContextId));
     }
 
     private HttpRequest.Builder getAllRequestBuilder(int offset, int limit) {
@@ -113,19 +123,20 @@ public class KeyPairs extends IdentityResource {
                 .GET();
     }
 
-    private HttpRequest.Builder getRequestBuilder(String participantId) {
+    private HttpRequest.Builder getRequestBuilder(String participantContextId) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/participants/%s/keypairs".formatted(this.url, participantId)))
+                .uri(URI.create("%s/participants/%s/keypairs".formatted(this.url, participantContextId)))
                 .GET();
     }
 
-    private HttpRequest.Builder getOneRequestBuilder(String participantId, String keyPairId) {
+    private HttpRequest.Builder getOneRequestBuilder(String participantContextId, String keyPairId) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/participants/%s/keypairs/%s".formatted(this.url, participantId, keyPairId)))
+                .uri(URI.create("%s/participants/%s/keypairs/%s".formatted(this.url, participantContextId, keyPairId)))
                 .GET();
     }
 
-    private HttpRequest.Builder addRequestBuilder(KeyDescriptor input, String participantId, Boolean makeDefault) {
+    private HttpRequest.Builder addRequestBuilder(
+            KeyDescriptor input, String participantContextId, Boolean makeDefault) {
         String requestBody;
         try {
             requestBody = context.objectMapper().writeValueAsString(input);
@@ -133,8 +144,8 @@ public class KeyPairs extends IdentityResource {
             throw new RuntimeException(e);
         }
         return HttpRequest.newBuilder()
-                .uri(URI.create(
-                        "%s/participants/%s/keypairs?makeDefault=%s".formatted(this.url, participantId, makeDefault)))
+                .uri(URI.create("%s/participants/%s/keypairs?makeDefault=%s"
+                        .formatted(this.url, participantContextId, makeDefault)))
                 .header("content-type", "application/json")
                 .PUT(HttpRequest.BodyPublishers.ofString(requestBody));
     }

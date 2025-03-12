@@ -23,29 +23,30 @@ public class VerifiableCredentials extends IdentityResource {
         url = "%s/v1alpha".formatted(identityUrl);
     }
 
-    public Result<VerifiableCredentialResource> get(String participantId, String credentialId) {
-        var requestBuilder = getRequestBuilder(participantId, credentialId);
+    public Result<VerifiableCredentialResource> get(String participantContextId, String credentialId) {
+        var requestBuilder = getRequestBuilder(participantContextId, credentialId);
 
         return context.httpClient().send(requestBuilder).map(this::getVerifiableCredential);
     }
 
-    public CompletableFuture<Result<VerifiableCredentialResource>> getAsync(String participantId, String credentialId) {
-        var requestBuilder = getRequestBuilder(participantId, credentialId);
+    public CompletableFuture<Result<VerifiableCredentialResource>> getAsync(
+            String participantContextId, String credentialId) {
+        var requestBuilder = getRequestBuilder(participantContextId, credentialId);
 
         return context.httpClient()
                 .sendAsync(requestBuilder)
                 .thenApply(result -> result.map(this::getVerifiableCredential));
     }
 
-    public Result<List<VerifiableCredentialResource>> getList(String participantId, String type) {
-        var requestBuilder = getListRequestBuilder(participantId, type);
+    public Result<List<VerifiableCredentialResource>> getList(String participantContextId, String type) {
+        var requestBuilder = getListRequestBuilder(participantContextId, type);
 
         return context.httpClient().send(requestBuilder).map(this::getVerifiableCredentials);
     }
 
     public CompletableFuture<Result<List<VerifiableCredentialResource>>> getListAsync(
-            String participantId, String type) {
-        var requestBuilder = getListRequestBuilder(participantId, type);
+            String participantContextId, String type) {
+        var requestBuilder = getListRequestBuilder(participantContextId, type);
 
         return context.httpClient()
                 .sendAsync(requestBuilder)
@@ -66,51 +67,57 @@ public class VerifiableCredentials extends IdentityResource {
                 .thenApply(result -> result.map(this::getVerifiableCredentials));
     }
 
-    public Result<String> create(VerifiableCredentialManifest input, String participantId) {
-        var requestBuilder = createRequestBuilder(input, participantId);
+    public Result<String> create(VerifiableCredentialManifest input, String participantContextId) {
+        var requestBuilder = createRequestBuilder(input, participantContextId);
 
         return context.httpClient().send(requestBuilder).map(result -> input.id());
     }
 
-    public CompletableFuture<Result<String>> createAsync(VerifiableCredentialManifest input, String participantId) {
-        var requestBuilder = createRequestBuilder(input, participantId);
+    public CompletableFuture<Result<String>> createAsync(
+            VerifiableCredentialManifest input, String participantContextId) {
+        var requestBuilder = createRequestBuilder(input, participantContextId);
 
         return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> input.id()));
     }
 
-    public Result<String> update(VerifiableCredentialManifest input, String participantId) {
-        var requestBuilder = updateRequestBuilder(input, participantId);
+    public Result<String> update(VerifiableCredentialManifest input, String participantContextId) {
+        var requestBuilder = updateRequestBuilder(input, participantContextId);
 
         return context.httpClient().send(requestBuilder).map(result -> input.id());
     }
 
-    public CompletableFuture<Result<String>> updateAsync(VerifiableCredentialManifest input, String participantId) {
-        var requestBuilder = updateRequestBuilder(input, participantId);
+    public CompletableFuture<Result<String>> updateAsync(
+            VerifiableCredentialManifest input, String participantContextId) {
+        var requestBuilder = updateRequestBuilder(input, participantContextId);
 
         return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> input.id()));
     }
 
-    public Result<String> delete(String participantId, String credentialId) {
-        var requestBuilder = deleteRequestBuilder(participantId, credentialId);
+    public Result<String> delete(String participantContextId, String credentialId) {
+        var requestBuilder = deleteRequestBuilder(participantContextId, credentialId);
 
         return context.httpClient().send(requestBuilder).map(result -> credentialId);
     }
 
-    public CompletableFuture<Result<String>> deleteAsync(String participantId, String credentialId) {
-        var requestBuilder = deleteRequestBuilder(participantId, credentialId);
+    public CompletableFuture<Result<String>> deleteAsync(String participantContextId, String credentialId) {
+        var requestBuilder = deleteRequestBuilder(participantContextId, credentialId);
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> participantId));
+        return context.httpClient()
+                .sendAsync(requestBuilder)
+                .thenApply(result -> result.map(content -> participantContextId));
     }
 
-    private HttpRequest.Builder getRequestBuilder(String participantId, String credentialId) {
+    private HttpRequest.Builder getRequestBuilder(String participantContextId, String credentialId) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/participants/%s/credentials/%s".formatted(this.url, participantId, credentialId)))
+                .uri(URI.create(
+                        "%s/participants/%s/credentials/%s".formatted(this.url, participantContextId, credentialId)))
                 .GET();
     }
 
-    private HttpRequest.Builder getListRequestBuilder(String participantId, String type) {
+    private HttpRequest.Builder getListRequestBuilder(String participantContextId, String type) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/participants/%s/credentials?type=%s".formatted(this.url, participantId, type)))
+                .uri(URI.create(
+                        "%s/participants/%s/credentials?type=%s".formatted(this.url, participantContextId, type)))
                 .GET();
     }
 
@@ -120,7 +127,7 @@ public class VerifiableCredentials extends IdentityResource {
                 .GET();
     }
 
-    private HttpRequest.Builder createRequestBuilder(VerifiableCredentialManifest input, String participantId) {
+    private HttpRequest.Builder createRequestBuilder(VerifiableCredentialManifest input, String participantContextId) {
         String requestBody = null;
         try {
             requestBody = context.objectMapper().writeValueAsString(input);
@@ -128,12 +135,12 @@ public class VerifiableCredentials extends IdentityResource {
             throw new RuntimeException(e);
         }
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/participants/%s/credentials".formatted(this.url, participantId)))
+                .uri(URI.create("%s/participants/%s/credentials".formatted(this.url, participantContextId)))
                 .header("content-type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody));
     }
 
-    private HttpRequest.Builder updateRequestBuilder(VerifiableCredentialManifest input, String participantId) {
+    private HttpRequest.Builder updateRequestBuilder(VerifiableCredentialManifest input, String participantContextId) {
         String requestBody = null;
         try {
             requestBody = context.objectMapper().writeValueAsString(input);
@@ -141,14 +148,15 @@ public class VerifiableCredentials extends IdentityResource {
             throw new RuntimeException(e);
         }
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/participants/%s/credentials".formatted(this.url, participantId)))
+                .uri(URI.create("%s/participants/%s/credentials".formatted(this.url, participantContextId)))
                 .header("content-type", "application/json")
                 .PUT(HttpRequest.BodyPublishers.ofString(requestBody));
     }
 
-    private HttpRequest.Builder deleteRequestBuilder(String participantId, String credentialId) {
+    private HttpRequest.Builder deleteRequestBuilder(String participantContextId, String credentialId) {
         return HttpRequest.newBuilder()
-                .uri(URI.create("%s/participants/%s/credentials/%s".formatted(this.url, participantId, credentialId)))
+                .uri(URI.create(
+                        "%s/participants/%s/credentials/%s".formatted(this.url, participantContextId, credentialId)))
                 .DELETE();
     }
 

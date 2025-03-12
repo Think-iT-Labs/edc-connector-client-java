@@ -8,6 +8,6 @@ public record ParticipantManifest(
         Map<String, Object> additionalProperties,
         String did,
         KeyDescriptor key,
-        String participantId,
+        String participantContextId,
         List<String> roles,
         List<ServiceInput> serviceEndpoints) {}

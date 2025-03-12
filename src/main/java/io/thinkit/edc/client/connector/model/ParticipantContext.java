@@ -8,6 +8,6 @@ public record ParticipantContext(
         BigInteger createdAt,
         String did,
         BigInteger lastModified,
-        String participantId,
+        String participantContextId,
         List<String> roles,
         int state) {}

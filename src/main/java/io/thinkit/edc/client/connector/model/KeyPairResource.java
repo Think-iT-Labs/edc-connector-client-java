@@ -8,7 +8,7 @@ public record KeyPairResource(
         String groupName,
         String keyContext,
         String keyId,
-        String participantId,
+        String participantContextId,
         String privateKeyAlias,
         BigInteger rotationDuration,
         String serializedPublicKey,

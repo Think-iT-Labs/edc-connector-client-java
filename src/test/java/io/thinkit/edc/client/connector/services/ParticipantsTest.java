@@ -44,7 +44,7 @@ class ParticipantsTest extends IdentityApiTestBase {
 
         @Test
         void should_get_a_participant() {
-            var result = participants.get("participantId");
+            var result = participants.get("participantContextId");
             assertThat(result).satisfies(ParticipantsTest.this::shouldGetAParticipantResponse);
         }
 
@@ -57,7 +57,7 @@ class ParticipantsTest extends IdentityApiTestBase {
         @Test
         void should_delete_a_participant() {
 
-            var result = participants.delete("participantId");
+            var result = participants.delete("participantContextId");
             assertThat(result.isSucceeded()).isTrue();
         }
 
@@ -133,7 +133,7 @@ class ParticipantsTest extends IdentityApiTestBase {
 
         @Test
         void should_get_a_participant_async() {
-            var result = participants.getAsync("participantId");
+            var result = participants.getAsync("participantContextId");
             assertThat(result)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
                     .satisfies(ParticipantsTest.this::shouldGetAParticipantResponse);
@@ -150,7 +150,7 @@ class ParticipantsTest extends IdentityApiTestBase {
         @Test
         void should_delete_a_participant_async() {
 
-            var deleted = participants.deleteAsync("participantId");
+            var deleted = participants.deleteAsync("participantContextId");
             assertThat(deleted)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
                     .satisfies(result -> assertThat(result.isSucceeded()).isTrue());
@@ -233,7 +233,7 @@ class ParticipantsTest extends IdentityApiTestBase {
         assertThat(participantContext.getContent().createdAt()).isNotNull();
         assertThat(participantContext.getContent().did()).isEqualTo("string");
         assertThat(participantContext.getContent().lastModified()).isNotNull();
-        assertThat(participantContext.getContent().participantId()).isEqualTo("string");
+        assertThat(participantContext.getContent().participantContextId()).isEqualTo("string");
         assertThat(participantContext.getContent().state()).isEqualTo(-2147483648);
         assertThat(participantContext.getContent().roles()).isNotNull().first().satisfies(role -> assertThat(role)
                 .isEqualTo("string"));
@@ -246,7 +246,7 @@ class ParticipantsTest extends IdentityApiTestBase {
             assertThat(participantContext.createdAt()).isNotNull();
             assertThat(participantContext.did()).isEqualTo("string");
             assertThat(participantContext.lastModified()).isNotNull();
-            assertThat(participantContext.participantId()).isEqualTo("string");
+            assertThat(participantContext.participantContextId()).isEqualTo("string");
             assertThat(participantContext.state()).isEqualTo(-2147483648);
             assertThat(participantContext.roles()).isNotNull().first().satisfies(role -> assertThat(role)
                     .isEqualTo("string"));

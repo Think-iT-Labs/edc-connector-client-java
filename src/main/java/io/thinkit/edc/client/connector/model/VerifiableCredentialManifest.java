@@ -5,6 +5,6 @@ import java.util.Map;
 public record VerifiableCredentialManifest(
         String id,
         Map<String, Object> issuancePolicy,
-        String participantId,
+        String participantContextId,
         Map<String, Object> reissuancePolicy,
         VerifiableCredentialContainer verifiableCredential) {}
