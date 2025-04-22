@@ -11,7 +11,7 @@ public class PresentationResource extends EdcResource {
         super(context);
         presentationUrl = context.urls().presentation();
         if (presentationUrl == null) {
-            throw new IllegalArgumentException("Cannot instantiate %s client without the presenttaion url"
+            throw new IllegalArgumentException("Cannot instantiate %s client without the presentation url"
                     .formatted(getClass().getSimpleName()));
         }
     }

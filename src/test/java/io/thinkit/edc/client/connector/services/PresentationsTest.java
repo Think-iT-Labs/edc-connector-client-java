@@ -1,8 +1,20 @@
 package io.thinkit.edc.client.connector.services;
 
-import io.thinkit.edc.client.connector.model.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-/*class PresentationsTest extends PresentationApiTestBase {
+import io.thinkit.edc.client.connector.EdcConnectorClient;
+import io.thinkit.edc.client.connector.PresentationApiTestBase;
+import io.thinkit.edc.client.connector.model.*;
+import java.net.http.HttpClient;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+@Disabled
+class PresentationsTest extends PresentationApiTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();
     private Presentations presentations;
@@ -61,4 +73,4 @@ import io.thinkit.edc.client.connector.model.*;
                 "org.eclipse.edc.vc.type:ThirdCredential:*");
         return PresentationQueryMessage.Builder.newInstance().scope(scopeList).build();
     }
-}*/
+}
