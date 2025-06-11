@@ -7,6 +7,7 @@ import io.thinkit.edc.client.connector.RealTimeConnectorApiTestBase;
 import io.thinkit.edc.client.connector.model.Asset;
 import java.net.http.HttpClient;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -59,7 +60,7 @@ class EndToEndTest extends RealTimeConnectorApiTestBase {
         var dataAddress = Map.of("type", "data-address-type");
 
         return Asset.Builder.newInstance()
-                .id("assetId")
+                .id("assetId-" + UUID.randomUUID().toString())
                 .properties(properties)
                 .privateProperties(privateProperties)
                 .dataAddress(dataAddress)
