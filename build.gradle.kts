@@ -30,6 +30,7 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
     downloadOpenapiSpecTasks.forEach { task -> dependsOn(task) }
+    dependsOn("dockerBuild")
 }
 
 spotless {
@@ -77,7 +78,13 @@ fun registerDownloadOpenapiSpec(repository: String, context: String): Task {
 
 
 fun download(url: String): String = URL(url).openConnection().getInputStream().bufferedReader().use { it.readText() }
+tasks.register<Exec>("dockerBuild") {
+    description = "Builds the Docker image for the connector"
+    group = "docker"
 
+    workingDir = file("connector") // directory containing your Dockerfile
+    commandLine = listOf("docker", "build", "-t", "connector:test", ".")
+}
 java {
     withSourcesJar()
     withJavadocJar()
