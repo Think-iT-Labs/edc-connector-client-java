@@ -16,7 +16,6 @@ repositories {
 
 dependencies {
     api(libs.jakarta.json.api)
-
     implementation(libs.titanium.json.ld)
     implementation(libs.jakarta.json)
     implementation(libs.parsson)
@@ -30,7 +29,6 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
     downloadOpenapiSpecTasks.forEach { task -> dependsOn(task) }
-    dependsOn("dockerBuild")
 }
 
 spotless {
@@ -82,7 +80,7 @@ tasks.register<Exec>("dockerBuild") {
     description = "Builds the Docker image for the connector"
     group = "docker"
 
-    workingDir = file("connector") // directory containing your Dockerfile
+    workingDir = file("connector")
     commandLine = listOf("docker", "build", "-t", "connector:test", ".")
 }
 java {
