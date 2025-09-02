@@ -11,7 +11,7 @@ jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", ver
 junit = { module = "org.junit.jupiter:junit-jupiter", version = "5.11.4" }
 parsson = { module = "org.eclipse.parsson:parsson", version = "1.1.7" }
 testcontainers = { module = "org.testcontainers:junit-jupiter", version = "1.21.0" }
-titanium-json-ld = { module = "com.apicatalog:titanium-json-ld", version = "1.4.1" }
+titanium-json-ld = { module = "com.apicatalog:titanium-json-ld", version = "1.6.0" }
 
 [plugins]
 spotless = { id = "com.diffplug.spotless", version = "7.0.1" }
