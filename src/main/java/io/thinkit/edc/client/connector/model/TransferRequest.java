@@ -117,7 +117,7 @@ public class TransferRequest extends JsonLdObject {
         }
 
         public TransferRequest.Builder dataDestination(Map<String, ?> dataDestination) {
-            var propertiesBuilder = Properties.Builder.newInstance();
+            var propertiesBuilder = Properties.Builder.newInstance().type("DataAddress");
             dataDestination.forEach(propertiesBuilder::property);
             builder.add(
                     TRANSFER_REQUEST_DATA_DESTINATION, propertiesBuilder.build().raw());

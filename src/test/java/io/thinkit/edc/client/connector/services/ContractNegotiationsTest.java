@@ -5,7 +5,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.ManagementApiTestBase;
-import io.thinkit.edc.client.connector.model.*;
+import io.thinkit.edc.client.connector.model.CallbackAddress;
+import io.thinkit.edc.client.connector.model.ContractNegotiation;
+import io.thinkit.edc.client.connector.model.ContractRequest;
+import io.thinkit.edc.client.connector.model.Policy;
+import io.thinkit.edc.client.connector.model.QuerySpec;
+import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.model.TerminateNegotiation;
 import java.net.http.HttpClient;
 import java.util.Arrays;
 import java.util.List;
@@ -97,7 +103,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
             var state = contractNegotiations.getState("negotiation-id");
 
             assertThat(state.isSucceeded()).isTrue();
-            assertThat(state.getContent()).isNotNull().isEqualTo("string");
+            assertThat(state.getContent()).isNotBlank();
         }
 
         @Test
@@ -196,7 +202,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
             var result = contractNegotiations.getStateAsync("negotiation-id");
             assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(state -> {
                 assertThat(state.isSucceeded()).isTrue();
-                assertThat(state.getContent()).isNotNull().isEqualTo("string");
+                assertThat(state.getContent()).isNotBlank();
             });
         }
 

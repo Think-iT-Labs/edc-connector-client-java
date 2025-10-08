@@ -12,6 +12,7 @@ public class CatalogRequest extends JsonLdObject {
     private static final String TYPE_CATALOG_REQUEST = EDC_NAMESPACE + "CatalogRequest";
     private static final String CATALOG_REQUEST_PROTOCOL = EDC_NAMESPACE + "protocol";
     private static final String CATALOG_REQUEST_COUNTER_PARTY_ADDRESS = EDC_NAMESPACE + "counterPartyAddress";
+    private static final String CATALOG_REQUEST_COUNTER_PARTY_ID = EDC_NAMESPACE + "counterPartyId";
     private static final String CATALOG_REQUEST_QUERY_SPEC = EDC_NAMESPACE + "querySpec";
 
     private CatalogRequest(JsonObject raw) {
@@ -58,6 +59,13 @@ public class CatalogRequest extends JsonLdObject {
 
         public CatalogRequest.Builder querySpec(QuerySpec querySpec) {
             builder.add(CATALOG_REQUEST_QUERY_SPEC, Json.createObjectBuilder(querySpec.raw()));
+            return this;
+        }
+
+        public CatalogRequest.Builder counterPartyId(String counterPartyId) {
+            builder.add(
+                    CATALOG_REQUEST_COUNTER_PARTY_ID,
+                    createArrayBuilder().add(createObjectBuilder().add(VALUE, counterPartyId)));
             return this;
         }
     }
