@@ -1,6 +1,7 @@
 package io.thinkit.edc.client.connector.model;
 
 import static io.thinkit.edc.client.connector.utils.Constants.EDC_NAMESPACE;
+import static io.thinkit.edc.client.connector.utils.Constants.TYPE;
 import static io.thinkit.edc.client.connector.utils.Constants.VALUE;
 import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
@@ -47,6 +48,11 @@ public class Properties {
 
         public Properties build() {
             return new Properties(raw.build());
+        }
+
+        public Builder type(String type) {
+            raw.add(TYPE, type);
+            return this;
         }
 
         public Builder property(String key, Object value) {

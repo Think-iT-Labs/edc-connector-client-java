@@ -92,10 +92,10 @@ class ApplicationObservabilityTest extends ObservabilityApiTestBase {
         assertThat(result.isSucceeded()).isTrue();
         assertThat(result.getContent().isSystemHealthy()).isTrue();
         assertThat(result.getContent().componentResults()).isNotNull().first().satisfies(componentResult -> {
-            assertThat(componentResult.component()).isNotNull().isEqualTo("string");
+            assertThat(componentResult.component()).isNotBlank();
             assertThat(componentResult.isHealthy()).isTrue();
             assertThat(componentResult.failure()).isNotNull().satisfies(failure -> {
-                assertThat(failure.failureDetail()).isNotNull().isEqualTo("string");
+                assertThat(failure.failureDetail()).isNotBlank();
                 assertThat(failure.messages().size()).isGreaterThan(0);
             });
         });

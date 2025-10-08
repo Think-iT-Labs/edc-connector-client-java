@@ -4,7 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.IdentityApiTestBase;
-import io.thinkit.edc.client.connector.model.*;
+import io.thinkit.edc.client.connector.model.CredentialStatus;
+import io.thinkit.edc.client.connector.model.CredentialSubject;
+import io.thinkit.edc.client.connector.model.Issuer;
+import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.model.VerifiableCredential;
+import io.thinkit.edc.client.connector.model.VerifiableCredentialContainer;
+import io.thinkit.edc.client.connector.model.VerifiableCredentialManifest;
+import io.thinkit.edc.client.connector.model.VerifiableCredentialResource;
 import java.net.http.HttpClient;
 import java.util.Collections;
 import java.util.HashMap;
@@ -220,7 +227,7 @@ class VerifiableCredentialsTest extends IdentityApiTestBase {
         assertThat(verifiableCredentials.getContent().verifiableCredential())
                 .isNotNull()
                 .satisfies(verifiableCredential -> {
-                    assertThat(verifiableCredential.format()).isEqualTo("JSON_LD");
+                    assertThat(verifiableCredential.format()).isNotBlank();
                     assertThat(verifiableCredential.rawVc()).isEqualTo("string");
                     assertThat(verifiableCredential.credential()).isNotNull().satisfies(credential -> {
                         assertThat(credential.description()).isEqualTo("string");
@@ -245,7 +252,7 @@ class VerifiableCredentialsTest extends IdentityApiTestBase {
             assertThat(verifiable.issuancePolicy()).isNotNull();
             assertThat(verifiable.reissuancePolicy()).isNotNull();
             assertThat(verifiable.verifiableCredential()).isNotNull().satisfies(verifiableCredential -> {
-                assertThat(verifiableCredential.format()).isEqualTo("JSON_LD");
+                assertThat(verifiableCredential.format()).isNotBlank();
                 assertThat(verifiableCredential.rawVc()).isEqualTo("string");
                 assertThat(verifiableCredential.credential()).isNotNull().satisfies(credential -> {
                     assertThat(credential.description()).isEqualTo("string");

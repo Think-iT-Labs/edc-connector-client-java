@@ -7,7 +7,7 @@ import org.testcontainers.containers.GenericContainer;
 public class ApiContainer extends GenericContainer<ApiContainer> {
 
     public ApiContainer(String file) {
-        super("stoplight/prism:5.12.1");
+        super("stoplight/prism:5.14.2");
         this.withClasspathResourceMapping(file, file, READ_WRITE);
         this.withCommand("mock -h 0.0.0.0 " + file);
         this.withExposedPorts(4010);

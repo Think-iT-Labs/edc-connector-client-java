@@ -128,6 +128,7 @@ class TransferProcessesTest extends ManagementApiTestBase {
         @Test
         void should_create_a_transfer_process_async() {
             var result = transferProcesses.createAsync(shouldCreateATransferProcessRequest());
+
             assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(created -> {
                 assertThat(created.isSucceeded()).isTrue();
                 assertThat(created.getContent()).isNotNull();

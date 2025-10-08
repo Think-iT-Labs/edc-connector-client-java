@@ -2,6 +2,7 @@ package io.thinkit.edc.client.connector.model;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 public record ParticipantContext(
         String apiTokenAlias,
@@ -10,4 +11,5 @@ public record ParticipantContext(
         BigInteger lastModified,
         String participantContextId,
         List<String> roles,
-        int state) {}
+        int state,
+        Map<String, Object> properties) {}
