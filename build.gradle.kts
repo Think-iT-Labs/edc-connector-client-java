@@ -80,8 +80,8 @@ tasks.register<Exec>("dockerBuild") {
     description = "Builds the Docker image for the connector"
     group = "docker"
 
-    workingDir = file("connector")
-    commandLine = listOf("docker", "build", "-t", "connector:test", ".")
+    workingDir = projectDir // parent project root
+    commandLine = listOf("docker", "build", "-f", "connector/Dockerfile", "-t", "connector:test", ".")
 }
 java {
     withSourcesJar()
