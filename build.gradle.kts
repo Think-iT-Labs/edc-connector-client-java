@@ -16,7 +16,6 @@ repositories {
 
 dependencies {
     api(libs.jakarta.json.api)
-
     implementation(libs.titanium.json.ld)
     implementation(libs.jakarta.json)
     implementation(libs.parsson)
@@ -77,7 +76,13 @@ fun registerDownloadOpenapiSpec(repository: String, context: String): Task {
 
 
 fun download(url: String): String = URL(url).openConnection().getInputStream().bufferedReader().use { it.readText() }
+tasks.register<Exec>("dockerBuild") {
+    description = "Builds the Docker image for the connector"
+    group = "docker"
 
+    workingDir = projectDir // parent project root
+    commandLine = listOf("docker", "build", "-f", "connector/Dockerfile", "-t", "connector:test", ".")
+}
 java {
     withSourcesJar()
     withJavadocJar()
