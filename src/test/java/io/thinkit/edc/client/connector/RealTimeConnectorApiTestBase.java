@@ -4,46 +4,40 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.MountableFile;
 
-@Testcontainers
 public abstract class RealTimeConnectorApiTestBase {
     protected static final int timeout = 60;
     protected static final Duration STARTUP_TIMEOUT = Duration.ofSeconds(120);
     private static final String DOCKER_IMAGE_NAME = "connector:test";
-
     private static final String GRADLE_WRAPPER = "gradlew";
-    private static File buildRoot;
+
+    protected static GenericContainer<?> myContainer;
 
     @BeforeAll
+    static void setUpContainer() {
+        ensureDockerImageIsBuilt();
+        myContainer = createContainer();
+        myContainer.start();
+    }
+
+    @AfterAll
+    static void tearDownContainer() {
+        if (myContainer != null) {
+            myContainer.stop();
+        }
+    }
+
     static void ensureDockerImageIsBuilt() {
-        if (!dockerImageExists()) {
-            buildDockerImage();
-        } else {
-            System.out.println("Docker image already exists, skipping build");
-        }
-    }
-
-    private static boolean dockerImageExists() {
-        try {
-            ProcessBuilder pb = new ProcessBuilder("docker", "inspect", DOCKER_IMAGE_NAME).redirectErrorStream(true);
-            Process process = pb.start();
-            int exitCode = process.waitFor();
-            return exitCode == 0;
-        } catch (IOException | InterruptedException e) {
-            return false;
-        }
-    }
-
-    private static void buildDockerImage() {
         try {
             File gradleRoot = findBuildRoot();
             String gradleCommand = "./gradlew";
+
+            System.out.println("Building Docker image from: " + gradleRoot.getAbsolutePath());
 
             ProcessBuilder processBuilder = new ProcessBuilder(gradleCommand, "dockerBuild", "--no-daemon")
                     .directory(gradleRoot)
@@ -52,36 +46,32 @@ public abstract class RealTimeConnectorApiTestBase {
             Process process = processBuilder.start();
             int exitCode = process.waitFor();
 
+            System.out.println("Docker build exit code: " + exitCode);
+
             if (exitCode != 0) {
                 throw new IllegalStateException(
                         "Failed to build Docker image. Gradle dockerBuild task exited with code: " + exitCode);
             }
+
         } catch (IOException | InterruptedException e) {
             throw new IllegalStateException("Failed to execute Gradle dockerBuild task", e);
         }
     }
 
     public static File findBuildRoot() {
-        if (buildRoot != null) {
-            return buildRoot;
-        }
-
-        File canonicalFile;
         try {
-            canonicalFile = new File(".").getCanonicalFile();
+            File canonicalFile = new File(".").getCanonicalFile();
+            File root = findBuildRootRecursive(canonicalFile);
+            if (root == null) {
+                throw new IllegalStateException("Could not find " + GRADLE_WRAPPER + " in parent directories.");
+            }
+            return root;
         } catch (IOException e) {
             throw new IllegalStateException("Could not resolve current directory.", e);
         }
-
-        buildRoot = findBuildRoot(canonicalFile);
-        if (buildRoot == null) {
-            throw new IllegalStateException("Could not find " + GRADLE_WRAPPER + " in parent directories.");
-        }
-
-        return buildRoot;
     }
 
-    private static File findBuildRoot(File path) {
+    private static File findBuildRootRecursive(File path) {
         if (path == null) {
             return null;
         }
@@ -93,7 +83,7 @@ public abstract class RealTimeConnectorApiTestBase {
 
         File parent = path.getParentFile();
         if (parent != null) {
-            return findBuildRoot(parent);
+            return findBuildRootRecursive(parent);
         }
 
         return null;
@@ -108,9 +98,6 @@ public abstract class RealTimeConnectorApiTestBase {
 
         return connectorPath;
     }
-
-    @Container
-    protected static final GenericContainer<?> myContainer = createContainer();
 
     private static GenericContainer<?> createContainer() {
         Path configFile = getConnectorFolder().resolve("conf/consumer-connector.config");
@@ -130,9 +117,9 @@ public abstract class RealTimeConnectorApiTestBase {
     }
 
     protected String getServiceUrl(int port) {
-        if (!myContainer.isRunning()) {
+        if (myContainer == null || !myContainer.isRunning()) {
             throw new IllegalStateException(
-                    "Container is not running. Make sure the test is properly annotated with @Testcontainers");
+                    "Container is not running. Make sure the test base class is properly initialized");
         }
         return "http://127.0.0.1:" + myContainer.getMappedPort(port);
     }
