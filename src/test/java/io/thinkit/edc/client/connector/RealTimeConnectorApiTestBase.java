@@ -26,7 +26,7 @@ public abstract class RealTimeConnectorApiTestBase {
             File gradleRoot = findBuildRoot();
             String gradleCommand = "./gradlew";
 
-            ProcessBuilder processBuilder = new ProcessBuilder(gradleCommand, "dockerBuild")
+            ProcessBuilder processBuilder = new ProcessBuilder(gradleCommand, "dockerBuild", "--no-daemon")
                     .directory(gradleRoot)
                     .inheritIO();
 
@@ -42,7 +42,6 @@ public abstract class RealTimeConnectorApiTestBase {
             throw new IllegalStateException("Failed to execute Gradle dockerBuild task", e);
         }
     }
-
     public static File findBuildRoot() {
         if (buildRoot != null) {
             return buildRoot;
