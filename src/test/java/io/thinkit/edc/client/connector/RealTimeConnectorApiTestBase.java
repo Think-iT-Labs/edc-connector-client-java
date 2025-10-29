@@ -22,6 +22,25 @@ public abstract class RealTimeConnectorApiTestBase {
 
     @BeforeAll
     static void ensureDockerImageIsBuilt() {
+        if (!dockerImageExists()) {
+            buildDockerImage();
+        } else {
+            System.out.println("Docker image already exists, skipping build");
+        }
+    }
+
+    private static boolean dockerImageExists() {
+        try {
+            ProcessBuilder pb = new ProcessBuilder("docker", "inspect", DOCKER_IMAGE_NAME).redirectErrorStream(true);
+            Process process = pb.start();
+            int exitCode = process.waitFor();
+            return exitCode == 0;
+        } catch (IOException | InterruptedException e) {
+            return false;
+        }
+    }
+
+    private static void buildDockerImage() {
         try {
             File gradleRoot = findBuildRoot();
             String gradleCommand = "./gradlew";
@@ -37,11 +56,11 @@ public abstract class RealTimeConnectorApiTestBase {
                 throw new IllegalStateException(
                         "Failed to build Docker image. Gradle dockerBuild task exited with code: " + exitCode);
             }
-
         } catch (IOException | InterruptedException e) {
             throw new IllegalStateException("Failed to execute Gradle dockerBuild task", e);
         }
     }
+
     public static File findBuildRoot() {
         if (buildRoot != null) {
             return buildRoot;
