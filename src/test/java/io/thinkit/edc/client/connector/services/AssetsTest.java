@@ -225,7 +225,9 @@ class AssetsTest extends ManagementApiTestBase {
     }
 
     private Asset shouldCreateAnAssetRequest() {
-        var properties = Map.of("key", Map.of("value", "value"));
+        var properties = Map.of(
+                "key", Map.of("value", "value"),
+                "key-with-id", Map.of("@id", "value"));
         var privateProperties = Map.of("private-key", Map.of("private-value", "private-value"));
         var dataAddress = Map.of("type", "data-address-type");
 
