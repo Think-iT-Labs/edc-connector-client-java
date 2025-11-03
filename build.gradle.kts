@@ -81,11 +81,6 @@ fun registerDownloadOpenapiSpec(repository: String, context: String): Task {
 
 fun download(url: String): String = URL(url).openConnection().getInputStream().bufferedReader().use { it.readText() }
 
-java {
-    withSourcesJar()
-    withJavadocJar()
-}
-
 publishing {
 
     publications {
