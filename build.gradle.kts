@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.spotless)
    `maven-publish`
    signing
-    alias(libs.plugins.nexus)
+    alias(libs.plugins.publish)
 }
 
 repositories {
@@ -87,6 +87,7 @@ java {
 }
 
 publishing {
+
     publications {
         create<MavenPublication>("mavenJava") {
             from(components["java"])
@@ -122,9 +123,7 @@ signing {
     sign(publishing.publications)
 }
 
-nexusPublishing {
-    repositories.create("sonatype") {
-        nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-        snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-    }
+mavenPublishing {
+    publishToMavenCentral()
+    signAllPublications()
 }
