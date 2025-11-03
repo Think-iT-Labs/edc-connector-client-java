@@ -81,38 +81,6 @@ fun registerDownloadOpenapiSpec(repository: String, context: String): Task {
 
 fun download(url: String): String = URL(url).openConnection().getInputStream().bufferedReader().use { it.readText() }
 
-publishing {
-
-    publications {
-        create<MavenPublication>("mavenJava") {
-            from(components["java"])
-
-            pom {
-                name.set(project.name)
-                description.set("SDK client library for interacting with EDC connector")
-                url.set("https://github.com/Think-iT-Labs/edc-connector-client-java")
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-                developers {
-                    developer {
-                        id = "think-it"
-                        name = "Think-it"
-                        email = "sonatype@think-it.io"
-                    }
-                }
-                scm {
-                    url.set("https://github.com/Think-iT-Labs/edc-connector-client-java")
-                    connection.set("scm:git:git@github.com:Think-iT-Labs/edc-connector-client-java.git")
-                }
-            }
-        }
-    }
-}
-
 signing {
     useGpgCmd()
     sign(publishing.publications)
@@ -122,6 +90,29 @@ mavenPublishing {
     publishToMavenCentral(true)
 
     signAllPublications()
+
+    pom {
+        name.set(project.name)
+        description.set("SDK client library for interacting with EDC connector")
+        url.set("https://github.com/Think-iT-Labs/edc-connector-client-java")
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+        }
+        developers {
+            developer {
+                id = "think-it"
+                name = "Think-it"
+                email = "sonatype@think-it.io"
+            }
+        }
+        scm {
+            url.set("https://github.com/Think-iT-Labs/edc-connector-client-java")
+            connection.set("scm:git:git@github.com:Think-iT-Labs/edc-connector-client-java.git")
+        }
+    }
 }
 
 tasks.withType<PublishToMavenRepository> {
