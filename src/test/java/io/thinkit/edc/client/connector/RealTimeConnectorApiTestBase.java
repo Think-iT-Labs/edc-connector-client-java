@@ -112,7 +112,7 @@ public abstract class RealTimeConnectorApiTestBase {
                         MountableFile.forHostPath(configFile.resolve("configuration.properties")),
                         "/config/configuration.properties")
                 .withLogConsumer(frame -> System.out.print(frame.getUtf8String()))
-                .waitingFor(Wait.forListeningPort().withStartupTimeout(STARTUP_TIMEOUT))
+                .waitingFor(Wait.forHealthcheck().withStartupTimeout(STARTUP_TIMEOUT))
                 .withStartupTimeout(STARTUP_TIMEOUT);
     }
 
