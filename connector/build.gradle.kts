@@ -1,6 +1,5 @@
 plugins {
     `java-library`
-    id("application")
     alias(libs.plugins.shadow)
 }
 
@@ -43,12 +42,19 @@ dependencies {
     implementation(libs.edc.federatedcatalog.api)
 }
 
-application {
-    mainClass.set("org.eclipse.edc.boot.system.runtime.BaseRuntime")
+tasks.shadowJar {
+    archiveFileName.set("connector.jar")
+    mergeServiceFiles()
+    manifest {
+        attributes(mapOf("Main-Class" to "org.eclipse.edc.boot.system.runtime.BaseRuntime"))
+    }
 }
 
-tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
-    dependsOn("distTar", "distZip")
-    mergeServiceFiles()
-    archiveFileName.set("connector.jar")
+// Make shadowJar the default output
+tasks.jar {
+    enabled = false
+}
+
+tasks.assemble {
+    dependsOn(tasks.shadowJar)
 }

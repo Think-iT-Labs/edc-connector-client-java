@@ -4,10 +4,11 @@ plugins {
     java
     `java-library`
     alias(libs.plugins.spotless)
-   `maven-publish`
-   signing
-    alias(libs.plugins.nexus)
+    `maven-publish`
+    signing
+    alias(libs.plugins.publish)
 }
+
 
 repositories {
     mavenLocal()
@@ -21,8 +22,11 @@ dependencies {
     implementation(libs.parsson)
     implementation(libs.jackson.databind)
 
+    testImplementation(platform(libs.junit.bom))
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testImplementation(libs.junit.jupiter)
+
     testImplementation(libs.assertj)
-    testImplementation(libs.junit)
     testImplementation(libs.testcontainers)
 }
 
@@ -59,7 +63,7 @@ val downloadOpenapiSpecTasks = listOf(
 fun registerDownloadOpenapiSpec(repository: String, context: String): Task {
     val uppercasedContext = context.replaceFirstChar { c -> c.uppercase() }
     val downloadOpenapiSpec by tasks.register("download${uppercasedContext}OpenapiSpec") {
-        dependsOn(tasks.findByName("processTestResources"))
+        dependsOn("processTestResources")
         val openapiFile = sourceSets.test.get().output.resourcesDir?.let { File("$it/$context-api.yml") }
         onlyIf { openapiFile?.exists()?.not() ?: false }
         doLast {
@@ -89,6 +93,7 @@ java {
 }
 
 publishing {
+
     publications {
         create<MavenPublication>("mavenJava") {
             from(components["java"])
@@ -124,9 +129,7 @@ signing {
     sign(publishing.publications)
 }
 
-nexusPublishing {
-    repositories.create("sonatype") {
-        nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-        snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-    }
+mavenPublishing {
+    publishToMavenCentral()
+    signAllPublications()
 }

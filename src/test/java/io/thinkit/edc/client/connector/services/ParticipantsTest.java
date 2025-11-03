@@ -4,9 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.IdentityApiTestBase;
-import io.thinkit.edc.client.connector.model.*;
+import io.thinkit.edc.client.connector.model.KeyDescriptor;
+import io.thinkit.edc.client.connector.model.ParticipantContext;
+import io.thinkit.edc.client.connector.model.ParticipantManifest;
+import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.model.ServiceInput;
 import java.net.http.HttpClient;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;

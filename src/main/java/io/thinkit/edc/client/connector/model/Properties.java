@@ -1,11 +1,12 @@
 package io.thinkit.edc.client.connector.model;
 
 import static io.thinkit.edc.client.connector.utils.Constants.EDC_NAMESPACE;
+import static io.thinkit.edc.client.connector.utils.Constants.TYPE;
 import static io.thinkit.edc.client.connector.utils.Constants.VALUE;
 import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
 
-import jakarta.json.JsonArray;
+import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
@@ -49,20 +50,29 @@ public class Properties {
             return new Properties(raw.build());
         }
 
+        public Builder type(String type) {
+            raw.add(TYPE, type);
+            return this;
+        }
+
         public Builder property(String key, Object value) {
-            JsonArray content;
+            raw.add(key, toJsonValue(value));
+            return this;
+        }
+
+        private JsonValue toJsonValue(Object value) {
             if (value instanceof Map<?, ?> map) {
                 var builder = Builder.newInstance();
                 map.forEach((k, v) -> builder.property((String) k, v));
                 var properties = builder.build();
-                content = createArrayBuilder().add(properties.raw).build();
+                return createArrayBuilder().add(properties.raw).build();
+            } else if (value instanceof String stringValue) {
+                return Json.createValue(stringValue);
             } else {
-                content = createArrayBuilder()
+                return createArrayBuilder()
                         .add(createObjectBuilder().add(VALUE, value.toString()))
                         .build(); // TODO: watch out toString
             }
-            raw.add(key, content);
-            return this;
         }
     }
 }
