@@ -78,7 +78,6 @@ fun registerDownloadOpenapiSpec(repository: String, context: String): Task {
     return downloadOpenapiSpec
 }
 
-
 fun download(url: String): String = URL(url).openConnection().getInputStream().bufferedReader().use { it.readText() }
 
 signing {
