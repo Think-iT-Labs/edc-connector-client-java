@@ -120,5 +120,10 @@ signing {
 
 mavenPublishing {
     publishToMavenCentral()
+
     signAllPublications()
+}
+
+tasks.publish {
+    dependsOn(tasks["sign"])
 }
