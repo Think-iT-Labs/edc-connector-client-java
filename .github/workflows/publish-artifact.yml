@@ -45,4 +45,4 @@ jobs:
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.ORG_SONATYPE_CENTRAL_PASSWORD }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ORG_GPG_PRIVATE_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.ORG_GPG_PASSPHRASE }}
-        run: ./gradlew publishToMavenCentral
+        run: ./gradlew publishToMavenCentral -Psigning.gnupg.executable=gpg -Psigning.gnupg.passphrase="${{ inputs.gpg-passphrase }}"
