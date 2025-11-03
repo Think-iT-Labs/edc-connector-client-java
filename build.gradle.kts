@@ -119,11 +119,11 @@ signing {
 }
 
 mavenPublishing {
-    publishToMavenCentral()
+    publishToMavenCentral(true)
 
     signAllPublications()
 }
 
-tasks.publish {
-    dependsOn(tasks["sign"])
+tasks.withType<PublishToMavenRepository> {
+    dependsOn(tasks.withType<Sign>())
 }
