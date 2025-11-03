@@ -53,6 +53,41 @@ From that `client` object the context specific endpoint services can be obtained
 - `applicationObservability()`
 - `catalogs()`
 
+### Extending the client
+
+The client provides a way to be extended to permit to cover additional APIs that could be added by extension on your EDC
+runtime.
+
+An extension can be implemented by extending the `io.thinkit.edc.client.connector.resource.EdcResource` class, e.g:
+
+```java
+private static class ExtensionResource extends EdcResource {
+
+    protected ExtensionResource(EdcClientContext context) {
+        super(context);
+    }
+
+    public String doStuff() {
+        // here you can call your endpoint by using the HTTP client and other components available in the `context` object
+        return context.httpClient().send(requestBuilder()).map(JsonLdUtil::expand).map(body -> extractDataFrom(body));
+    }
+}
+```
+
+To make the extension available in the client it can be added on the builder using the `with` method:
+```java
+var client = EdcConnectorClient.newBuilder()
+        .with(ExtensionResource.class, ExtensionResource::new)
+        .build();
+```
+
+and it can be obtained from the client using the `resource` method:
+```
+var extension = client.resource(ExtensionResource.class);
+
+var result = extension.doStuff();
+```
+
 ## Contributing
 
 Contributions to this library are always welcome and highly encouraged

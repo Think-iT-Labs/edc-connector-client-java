@@ -10,7 +10,7 @@ import jakarta.json.JsonObject;
 public class Service extends JsonLdObject {
     private static final String TYPE_SERVICE = DCAT_NAMESPACE + "DataService";
     private static final String SERVICE_TERMS = DCT_NAMESPACE + "terms";
-    private static final String SERVICE_ENDPOINT_URL = DCT_NAMESPACE + "endpointUrl";
+    private static final String SERVICE_ENDPOINT_URL = DCAT_NAMESPACE + "endpointURL";
 
     private Service(JsonObject raw) {
         super(raw);

@@ -73,6 +73,7 @@ class CatalogsTest extends ManagementApiTestBase {
                 .build();
         return CatalogRequest.Builder.newInstance()
                 .protocol("dataspace-protocol-http")
+                .counterPartyId("counterPartyId")
                 .counterPartyAddress("http://provider-address")
                 .querySpec(query)
                 .build();

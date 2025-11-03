@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.spotless)
    `maven-publish`
    signing
-    alias(libs.plugins.nexus)
+    alias(libs.plugins.publish)
 }
 
 repositories {
@@ -22,8 +22,11 @@ dependencies {
     implementation(libs.parsson)
     implementation(libs.jackson.databind)
 
+    testImplementation(platform(libs.junit.bom))
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testImplementation(libs.junit.jupiter)
+
     testImplementation(libs.assertj)
-    testImplementation(libs.junit)
     testImplementation(libs.testcontainers)
 }
 
@@ -52,13 +55,15 @@ allprojects {
 val downloadOpenapiSpecTasks = listOf(
     registerDownloadOpenapiSpec("Connector", "management"),
     registerDownloadOpenapiSpec("Connector", "observability"),
-    registerDownloadOpenapiSpec("FederatedCatalog", "catalog")
+    registerDownloadOpenapiSpec("FederatedCatalog", "catalog"),
+    registerDownloadOpenapiSpec("IdentityHub", "identity"),
+    registerDownloadOpenapiSpec("IdentityHub", "presentation")
 )
 
 fun registerDownloadOpenapiSpec(repository: String, context: String): Task {
     val uppercasedContext = context.replaceFirstChar { c -> c.uppercase() }
     val downloadOpenapiSpec by tasks.register("download${uppercasedContext}OpenapiSpec") {
-        dependsOn(tasks.findByName("processTestResources"))
+        dependsOn("processTestResources")
         val openapiFile = sourceSets.test.get().output.resourcesDir?.let { File("$it/$context-api.yml") }
         onlyIf { openapiFile?.exists()?.not() ?: false }
         doLast {
@@ -73,53 +78,42 @@ fun registerDownloadOpenapiSpec(repository: String, context: String): Task {
     return downloadOpenapiSpec
 }
 
-
 fun download(url: String): String = URL(url).openConnection().getInputStream().bufferedReader().use { it.readText() }
-
-java {
-    withSourcesJar()
-    withJavadocJar()
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            from(components["java"])
-
-            pom {
-                name.set(project.name)
-                description.set("SDK client library for interacting with EDC connector")
-                url.set("https://github.com/Think-iT-Labs/edc-connector-client-java")
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-                developers {
-                    developer {
-                        id = "think-it"
-                        name = "Think-it"
-                        email = "sonatype@think-it.io"
-                    }
-                }
-                scm {
-                    url.set("https://github.com/Think-iT-Labs/edc-connector-client-java")
-                    connection.set("scm:git:git@github.com:Think-iT-Labs/edc-connector-client-java.git")
-                }
-            }
-        }
-    }
-}
 
 signing {
     useGpgCmd()
     sign(publishing.publications)
 }
 
-nexusPublishing {
-    repositories.create("sonatype") {
-        nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-        snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+mavenPublishing {
+    publishToMavenCentral(true)
+
+    signAllPublications()
+
+    pom {
+        name.set(project.name)
+        description.set("SDK client library for interacting with EDC connector")
+        url.set("https://github.com/Think-iT-Labs/edc-connector-client-java")
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+        }
+        developers {
+            developer {
+                id = "think-it"
+                name = "Think-it"
+                email = "sonatype@think-it.io"
+            }
+        }
+        scm {
+            url.set("https://github.com/Think-iT-Labs/edc-connector-client-java")
+            connection.set("scm:git:git@github.com:Think-iT-Labs/edc-connector-client-java.git")
+        }
     }
+}
+
+tasks.withType<PublishToMavenRepository> {
+    dependsOn(tasks.withType<Sign>())
 }

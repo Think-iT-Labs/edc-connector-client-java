@@ -23,7 +23,7 @@ class CatalogCacheTest extends CatalogApiTestBase {
 
     @BeforeEach
     void setUp() {
-        var client = new EdcConnectorClient.Builder()
+        var client = EdcConnectorClient.newBuilder()
                 .httpClient(http)
                 .catalogCacheUrl(prism.getUrl())
                 .build();
