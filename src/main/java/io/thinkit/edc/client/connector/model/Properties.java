@@ -1,18 +1,17 @@
 package io.thinkit.edc.client.connector.model;
 
-import jakarta.json.Json;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
-import jakarta.json.JsonValue;
-
-import java.util.Map;
-import java.util.Optional;
-
 import static io.thinkit.edc.client.connector.utils.Constants.EDC_NAMESPACE;
 import static io.thinkit.edc.client.connector.utils.Constants.TYPE;
 import static io.thinkit.edc.client.connector.utils.Constants.VALUE;
 import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
+
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
+import java.util.Map;
+import java.util.Optional;
 
 public class Properties {
     private final JsonObject raw;
