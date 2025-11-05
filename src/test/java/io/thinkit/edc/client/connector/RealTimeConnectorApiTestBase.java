@@ -37,16 +37,12 @@ public abstract class RealTimeConnectorApiTestBase {
             File gradleRoot = findBuildRoot();
             String gradleCommand = "./gradlew";
 
-            System.out.println("Building Docker image from: " + gradleRoot.getAbsolutePath());
-
             ProcessBuilder processBuilder = new ProcessBuilder(gradleCommand, "dockerBuild", "--no-daemon")
                     .directory(gradleRoot)
                     .inheritIO();
 
             Process process = processBuilder.start();
             int exitCode = process.waitFor();
-
-            System.out.println("Docker build exit code: " + exitCode);
 
             if (exitCode != 0) {
                 throw new IllegalStateException(

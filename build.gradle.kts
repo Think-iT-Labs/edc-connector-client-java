@@ -87,10 +87,7 @@ tasks.register<Exec>("dockerBuild") {
     workingDir = projectDir // parent project root
     commandLine = listOf("docker", "build", "-f", "connector/Dockerfile", "-t", "connector:test", ".")
 }
-java {
-    withSourcesJar()
-    withJavadocJar()
-}
+
 
 publishing {
 
