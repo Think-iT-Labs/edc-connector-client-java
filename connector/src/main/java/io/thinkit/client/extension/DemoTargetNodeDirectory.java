@@ -35,6 +35,11 @@ public class DemoTargetNodeDirectory implements TargetNodeDirectory {
         throw new UnsupportedOperationException("Adding new participant is not supported");
     }
 
+    @Override
+    public TargetNode remove(String id) {
+        return null;
+    }
+
     private TargetNode toTargetNode(String id) {
         return new TargetNode(id, id, DSP_URL_PATTERN.formatted(id), List.of("dataspace-protocol-http"));
     }

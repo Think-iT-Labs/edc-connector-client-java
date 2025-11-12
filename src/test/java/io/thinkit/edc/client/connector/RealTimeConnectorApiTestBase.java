@@ -34,15 +34,15 @@ public abstract class RealTimeConnectorApiTestBase {
 
     static void ensureDockerImageIsBuilt() {
         try {
-            File gradleRoot = findBuildRoot();
-            String gradleCommand = "./gradlew";
+            var gradleRoot = findBuildRoot();
+            var gradleCommand = "./gradlew";
 
-            ProcessBuilder processBuilder = new ProcessBuilder(gradleCommand, "dockerBuild", "--no-daemon")
+            var processBuilder = new ProcessBuilder(gradleCommand, "dockerBuild", "--no-daemon")
                     .directory(gradleRoot)
                     .inheritIO();
 
-            Process process = processBuilder.start();
-            int exitCode = process.waitFor();
+            var process = processBuilder.start();
+            var exitCode = process.waitFor();
 
             if (exitCode != 0) {
                 throw new IllegalStateException(
@@ -56,8 +56,8 @@ public abstract class RealTimeConnectorApiTestBase {
 
     public static File findBuildRoot() {
         try {
-            File canonicalFile = new File(".").getCanonicalFile();
-            File root = findBuildRootRecursive(canonicalFile);
+            var canonicalFile = new File(".").getCanonicalFile();
+            var root = findBuildRootRecursive(canonicalFile);
             if (root == null) {
                 throw new IllegalStateException("Could not find " + GRADLE_WRAPPER + " in parent directories.");
             }
@@ -72,12 +72,12 @@ public abstract class RealTimeConnectorApiTestBase {
             return null;
         }
 
-        File gradlew = new File(path, GRADLE_WRAPPER);
+        var gradlew = new File(path, GRADLE_WRAPPER);
         if (gradlew.exists()) {
             return path;
         }
 
-        File parent = path.getParentFile();
+        var parent = path.getParentFile();
         if (parent != null) {
             return findBuildRootRecursive(parent);
         }
@@ -86,8 +86,8 @@ public abstract class RealTimeConnectorApiTestBase {
     }
 
     public static Path getConnectorFolder() {
-        File root = findBuildRoot();
-        Path connectorPath = root.toPath().resolve("connector").toAbsolutePath().normalize();
+        var root = findBuildRoot();
+        var connectorPath = root.toPath().resolve("connector").toAbsolutePath().normalize();
         if (!connectorPath.toFile().exists()) {
             throw new IllegalStateException("Connector directory does not exist: " + connectorPath);
         }
@@ -96,7 +96,7 @@ public abstract class RealTimeConnectorApiTestBase {
     }
 
     private static GenericContainer<?> createContainer() {
-        Path configFile = getConnectorFolder().resolve("conf/consumer-connector.config");
+        var configFile = getConnectorFolder().resolve("conf/consumer-connector.config");
         if (!configFile.toFile().exists()) {
             throw new IllegalStateException("Configuration file not found: " + configFile);
         }
