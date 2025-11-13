@@ -1,10 +1,11 @@
-package io.thinkit.edc.client.connector.services;
+package io.thinkit.edc.client.connector.endtoend;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.RealTimeConnectorApiTestBase;
 import io.thinkit.edc.client.connector.model.Asset;
+import io.thinkit.edc.client.connector.services.Assets;
 import java.net.http.HttpClient;
 import java.util.Map;
 import java.util.UUID;
@@ -60,7 +61,7 @@ class EndToEndTest extends RealTimeConnectorApiTestBase {
         var dataAddress = Map.of("type", "data-address-type");
 
         return Asset.Builder.newInstance()
-                .id("assetId-" + UUID.randomUUID().toString())
+                .id("assetId-" + UUID.randomUUID())
                 .properties(properties)
                 .privateProperties(privateProperties)
                 .dataAddress(dataAddress)
