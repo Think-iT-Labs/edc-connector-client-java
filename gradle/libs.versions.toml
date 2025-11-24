@@ -25,5 +25,5 @@ edc-iam-mock = { module = "org.eclipse.edc:iam-mock", version.ref = "edc" }
 
 [plugins]
 spotless = { id = "com.diffplug.spotless", version = "8.0.0" }
-publish = { id = "com.vanniktech.maven.publish", version = "0.34.0" }
+publish = { id = "com.vanniktech.maven.publish", version = "0.35.0" }
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
