@@ -14,7 +14,7 @@ junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 junit-bom = { module = "org.junit:junit-bom", version = "6.0.1" }
 parsson = { module = "org.eclipse.parsson:parsson", version = "1.1.7" }
-testcontainers = { module = "org.testcontainers:junit-jupiter", version = "1.21.3" }
+testcontainers = { module = "org.testcontainers:junit-jupiter", version = "1.21.4" }
 titanium-json-ld = { module = "com.apicatalog:titanium-json-ld", version = "1.7.0" }
 
 edc-controlplane-base-bom = { module = "org.eclipse.edc:controlplane-base-bom", version.ref = "edc" }
