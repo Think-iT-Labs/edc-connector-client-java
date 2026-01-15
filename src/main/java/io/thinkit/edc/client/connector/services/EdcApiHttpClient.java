@@ -22,7 +22,7 @@ public class EdcApiHttpClient {
         this.interceptor = interceptor;
     }
 
-    protected Result<InputStream> send(HttpRequest.Builder requestBuilder) {
+    public Result<InputStream> send(HttpRequest.Builder requestBuilder) {
         try {
             var request = interceptor.apply(requestBuilder).build();
 
@@ -34,7 +34,7 @@ public class EdcApiHttpClient {
         }
     }
 
-    protected CompletableFuture<Result<InputStream>> sendAsync(HttpRequest.Builder requestBuilder) {
+    public CompletableFuture<Result<InputStream>> sendAsync(HttpRequest.Builder requestBuilder) {
         var request = interceptor.apply(requestBuilder).build();
 
         return httpClient
@@ -42,7 +42,7 @@ public class EdcApiHttpClient {
                 .thenApply(this::toResult);
     }
 
-    protected Result<InputStream> toResult(HttpResponse<InputStream> response) {
+    public Result<InputStream> toResult(HttpResponse<InputStream> response) {
         try {
             var statusCode = response.statusCode();
             if (isSuccessful(statusCode)) {

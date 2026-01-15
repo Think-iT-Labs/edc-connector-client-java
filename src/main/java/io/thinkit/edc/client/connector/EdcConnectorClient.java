@@ -4,6 +4,17 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.thinkit.edc.client.connector.resource.EdcResource;
 import io.thinkit.edc.client.connector.services.*;
+import io.thinkit.edc.client.connector.services.management.Assets;
+import io.thinkit.edc.client.connector.services.management.Catalogs;
+import io.thinkit.edc.client.connector.services.management.ContractAgreements;
+import io.thinkit.edc.client.connector.services.management.ContractDefinitions;
+import io.thinkit.edc.client.connector.services.management.ContractNegotiations;
+import io.thinkit.edc.client.connector.services.management.Dataplanes;
+import io.thinkit.edc.client.connector.services.management.EdrCache;
+import io.thinkit.edc.client.connector.services.management.PolicyDefinitions;
+import io.thinkit.edc.client.connector.services.management.Secrets;
+import io.thinkit.edc.client.connector.services.management.TransferProcesses;
+
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.util.HashMap;
