@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.RealTimeConnectorApiTestBase;
 import io.thinkit.edc.client.connector.model.Asset;
-import io.thinkit.edc.client.connector.services.Assets;
+import io.thinkit.edc.client.connector.services.management.Assets;
 import java.net.http.HttpClient;
 import java.util.Map;
 import java.util.UUID;

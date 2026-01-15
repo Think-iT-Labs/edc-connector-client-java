@@ -1,4 +1,4 @@
-package io.thinkit.edc.client.connector.services;
+package io.thinkit.edc.client.connector.services.management;
 
 import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
 import static java.util.Collections.emptyList;
@@ -9,6 +9,7 @@ import io.thinkit.edc.client.connector.ManagementApiTestBase;
 import io.thinkit.edc.client.connector.model.*;
 import java.net.http.HttpClient;
 import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

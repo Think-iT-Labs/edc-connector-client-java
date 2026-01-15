@@ -1,4 +1,4 @@
-package io.thinkit.edc.client.connector.services;
+package io.thinkit.edc.client.connector.services.management;
 
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -10,6 +10,7 @@ import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
 import java.net.http.HttpClient;
 import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

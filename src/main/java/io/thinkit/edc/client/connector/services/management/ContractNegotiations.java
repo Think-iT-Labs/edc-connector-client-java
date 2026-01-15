@@ -1,4 +1,4 @@
-package io.thinkit.edc.client.connector.services;
+package io.thinkit.edc.client.connector.services.management;
 
 import static io.thinkit.edc.client.connector.utils.Constants.ID;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.compact;
