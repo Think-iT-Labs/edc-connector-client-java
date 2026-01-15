@@ -15,6 +15,7 @@ jobs:
     needs: [ publish ]
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v6
         with:
@@ -40,6 +41,7 @@ jobs:
           removeArtifacts: true
 
       - name: Prepare next version
+        id: prepare-next-version
         run: |
           git config user.name "think-it-account"
           git config user.email "technical@think-it.io"
@@ -50,12 +52,29 @@ jobs:
           IFS=.- read -r VERSION_MAJOR VERSION_MINOR VERSION_PATCH SNAPSHOT<<<"${{ env.VERSION }}"
           SNAPSHOT_VERSION="$VERSION_MAJOR.$VERSION_MINOR.$((VERSION_PATCH+1))-SNAPSHOT"
           
+          # Export for use in later steps
+          echo "SNAPSHOT_VERSION=$SNAPSHOT_VERSION" >> $GITHUB_OUTPUT
+          
           # Persist the "version" in the gradle.properties
           sed -i "s/version=.*/version=$SNAPSHOT_VERSION/g" gradle.properties
           
           git add gradle.properties
           
-          # Commit and push to origin main
+          # Commit and push to a new branch
+          BRANCH_NAME="release/bump-to-$SNAPSHOT_VERSION"
+          git checkout -b "$BRANCH_NAME"
           git commit --message "Introduce new snapshot version $SNAPSHOT_VERSION"
 
-          git push origin main
+          git push origin "$BRANCH_NAME"
+      
+      - name: Create pull request
+        uses: thomaseizinger/create-pull-request@1.4.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          head: release/bump-to-${{ steps.prepare-next-version.outputs.SNAPSHOT_VERSION }}
+          base: main
+          title: Bump version to ${{ steps.prepare-next-version.outputs.SNAPSHOT_VERSION }}
+          body: |-
+            This PR was created automatically after release ${{ env.VERSION }}.
+            It updates the version in gradle.properties to the next SNAPSHOT version.
