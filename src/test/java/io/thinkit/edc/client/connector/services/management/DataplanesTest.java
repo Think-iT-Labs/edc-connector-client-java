@@ -9,7 +9,6 @@ import io.thinkit.edc.client.connector.model.Result;
 import java.net.http.HttpClient;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

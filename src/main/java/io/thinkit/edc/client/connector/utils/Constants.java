@@ -5,7 +5,7 @@ public interface Constants {
     String DCAT_NAMESPACE = "http://www.w3.org/ns/dcat#";
     String DCT_NAMESPACE = "http://purl.org/dc/terms/";
     String ODRL_NAMESPACE = "http://www.w3.org/ns/odrl/2/";
-    String DSCPACE_NAMESPACE = "https://w3id.org/dspace/v0.8/";
+    String DSCPACE_NAMESPACE = "https://w3id.org/dspace/2025/1/";
 
     String ID = "@id";
     String TYPE = "@type";
