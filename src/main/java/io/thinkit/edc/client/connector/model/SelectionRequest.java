@@ -1,9 +1,12 @@
 package io.thinkit.edc.client.connector.model;
 
-import static io.thinkit.edc.client.connector.utils.Constants.*;
+import static io.thinkit.edc.client.connector.utils.Constants.EDC_NAMESPACE;
+import static io.thinkit.edc.client.connector.utils.Constants.TYPE;
+import static io.thinkit.edc.client.connector.utils.Constants.VALUE;
 import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
 
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdDataAddress;
 import io.thinkit.edc.client.connector.utils.JsonLdObject;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
@@ -19,11 +22,11 @@ public class SelectionRequest extends JsonLdObject {
     }
 
     public DataAddress destination() {
-        return new DataAddress(object(SELECTION_REQUEST_DESTINATION));
+        return new JsonLdDataAddress(object(SELECTION_REQUEST_DESTINATION));
     }
 
     public DataAddress source() {
-        return new DataAddress(object(SELECTION_REQUEST_SOURCE));
+        return new JsonLdDataAddress(object(SELECTION_REQUEST_SOURCE));
     }
 
     public String strategy() {

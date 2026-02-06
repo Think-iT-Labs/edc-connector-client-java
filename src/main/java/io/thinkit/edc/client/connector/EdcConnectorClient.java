@@ -1,9 +1,19 @@
 package io.thinkit.edc.client.connector;
 
+import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.thinkit.edc.client.connector.resource.EdcResource;
-import io.thinkit.edc.client.connector.services.*;
+import io.thinkit.edc.client.connector.resource.VersionedApi;
+import io.thinkit.edc.client.connector.services.ApplicationObservability;
+import io.thinkit.edc.client.connector.services.CatalogCache;
+import io.thinkit.edc.client.connector.services.Did;
+import io.thinkit.edc.client.connector.services.EdcApiHttpClient;
+import io.thinkit.edc.client.connector.services.KeyPairs;
+import io.thinkit.edc.client.connector.services.Participants;
+import io.thinkit.edc.client.connector.services.Presentations;
+import io.thinkit.edc.client.connector.services.VerifiableCredentials;
 import io.thinkit.edc.client.connector.services.management.Assets;
 import io.thinkit.edc.client.connector.services.management.Catalogs;
 import io.thinkit.edc.client.connector.services.management.ContractAgreements;
@@ -22,7 +32,7 @@ import java.util.function.UnaryOperator;
 
 public class EdcConnectorClient {
 
-    private String managementUrl;
+    private VersionedApi managementApi;
     private String observabilityUrl;
     private String catalogCacheUrl;
     private String identityUrl;
@@ -127,7 +137,7 @@ public class EdcConnectorClient {
 
     private EdcClientContext createContext() {
         return new EdcClientContext(
-                new EdcClientUrls(managementUrl, observabilityUrl, catalogCacheUrl, identityUrl, presentation),
+                new EdcClientUrls(managementApi, observabilityUrl, catalogCacheUrl, identityUrl, presentation),
                 objectMapper,
                 edcClientHttpClient);
     }
@@ -140,9 +150,19 @@ public class EdcConnectorClient {
             client.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         }
 
-        public Builder managementUrl(String managementUrl) {
-            client.managementUrl = managementUrl;
+        public Builder management(String url, String version) {
+            client.managementApi = new VersionedApi(url, version);
             return this;
+        }
+
+        public Builder management(String url) {
+            client.managementApi = new VersionedApi(url, V3);
+            return this;
+        }
+
+        @Deprecated(since = "0.5.0")
+        public Builder managementUrl(String url) {
+            return management(url);
         }
 
         public Builder observabilityUrl(String observabilityUrl) {
@@ -207,5 +227,10 @@ public class EdcConnectorClient {
             with(Participants.class, Participants::new);
             return client;
         }
+    }
+
+    public interface Versions {
+        String V3 = "v3";
+        String V4BETA = "v4beta";
     }
 }

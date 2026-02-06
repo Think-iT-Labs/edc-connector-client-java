@@ -1,6 +1,5 @@
 package io.thinkit.edc.client.connector.services.management;
 
-import static io.thinkit.edc.client.connector.utils.JsonLdUtil.compact;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import io.thinkit.edc.client.connector.EdcClientContext;
@@ -8,6 +7,7 @@ import io.thinkit.edc.client.connector.model.DataAddress;
 import io.thinkit.edc.client.connector.model.Edr;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdDataAddress;
 import io.thinkit.edc.client.connector.resource.management.ManagementResource;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
@@ -20,7 +20,7 @@ public class EdrCache extends ManagementResource {
 
     public EdrCache(EdcClientContext context) {
         super(context);
-        url = "%s/v3/edrs".formatted(managementUrl);
+        url = "%s/edrs".formatted(managementUrl);
     }
 
     public Result<String> delete(String transferProcessId) {
@@ -83,7 +83,9 @@ public class EdrCache extends ManagementResource {
     }
 
     private DataAddress getDataAddress(JsonArray array) {
-        return DataAddress.Builder.newInstance().raw(array.getJsonObject(0)).build();
+        return JsonLdDataAddress.Builder.newInstance()
+                .raw(array.getJsonObject(0))
+                .build();
     }
 
     private Edr getEDR(JsonArray array) {

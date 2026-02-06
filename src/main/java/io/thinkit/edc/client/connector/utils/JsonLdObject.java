@@ -1,12 +1,17 @@
 package io.thinkit.edc.client.connector.utils;
 
-import static io.thinkit.edc.client.connector.utils.Constants.*;
+import static io.thinkit.edc.client.connector.utils.Constants.CONTEXT;
+import static io.thinkit.edc.client.connector.utils.Constants.EDC_NAMESPACE;
+import static io.thinkit.edc.client.connector.utils.Constants.ID;
+import static io.thinkit.edc.client.connector.utils.Constants.VALUE;
+import static io.thinkit.edc.client.connector.utils.Constants.VOCAB;
 import static jakarta.json.Json.createObjectBuilder;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class JsonLdObject {
@@ -26,7 +31,10 @@ public class JsonLdObject {
     }
 
     protected JsonObject object(String key) {
-        return raw.getJsonArray(key).getJsonObject(0);
+        return Optional.of(key)
+                .map(raw::getJsonArray)
+                .map(it -> it.getJsonObject(0))
+                .orElse(null);
     }
 
     protected Stream<JsonObject> objects(String key) {
@@ -34,7 +42,11 @@ public class JsonLdObject {
     }
 
     protected String stringValue(String key) {
-        return raw.getJsonArray(key).getJsonObject(0).getString(VALUE);
+        return Optional.of(key)
+                .map(raw::getJsonArray)
+                .map(it -> it.getJsonObject(0))
+                .map(it -> it.getString(VALUE))
+                .orElse(null);
     }
 
     protected long longValue(String key) {

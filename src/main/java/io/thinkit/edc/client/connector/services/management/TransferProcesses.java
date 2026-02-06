@@ -18,7 +18,7 @@ public class TransferProcesses extends ManagementResource {
 
     public TransferProcesses(EdcClientContext context) {
         super(context);
-        url = "%s/v3/transferprocesses".formatted(managementUrl);
+        url = "%s/transferprocesses".formatted(managementUrl);
     }
 
     public Result<TransferProcess> get(String id) {

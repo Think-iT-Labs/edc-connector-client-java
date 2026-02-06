@@ -21,7 +21,7 @@ public class ContractAgreements extends ManagementResource {
 
     public ContractAgreements(EdcClientContext context) {
         super(context);
-        url = "%s/v3/contractagreements".formatted(managementUrl);
+        url = "%s/contractagreements".formatted(managementUrl);
     }
 
     public Result<ContractAgreement> get(String id) {

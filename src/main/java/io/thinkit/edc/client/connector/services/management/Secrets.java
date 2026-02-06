@@ -19,7 +19,7 @@ public class Secrets extends ManagementResource {
 
     public Secrets(EdcClientContext context) {
         super(context);
-        url = "%s/v3/secrets".formatted(managementUrl);
+        url = "%s/secrets".formatted(managementUrl);
     }
 
     public Result<Secret> get(String id) {
