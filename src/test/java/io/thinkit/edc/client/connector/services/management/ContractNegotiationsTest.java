@@ -16,7 +16,6 @@ import java.net.http.HttpClient;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -233,7 +232,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
         assertThat(contractNegotiation.getContent().type()).isNotNull().satisfies(type -> assertThat(type)
                 .isEqualTo("PROVIDER"));
         assertThat(contractNegotiation.getContent().protocol()).isNotNull().satisfies(protocol -> assertThat(protocol)
-                .isEqualTo("dataspace-protocol-http"));
+                .isEqualTo("dataspace-protocol-http:2025-1"));
         assertThat(contractNegotiation.getContent().counterPartyId())
                 .isNotNull()
                 .satisfies(counterPartyId -> assertThat(counterPartyId).isEqualTo("counter-party-id"));
@@ -324,7 +323,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
             assertThat(contractNegotiation.type()).isNotNull().satisfies(type -> assertThat(type)
                     .isEqualTo("PROVIDER"));
             assertThat(contractNegotiation.protocol()).isNotNull().satisfies(protocol -> assertThat(protocol)
-                    .isEqualTo("dataspace-protocol-http"));
+                    .isEqualTo("dataspace-protocol-http:2025-1"));
             assertThat(contractNegotiation.counterPartyId())
                     .isNotNull()
                     .satisfies(counterPartyId -> assertThat(counterPartyId).isEqualTo("counter-party-id"));
