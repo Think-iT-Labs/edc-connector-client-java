@@ -7,6 +7,7 @@ import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
 import static jakarta.json.stream.JsonCollectors.toJsonArray;
 
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdProperties;
 import io.thinkit.edc.client.connector.utils.JsonLdObject;
 import jakarta.json.JsonObject;
 import java.util.List;
@@ -54,12 +55,12 @@ public class TransferProcess extends JsonLdObject {
         return stringValue(TRANSFER_PROCESS_CONTRACT_ID);
     }
 
-    public Properties dataDestination() {
-        return new Properties(object(TRANSFER_PROCESS_DATA_DESTINATION));
+    public JsonLdProperties dataDestination() {
+        return new JsonLdProperties(object(TRANSFER_PROCESS_DATA_DESTINATION));
     }
 
-    public Properties privateProperties() {
-        return new Properties(object(TRANSFER_PROCESS_PRIVATE_PROPERTIES));
+    public JsonLdProperties privateProperties() {
+        return new JsonLdProperties(object(TRANSFER_PROCESS_PRIVATE_PROPERTIES));
     }
 
     public String errorDetail() {
@@ -129,7 +130,7 @@ public class TransferProcess extends JsonLdObject {
         }
 
         public TransferProcess.Builder dataDestination(Map<String, ?> dataDestination) {
-            var propertiesBuilder = Properties.Builder.newInstance();
+            var propertiesBuilder = JsonLdProperties.Builder.newInstance();
             dataDestination.forEach(propertiesBuilder::property);
             builder.add(
                     TRANSFER_PROCESS_DATA_DESTINATION, propertiesBuilder.build().raw());
@@ -137,7 +138,7 @@ public class TransferProcess extends JsonLdObject {
         }
 
         public TransferProcess.Builder privateProperties(Map<String, ?> properties) {
-            var propertiesBuilder = Properties.Builder.newInstance();
+            var propertiesBuilder = JsonLdProperties.Builder.newInstance();
             properties.forEach(propertiesBuilder::property);
             builder.add(
                     TRANSFER_PROCESS_PRIVATE_PROPERTIES,

@@ -7,6 +7,10 @@ public class Result<T> {
     private T content;
     private final List<ApiErrorDetail> errors;
 
+    public static <T> Result<T> succeded(T content) {
+        return new Result<>(content, null);
+    }
+
     public Result(List<ApiErrorDetail> error) {
         this.errors = error;
     }
@@ -31,6 +35,14 @@ public class Result<T> {
     public <R> Result<R> map(Function<T, R> mappingFunction) {
         if (isSucceeded()) {
             return new Result<>(mappingFunction.apply(this.content), null);
+        } else {
+            return new Result<>(null, this.errors);
+        }
+    }
+
+    public <R> Result<R> compose(Function<T, Result<R>> mappingFunction) {
+        if (isSucceeded()) {
+            return mappingFunction.apply(this.content);
         } else {
             return new Result<>(null, this.errors);
         }

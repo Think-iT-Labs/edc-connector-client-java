@@ -16,7 +16,7 @@ public class Dataplanes extends ManagementResource {
 
     public Dataplanes(EdcClientContext context) {
         super(context);
-        url = "%s/v3/dataplanes".formatted(managementUrl);
+        url = "%s/dataplanes".formatted(managementUrl);
     }
 
     public Result<List<DataPlaneInstance>> get() {

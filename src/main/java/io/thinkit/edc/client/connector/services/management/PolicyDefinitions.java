@@ -22,7 +22,7 @@ public class PolicyDefinitions extends ManagementResource {
 
     public PolicyDefinitions(EdcClientContext context) {
         super(context);
-        url = "%s/v3/policydefinitions".formatted(managementUrl);
+        url = "%s/policydefinitions".formatted(managementUrl);
     }
 
     public Result<PolicyDefinition> get(String id) {

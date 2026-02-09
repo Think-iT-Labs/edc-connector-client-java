@@ -1,8 +1,5 @@
 package io.thinkit.edc.client.connector.services.management;
 
-import static jakarta.json.Json.createObjectBuilder;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.ManagementApiTestBase;
 import io.thinkit.edc.client.connector.model.CallbackAddress;
@@ -12,13 +9,17 @@ import io.thinkit.edc.client.connector.model.Policy;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
 import io.thinkit.edc.client.connector.model.TerminateNegotiation;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
 import java.net.http.HttpClient;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+
+import static jakarta.json.Json.createObjectBuilder;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ContractNegotiationsTest extends ManagementApiTestBase {
 

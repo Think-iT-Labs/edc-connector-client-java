@@ -17,7 +17,7 @@ public class Catalogs extends ManagementResource {
 
     public Catalogs(EdcClientContext context) {
         super(context);
-        url = "%s/v3/catalog".formatted(managementUrl);
+        url = "%s/catalog".formatted(managementUrl);
     }
 
     public Result<Catalog> request(CatalogRequest input) {

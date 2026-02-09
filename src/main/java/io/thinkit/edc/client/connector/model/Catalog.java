@@ -13,7 +13,7 @@ public class Catalog extends JsonLdObject {
     private static final String TYPE_CATALOG = EDC_NAMESPACE + "Catalog";
     private static final String CATALOG_DATASET = DCAT_NAMESPACE + "dataset";
     private static final String CATALOG_SERVICE = DCAT_NAMESPACE + "service";
-    private static final String CATALOG_PARTICIPANT_ID = DSCPACE_NAMESPACE + "participantId";
+    private static final String CATALOG_PARTICIPANT_ID = DSPACE_NAMESPACE + "participantId";
 
     private Catalog(JsonObject raw) {
         super(raw);
@@ -41,7 +41,7 @@ public class Catalog extends JsonLdObject {
                                 .add(DCT_PREFIX, DCT_NAMESPACE)
                                 .add(DCAT_PREFIX, DCAT_NAMESPACE)
                                 .add(ODRL_PREFIX, ODRL_NAMESPACE)
-                                .add(DSCPACE_PREFIX, DSCPACE_NAMESPACE))
+                                .add(DSCPACE_PREFIX, DSPACE_NAMESPACE))
                 .add(TYPE, TYPE_CATALOG);
 
         public static Catalog.Builder newInstance() {
