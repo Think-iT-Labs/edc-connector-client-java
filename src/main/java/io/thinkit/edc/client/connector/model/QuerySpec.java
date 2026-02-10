@@ -7,6 +7,7 @@ import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
 import static jakarta.json.stream.JsonCollectors.toJsonArray;
 
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdCriterion;
 import io.thinkit.edc.client.connector.utils.JsonLdObject;
 import jakarta.json.JsonObject;
 import java.util.List;
@@ -40,9 +41,9 @@ public class QuerySpec extends JsonLdObject {
         return stringValue(QUERY_SPEC_SORT_FIELD);
     }
 
-    public List<Criterion> filterExpression() {
+    public List<JsonLdCriterion> filterExpression() {
         return objects(QUERY_SPEC_FILTER_EXPRESSION)
-                .map(it -> Criterion.Builder.newInstance().raw(it).build())
+                .map(it -> JsonLdCriterion.Builder.newInstance().raw(it).build())
                 .toList();
     }
 
@@ -79,9 +80,10 @@ public class QuerySpec extends JsonLdObject {
             return this;
         }
 
-        public Builder filterExpression(List<Criterion> criteria) {
+        public Builder filterExpression(List<JsonLdCriterion> criteria) {
             builder.add(
-                    "filterExpression", criteria.stream().map(Criterion::raw).collect(toJsonArray()));
+                    "filterExpression",
+                    criteria.stream().map(JsonLdCriterion::raw).collect(toJsonArray()));
             return this;
         }
     }
