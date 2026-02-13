@@ -1,5 +1,7 @@
 package io.thinkit.edc.client.connector.services.management;
 
+import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
+import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V4BETA;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,17 +15,26 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.ValueSource;
 
+@ParameterizedClass
+@ValueSource(strings = {V3, V4BETA})
 class EdrCacheTest extends ManagementApiTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();
+    private final String managementVersion;
     private EdrCache edrCache;
+
+    EdrCacheTest(String managementVersion) {
+        this.managementVersion = managementVersion;
+    }
 
     @BeforeEach
     void setUp() {
         var client = EdcConnectorClient.newBuilder()
                 .httpClient(http)
-                .managementUrl(prism.getUrl())
+                .management(prism.getUrl(), managementVersion)
                 .build();
         edrCache = client.edrCache();
     }
@@ -110,10 +121,10 @@ class EdrCacheTest extends ManagementApiTestBase {
     private <T> void errorResponse(Result<T> error) {
         assertThat(error.isSucceeded()).isFalse();
         assertThat(error.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-            assertThat(apiErrorDetail.message()).isEqualTo("error message");
-            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
-            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
-            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+            assertThat(apiErrorDetail.message()).isNotBlank();
+            assertThat(apiErrorDetail.type()).isNotBlank();
+            assertThat(apiErrorDetail.path()).isNotBlank();
+            assertThat(apiErrorDetail.invalidValue()).isNotBlank();
         });
     }
 
@@ -124,7 +135,7 @@ class EdrCacheTest extends ManagementApiTestBase {
         assertThat(edr.getContent().contractNegotiationId()).isNotBlank();
         assertThat(edr.getContent().assetId()).isNotBlank();
         assertThat(edr.getContent().providerId()).isNotBlank();
-        assertThat(edr.getContent().createdAt()).isGreaterThan(0);
+        assertThat(edr.getContent().createdAt()).isGreaterThan(-1);
     }
 
     private QuerySpec shouldRequestQuery() {

@@ -1,19 +1,25 @@
 package io.thinkit.edc.client.connector.services.management;
 
+import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.thinkit.edc.client.connector.EdcClientContext;
-import io.thinkit.edc.client.connector.model.DataAddress;
-import io.thinkit.edc.client.connector.model.Edr;
-import io.thinkit.edc.client.connector.model.QuerySpec;
-import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.model.*;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdDataAddress;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdEdr;
+import io.thinkit.edc.client.connector.model.pojo.PojoDataAddress;
+import io.thinkit.edc.client.connector.model.pojo.PojoEdr;
 import io.thinkit.edc.client.connector.resource.management.ManagementResource;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpRequest;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 public class EdrCache extends ManagementResource {
     private final String url;
@@ -39,27 +45,38 @@ public class EdrCache extends ManagementResource {
 
     public Result<DataAddress> dataAddress(String transferProcessId) {
         var requestBuilder = getDataAddressRequestBuilder(transferProcessId);
-        return context.httpClient().send(requestBuilder).map(JsonLdUtil::expand).map(this::getDataAddress);
+        Function<InputStream, Result<DataAddress>> function = managementVersion.equals(V3)
+                ? stream -> Result.succeded(stream).map(JsonLdUtil::expand).map(this::getDataAddress)
+                : stream -> Result.succeded(stream).map(deserializeDataAddress());
+
+        return context.httpClient().send(requestBuilder).compose(function);
     }
 
     public CompletableFuture<Result<DataAddress>> dataAddressAsync(String transferProcessId) {
         var requestBuilder = getDataAddressRequestBuilder(transferProcessId);
+        Function<Result<InputStream>, Result<DataAddress>> function = managementVersion.equals(V3)
+                ? result -> result.map(JsonLdUtil::expand).map(this::getDataAddress)
+                : result -> result.map(deserializeDataAddress());
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
-                .map(this::getDataAddress));
+        return context.httpClient().sendAsync(requestBuilder).thenApply(function);
     }
 
     public Result<Edr> request(QuerySpec input) {
         var requestBuilder = getRequestBuilder(input);
+        Function<InputStream, Result<Edr>> function = managementVersion.equals(V3)
+                ? stream -> Result.succeded(stream).map(JsonLdUtil::expand).map(this::getEDR)
+                : stream -> Result.succeded(stream).map(deserializeEdr());
 
-        return context.httpClient().send(requestBuilder).map(JsonLdUtil::expand).map(this::getEDR);
+        return context.httpClient().send(requestBuilder).compose(function);
     }
 
     public CompletableFuture<Result<Edr>> requestAsync(QuerySpec input) {
         var requestBuilder = getRequestBuilder(input);
+        Function<Result<InputStream>, Result<Edr>> function = managementVersion.equals(V3)
+                ? result -> result.map(JsonLdUtil::expand).map(this::getEDR)
+                : result -> result.map(deserializeEdr());
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
-                .map(this::getEDR));
+        return context.httpClient().sendAsync(requestBuilder).thenApply(function);
     }
 
     private HttpRequest.Builder getDeleteRequestBuilder(String transferProcessId) {
@@ -89,6 +106,29 @@ public class EdrCache extends ManagementResource {
     }
 
     private Edr getEDR(JsonArray array) {
-        return Edr.Builder.newInstance().raw(array.getJsonObject(0)).build();
+        return JsonLdEdr.Builder.newInstance().raw(array.getJsonObject(0)).build();
+    }
+
+    private Function<InputStream, DataAddress> deserializeDataAddress() {
+        return stream -> {
+            try {
+                return context.objectMapper().readValue(stream, PojoDataAddress.class);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    private Function<InputStream, Edr> deserializeEdr() {
+        return stream -> {
+            try {
+                return context.objectMapper().readValue(stream, new TypeReference<List<PojoEdr>>() {}).stream()
+                        .map(Edr.class::cast)
+                        .toList()
+                        .get(0);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        };
     }
 }
