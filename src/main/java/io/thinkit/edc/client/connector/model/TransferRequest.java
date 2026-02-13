@@ -5,6 +5,7 @@ import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
 import static jakarta.json.stream.JsonCollectors.toJsonArray;
 
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdCallbackAddress;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdProperties;
 import io.thinkit.edc.client.connector.utils.JsonLdObject;
 import jakarta.json.JsonObject;
@@ -59,9 +60,9 @@ public class TransferRequest extends JsonLdObject {
         return new JsonLdProperties(object(TRANSFER_REQUEST_PRIVATE_PROPERTIES));
     }
 
-    public List<CallbackAddress> callbackAddresses() {
+    public List<JsonLdCallbackAddress> callbackAddresses() {
         return objects(TRANSFER_REQUEST_CALLBACK_ADDRESSES)
-                .map(it -> CallbackAddress.Builder.newInstance().raw(it).build())
+                .map(it -> JsonLdCallbackAddress.Builder.newInstance().raw(it).build())
                 .toList();
     }
 
@@ -134,10 +135,10 @@ public class TransferRequest extends JsonLdObject {
             return this;
         }
 
-        public TransferRequest.Builder callbackAddresses(List<CallbackAddress> callbackAddresses) {
+        public TransferRequest.Builder callbackAddresses(List<JsonLdCallbackAddress> callbackAddresses) {
             builder.add(
                     TRANSFER_REQUEST_CALLBACK_ADDRESSES,
-                    callbackAddresses.stream().map(CallbackAddress::raw).collect(toJsonArray()));
+                    callbackAddresses.stream().map(JsonLdCallbackAddress::raw).collect(toJsonArray()));
             return this;
         }
     }

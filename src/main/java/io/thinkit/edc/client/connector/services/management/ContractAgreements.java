@@ -8,6 +8,7 @@ import io.thinkit.edc.client.connector.model.ContractAgreement;
 import io.thinkit.edc.client.connector.model.ContractNegotiation;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdContractNegotiation;
 import io.thinkit.edc.client.connector.resource.management.ManagementResource;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
@@ -87,7 +88,7 @@ public class ContractAgreements extends ManagementResource {
     }
 
     private ContractNegotiation getContractNegotiation(JsonArray array) {
-        return ContractNegotiation.Builder.newInstance()
+        return JsonLdContractNegotiation.Builder.newInstance()
                 .raw(array.getJsonObject(0))
                 .build();
     }
