@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpRequest;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -62,21 +61,14 @@ public class Dataplanes extends ManagementResource {
     private Function<InputStream, List<DataPlaneInstance>> deserializeDataPlaneInstances() {
         return stream -> {
             try {
-                // 1. Read the stream into a byte array so we can use it twice
-                byte[] bytes = stream.readAllBytes();
-
-                // 2. Debug print: Convert bytes to String to see the raw JSON
-                System.out.println("DEBUG - Raw JSON: " + new String(bytes, StandardCharsets.UTF_8));
-
-                // 3. Deserialize from the byte array instead of the consumed stream
                 return context
                         .objectMapper()
-                        .readValue(bytes, new TypeReference<List<PojoDataPlaneInstance>>() {})
+                        .readValue(stream, new TypeReference<List<PojoDataPlaneInstance>>() {})
                         .stream()
                         .map(DataPlaneInstance.class::cast)
                         .toList();
             } catch (IOException e) {
-                throw new RuntimeException("Failed to deserialize DataPlaneInstances", e);
+                throw new RuntimeException(e);
             }
         };
     }
