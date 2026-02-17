@@ -1,6 +1,5 @@
 package io.thinkit.edc.client.connector.services.management;
 
-import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
 import static io.thinkit.edc.client.connector.utils.Constants.ID;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
@@ -32,20 +31,14 @@ public class Assets extends ManagementResource {
 
     public Result<Asset> get(String id) {
         var requestBuilder = getRequestBuilder(id);
+        var function = responseMapper(this::getAsset, deserializeAsset());
 
-        Function<InputStream, Result<Asset>> function = managementVersion.equals(V3)
-                ? stream -> Result.succeded(stream).map(JsonLdUtil::expand).map(this::getAsset)
-                : stream -> Result.succeded(stream).map(deserializeAsset());
-
-        return context.httpClient().send(requestBuilder).compose(function);
+        return function.apply(context.httpClient().send(requestBuilder));
     }
 
     public CompletableFuture<Result<Asset>> getAsync(String id) {
         var requestBuilder = getRequestBuilder(id);
-
-        Function<Result<InputStream>, Result<Asset>> function = managementVersion.equals(V3)
-                ? result -> result.map(JsonLdUtil::expand).map(this::getAsset)
-                : result -> result.map(deserializeAsset());
+        var function = responseMapper(this::getAsset, deserializeAsset());
 
         return context.httpClient().sendAsync(requestBuilder).thenApply(function);
     }
@@ -94,16 +87,14 @@ public class Assets extends ManagementResource {
     public Result<List<Asset>> request(QuerySpec input) {
 
         var requestBuilder = getAssetsRequestBuilder(input);
+        var function = responseMapper(this::getAssets, deserializeAssets());
 
-        return context.httpClient().send(requestBuilder).map(JsonLdUtil::expand).map(this::getAssets);
+        return function.apply(context.httpClient().send(requestBuilder));
     }
 
     public CompletableFuture<Result<List<Asset>>> requestAsync(QuerySpec input) {
         var requestBuilder = getAssetsRequestBuilder(input);
-
-        Function<Result<InputStream>, Result<List<Asset>>> function = managementVersion.equals(V3)
-                ? result -> result.map(JsonLdUtil::expand).map(this::getAssets)
-                : result -> result.map(deserializeAssets());
+        var function = responseMapper(this::getAssets, deserializeAssets());
 
         return context.httpClient().sendAsync(requestBuilder).thenApply(function);
     }

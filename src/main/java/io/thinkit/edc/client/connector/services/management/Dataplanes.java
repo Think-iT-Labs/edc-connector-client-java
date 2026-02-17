@@ -1,7 +1,5 @@
 package io.thinkit.edc.client.connector.services.management;
 
-import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.thinkit.edc.client.connector.EdcClientContext;
 import io.thinkit.edc.client.connector.model.DataPlaneInstance;
@@ -9,7 +7,6 @@ import io.thinkit.edc.client.connector.model.Result;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdDataPlaneInstance;
 import io.thinkit.edc.client.connector.model.pojo.PojoDataPlaneInstance;
 import io.thinkit.edc.client.connector.resource.management.ManagementResource;
-import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,18 +26,13 @@ public class Dataplanes extends ManagementResource {
 
     public Result<List<DataPlaneInstance>> get() {
         var requestBuilder = getRequestBuilder();
-        Function<Result<InputStream>, Result<List<DataPlaneInstance>>> function = managementVersion.equals(V3)
-                ? result -> result.map(JsonLdUtil::expand).map(this::getDataPlaneInstances)
-                : result -> result.map(deserializeDataPlaneInstances());
-
+        var function = responseMapper(this::getDataPlaneInstances, deserializeDataPlaneInstances());
         return function.apply(context.httpClient().send(requestBuilder));
     }
 
     public CompletableFuture<Result<List<DataPlaneInstance>>> getAsync() {
         var requestBuilder = getRequestBuilder();
-        Function<Result<InputStream>, Result<List<DataPlaneInstance>>> function = managementVersion.equals(V3)
-                ? result -> result.map(JsonLdUtil::expand).map(this::getDataPlaneInstances)
-                : result -> result.map(deserializeDataPlaneInstances());
+        var function = responseMapper(this::getDataPlaneInstances, deserializeDataPlaneInstances());
 
         return context.httpClient().sendAsync(requestBuilder).thenApply(function);
     }

@@ -63,18 +63,14 @@ public class EdrCache extends ManagementResource {
 
     public Result<Edr> request(QuerySpec input) {
         var requestBuilder = getRequestBuilder(input);
-        Function<InputStream, Result<Edr>> function = managementVersion.equals(V3)
-                ? stream -> Result.succeded(stream).map(JsonLdUtil::expand).map(this::getEDR)
-                : stream -> Result.succeded(stream).map(deserializeEdr());
+        var function = responseMapper(this::getEDR, deserializeEdr());
 
-        return context.httpClient().send(requestBuilder).compose(function);
+        return function.apply(context.httpClient().send(requestBuilder));
     }
 
     public CompletableFuture<Result<Edr>> requestAsync(QuerySpec input) {
         var requestBuilder = getRequestBuilder(input);
-        Function<Result<InputStream>, Result<Edr>> function = managementVersion.equals(V3)
-                ? result -> result.map(JsonLdUtil::expand).map(this::getEDR)
-                : result -> result.map(deserializeEdr());
+        var function = responseMapper(this::getEDR, deserializeEdr());
 
         return context.httpClient().sendAsync(requestBuilder).thenApply(function);
     }
