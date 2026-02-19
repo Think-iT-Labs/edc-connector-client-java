@@ -1,15 +1,23 @@
 package io.thinkit.edc.client.connector.services.management;
 
+import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.thinkit.edc.client.connector.EdcClientContext;
 import io.thinkit.edc.client.connector.model.DataPlaneInstance;
 import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdDataPlaneInstance;
+import io.thinkit.edc.client.connector.model.pojo.PojoDataPlaneInstance;
 import io.thinkit.edc.client.connector.resource.management.ManagementResource;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 public class Dataplanes extends ManagementResource {
     private final String url;
@@ -21,14 +29,20 @@ public class Dataplanes extends ManagementResource {
 
     public Result<List<DataPlaneInstance>> get() {
         var requestBuilder = getRequestBuilder();
+        Function<Result<InputStream>, Result<List<DataPlaneInstance>>> function = managementVersion.equals(V3)
+                ? result -> result.map(JsonLdUtil::expand).map(this::getDataPlaneInstances)
+                : result -> result.map(deserializeDataPlaneInstances());
 
-        return context.httpClient().send(requestBuilder).map(JsonLdUtil::expand).map(this::getDataPlaneInstances);
+        return function.apply(context.httpClient().send(requestBuilder));
     }
 
     public CompletableFuture<Result<List<DataPlaneInstance>>> getAsync() {
         var requestBuilder = getRequestBuilder();
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
-                .map(this::getDataPlaneInstances));
+        Function<Result<InputStream>, Result<List<DataPlaneInstance>>> function = managementVersion.equals(V3)
+                ? result -> result.map(JsonLdUtil::expand).map(this::getDataPlaneInstances)
+                : result -> result.map(deserializeDataPlaneInstances());
+
+        return context.httpClient().sendAsync(requestBuilder).thenApply(function);
     }
 
     private HttpRequest.Builder getRequestBuilder() {
@@ -37,9 +51,25 @@ public class Dataplanes extends ManagementResource {
 
     private List<DataPlaneInstance> getDataPlaneInstances(JsonArray array) {
         return array.stream()
-                .map(s -> DataPlaneInstance.Builder.newInstance()
+                .map(s -> JsonLdDataPlaneInstance.Builder.newInstance()
                         .raw(s.asJsonObject())
                         .build())
+                .map(DataPlaneInstance.class::cast)
                 .toList();
+    }
+
+    private Function<InputStream, List<DataPlaneInstance>> deserializeDataPlaneInstances() {
+        return stream -> {
+            try {
+                return context
+                        .objectMapper()
+                        .readValue(stream, new TypeReference<List<PojoDataPlaneInstance>>() {})
+                        .stream()
+                        .map(DataPlaneInstance.class::cast)
+                        .toList();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        };
     }
 }

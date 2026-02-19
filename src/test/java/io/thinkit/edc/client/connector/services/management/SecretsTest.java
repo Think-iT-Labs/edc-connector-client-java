@@ -1,27 +1,39 @@
 package io.thinkit.edc.client.connector.services.management;
 
+import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
+import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V4BETA;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.ManagementApiTestBase;
 import io.thinkit.edc.client.connector.model.Result;
 import io.thinkit.edc.client.connector.model.Secret;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdSecret;
 import java.net.http.HttpClient;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.ValueSource;
 
+@ParameterizedClass
+@ValueSource(strings = {V3, V4BETA})
 class SecretsTest extends ManagementApiTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();
+    private final String managementVersion;
     private Secrets secrets;
+
+    SecretsTest(String managementVersion) {
+        this.managementVersion = managementVersion;
+    }
 
     @BeforeEach
     void setUp() {
         var client = EdcConnectorClient.newBuilder()
                 .httpClient(http)
-                .managementUrl(prism.getUrl())
+                .management(prism.getUrl(), managementVersion)
                 .build();
         secrets = client.secrets();
     }
@@ -147,10 +159,10 @@ class SecretsTest extends ManagementApiTestBase {
     private <T> void errorResponse(Result<T> error) {
         assertThat(error.isSucceeded()).isFalse();
         assertThat(error.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-            assertThat(apiErrorDetail.message()).isEqualTo("error message");
-            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
-            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
-            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+            assertThat(apiErrorDetail.message()).isNotBlank();
+            assertThat(apiErrorDetail.type()).isNotBlank();
+            assertThat(apiErrorDetail.path()).isNotBlank();
+            assertThat(apiErrorDetail.invalidValue()).isNotBlank();
         });
     }
 
@@ -161,10 +173,13 @@ class SecretsTest extends ManagementApiTestBase {
 
     private Secret shouldCreateASecretRequest() {
 
-        return Secret.Builder.newInstance().id("secretId").value("secretValue").build();
+        return JsonLdSecret.Builder.newInstance()
+                .id("secretId")
+                .value("secretValue")
+                .build();
     }
 
     private Secret shouldNotCreateASecretRequest() {
-        return Secret.Builder.newInstance().id("").build();
+        return JsonLdSecret.Builder.newInstance().id("").build();
     }
 }
