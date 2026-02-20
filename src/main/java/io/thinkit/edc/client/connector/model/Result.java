@@ -47,4 +47,8 @@ public class Result<T> {
             return new Result<>(null, this.errors);
         }
     }
+
+    public <R> Result<R> flatMap(Function<Result<T>, Result<R>> mappingFunction) {
+        return mappingFunction.apply(this);
+    }
 }
