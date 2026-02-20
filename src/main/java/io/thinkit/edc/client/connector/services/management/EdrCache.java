@@ -1,6 +1,5 @@
 package io.thinkit.edc.client.connector.services.management;
 
-import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -11,7 +10,6 @@ import io.thinkit.edc.client.connector.model.jsonld.JsonLdEdr;
 import io.thinkit.edc.client.connector.model.pojo.PojoDataAddress;
 import io.thinkit.edc.client.connector.model.pojo.PojoEdr;
 import io.thinkit.edc.client.connector.resource.management.ManagementResource;
-import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,34 +43,30 @@ public class EdrCache extends ManagementResource {
 
     public Result<DataAddress> dataAddress(String transferProcessId) {
         var requestBuilder = getDataAddressRequestBuilder(transferProcessId);
-        Function<InputStream, Result<DataAddress>> function = managementVersion.equals(V3)
-                ? stream -> Result.succeded(stream).map(JsonLdUtil::expand).map(this::getDataAddress)
-                : stream -> Result.succeded(stream).map(deserializeDataAddress());
+        var deserialize = responseDeserializer(this::getDataAddress, deserializeDataAddress());
 
-        return context.httpClient().send(requestBuilder).compose(function);
+        return context.httpClient().send(requestBuilder).flatMap(deserialize);
     }
 
     public CompletableFuture<Result<DataAddress>> dataAddressAsync(String transferProcessId) {
         var requestBuilder = getDataAddressRequestBuilder(transferProcessId);
-        Function<Result<InputStream>, Result<DataAddress>> function = managementVersion.equals(V3)
-                ? result -> result.map(JsonLdUtil::expand).map(this::getDataAddress)
-                : result -> result.map(deserializeDataAddress());
+        var deserialize = responseDeserializer(this::getDataAddress, deserializeDataAddress());
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(function);
+        return context.httpClient().sendAsync(requestBuilder).thenApply(deserialize);
     }
 
     public Result<Edr> request(QuerySpec input) {
         var requestBuilder = getRequestBuilder(input);
-        var function = responseMapper(this::getEDR, deserializeEdr());
+        var deserialize = responseDeserializer(this::getEDR, deserializeEdr());
 
-        return function.apply(context.httpClient().send(requestBuilder));
+        return context.httpClient().send(requestBuilder).flatMap(deserialize);
     }
 
     public CompletableFuture<Result<Edr>> requestAsync(QuerySpec input) {
         var requestBuilder = getRequestBuilder(input);
-        var function = responseMapper(this::getEDR, deserializeEdr());
+        var deserialize = responseDeserializer(this::getEDR, deserializeEdr());
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(function);
+        return context.httpClient().sendAsync(requestBuilder).thenApply(deserialize);
     }
 
     private HttpRequest.Builder getDeleteRequestBuilder(String transferProcessId) {

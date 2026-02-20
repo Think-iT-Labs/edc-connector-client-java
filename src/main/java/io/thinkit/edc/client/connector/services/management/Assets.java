@@ -31,16 +31,16 @@ public class Assets extends ManagementResource {
 
     public Result<Asset> get(String id) {
         var requestBuilder = getRequestBuilder(id);
-        var function = responseMapper(this::getAsset, deserializeAsset());
+        var deserialize = responseDeserializer(this::getAsset, deserializeAsset());
 
-        return function.apply(context.httpClient().send(requestBuilder));
+        return context.httpClient().send(requestBuilder).flatMap(deserialize);
     }
 
     public CompletableFuture<Result<Asset>> getAsync(String id) {
         var requestBuilder = getRequestBuilder(id);
-        var function = responseMapper(this::getAsset, deserializeAsset());
+        var deserialize = responseDeserializer(this::getAsset, deserializeAsset());
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(function);
+        return context.httpClient().sendAsync(requestBuilder).thenApply(deserialize);
     }
 
     public Result<String> create(Asset input) {
@@ -87,16 +87,16 @@ public class Assets extends ManagementResource {
     public Result<List<Asset>> request(QuerySpec input) {
 
         var requestBuilder = getAssetsRequestBuilder(input);
-        var function = responseMapper(this::getAssets, deserializeAssets());
+        var deserialize = responseDeserializer(this::getAssets, deserializeAssets());
 
-        return function.apply(context.httpClient().send(requestBuilder));
+        return context.httpClient().send(requestBuilder).flatMap(deserialize);
     }
 
     public CompletableFuture<Result<List<Asset>>> requestAsync(QuerySpec input) {
         var requestBuilder = getAssetsRequestBuilder(input);
-        var function = responseMapper(this::getAssets, deserializeAssets());
+        var deserialize = responseDeserializer(this::getAssets, deserializeAssets());
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(function);
+        return context.httpClient().sendAsync(requestBuilder).thenApply(deserialize);
     }
 
     private Function<InputStream, List<Asset>> deserializeAssets() {

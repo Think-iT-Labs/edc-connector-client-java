@@ -48,7 +48,7 @@ public class ManagementResource extends EdcResource {
         }
     }
 
-    protected <T> Function<Result<InputStream>, Result<T>> responseMapper(
+    protected <T> Function<Result<InputStream>, Result<T>> responseDeserializer(
             Function<JsonArray, T> v3Mapper, Function<InputStream, T> v4Mapper) {
         return managementVersion.equals(V3)
                 ? result -> result.map(JsonLdUtil::expand).map(v3Mapper)

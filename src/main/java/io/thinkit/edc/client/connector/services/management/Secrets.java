@@ -29,16 +29,16 @@ public class Secrets extends ManagementResource {
 
     public Result<Secret> get(String id) {
         var requestBuilder = getRequestBuilder(id);
-        var function = responseMapper(this::getSecret, deserializeSecret());
+        var deserialize = responseDeserializer(this::getSecret, deserializeSecret());
 
-        return function.apply(context.httpClient().send(requestBuilder));
+        return context.httpClient().send(requestBuilder).flatMap(deserialize);
     }
 
     public CompletableFuture<Result<Secret>> getAsync(String id) {
         var requestBuilder = getRequestBuilder(id);
-        var function = responseMapper(this::getSecret, deserializeSecret());
+        var deserialize = responseDeserializer(this::getSecret, deserializeSecret());
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(function);
+        return context.httpClient().sendAsync(requestBuilder).thenApply(deserialize);
     }
 
     public Result<String> create(Secret input) {

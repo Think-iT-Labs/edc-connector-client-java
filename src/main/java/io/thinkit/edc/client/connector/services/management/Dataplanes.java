@@ -26,15 +26,15 @@ public class Dataplanes extends ManagementResource {
 
     public Result<List<DataPlaneInstance>> get() {
         var requestBuilder = getRequestBuilder();
-        var function = responseMapper(this::getDataPlaneInstances, deserializeDataPlaneInstances());
-        return function.apply(context.httpClient().send(requestBuilder));
+        var deserialize = responseDeserializer(this::getDataPlaneInstances, deserializeDataPlaneInstances());
+        return context.httpClient().send(requestBuilder).flatMap(deserialize);
     }
 
     public CompletableFuture<Result<List<DataPlaneInstance>>> getAsync() {
         var requestBuilder = getRequestBuilder();
-        var function = responseMapper(this::getDataPlaneInstances, deserializeDataPlaneInstances());
+        var deserialize = responseDeserializer(this::getDataPlaneInstances, deserializeDataPlaneInstances());
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(function);
+        return context.httpClient().sendAsync(requestBuilder).thenApply(deserialize);
     }
 
     private HttpRequest.Builder getRequestBuilder() {

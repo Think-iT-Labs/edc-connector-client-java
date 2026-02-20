@@ -31,15 +31,15 @@ public class ContractDefinitions extends ManagementResource {
 
     public Result<ContractDefinition> get(String id) {
         var requestBuilder = getRequestBuilder(id);
-        var function = responseMapper(this::getContractDefinition, deserializeContractDefinition());
-        return function.apply(context.httpClient().send(requestBuilder));
+        var deserialize = responseDeserializer(this::getContractDefinition, deserializeContractDefinition());
+        return context.httpClient().send(requestBuilder).flatMap(deserialize);
     }
 
     public CompletableFuture<Result<ContractDefinition>> getAsync(String id) {
         var requestBuilder = getRequestBuilder(id);
-        var function = responseMapper(this::getContractDefinition, deserializeContractDefinition());
+        var deserialize = responseDeserializer(this::getContractDefinition, deserializeContractDefinition());
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(function);
+        return context.httpClient().sendAsync(requestBuilder).thenApply(deserialize);
     }
 
     public Result<String> create(ContractDefinition input) {
@@ -71,17 +71,17 @@ public class ContractDefinitions extends ManagementResource {
     public Result<List<ContractDefinition>> request(QuerySpec input) {
 
         var requestBuilder = getContractDefinitionsRequestBuilder(input);
-        var function = responseMapper(this::getContractDefinitions, deserializeContractDefinitions());
+        var deserialize = responseDeserializer(this::getContractDefinitions, deserializeContractDefinitions());
 
-        return function.apply(context.httpClient().send(requestBuilder));
+        return context.httpClient().send(requestBuilder).flatMap(deserialize);
     }
 
     public CompletableFuture<Result<List<ContractDefinition>>> requestAsync(QuerySpec input) {
 
         var requestBuilder = getContractDefinitionsRequestBuilder(input);
-        var function = responseMapper(this::getContractDefinitions, deserializeContractDefinitions());
+        var deserialize = responseDeserializer(this::getContractDefinitions, deserializeContractDefinitions());
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(function);
+        return context.httpClient().sendAsync(requestBuilder).thenApply(deserialize);
     }
 
     public Result<String> update(ContractDefinition input) {
