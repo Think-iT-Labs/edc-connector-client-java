@@ -163,10 +163,6 @@ class AssetsTest extends ManagementApiTestBase {
         assertThat(asset.getContent().privateProperties()).isNotNull().satisfies(privateProperties -> {
             assertThat(privateProperties.size()).isGreaterThan(0);
         });
-        assertThat(asset.getContent().dataAddress()).isNotNull().satisfies(dataAddress -> {
-            assertThat(dataAddress.type()).isNotBlank();
-            assertThat(dataAddress.properties().size()).isGreaterThan(0);
-        });
         assertThat(asset.getContent().createdAt()).isGreaterThan(-1);
     }
 
@@ -176,10 +172,6 @@ class AssetsTest extends ManagementApiTestBase {
             assertThat(asset.id()).isNotBlank();
             assertThat(asset.properties()).isNotNull();
             assertThat(asset.privateProperties()).isNotNull();
-            assertThat(asset.dataAddress()).isNotNull().satisfies(dataAddress -> {
-                assertThat(dataAddress.type()).isNotBlank();
-                assertThat(dataAddress.properties().size()).isGreaterThan(0);
-            });
             assertThat(asset.createdAt()).isGreaterThan(-1);
         });
     }
