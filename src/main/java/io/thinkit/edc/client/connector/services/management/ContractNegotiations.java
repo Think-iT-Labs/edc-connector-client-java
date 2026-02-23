@@ -5,6 +5,7 @@ import static io.thinkit.edc.client.connector.utils.Constants.ID;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.compact;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.thinkit.edc.client.connector.EdcClientContext;
 import io.thinkit.edc.client.connector.model.*;
@@ -138,11 +139,16 @@ public class ContractNegotiations extends ManagementResource {
     }
 
     private HttpRequest.Builder createRequestBuilder(ContractRequest input) {
-        var requestBody = compact(input);
-        return HttpRequest.newBuilder()
-                .uri(URI.create(this.url))
-                .header("content-type", "application/json")
-                .POST(ofString(requestBody.toString()));
+        String requestBody = null;
+        try {
+            requestBody = context.objectMapper().writeValueAsString(input);
+            return HttpRequest.newBuilder()
+                    .uri(URI.create(this.url))
+                    .header("content-type", "application/json")
+                    .POST(ofString(requestBody));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private HttpRequest.Builder terminateRequestBuilder(TerminateNegotiation input) {

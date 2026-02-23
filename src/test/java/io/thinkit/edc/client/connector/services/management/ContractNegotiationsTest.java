@@ -2,20 +2,18 @@ package io.thinkit.edc.client.connector.services.management;
 
 import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
 import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V4BETA;
-import static jakarta.json.Json.createObjectBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.ManagementApiTestBase;
 import io.thinkit.edc.client.connector.model.ContractNegotiation;
 import io.thinkit.edc.client.connector.model.ContractRequest;
-import io.thinkit.edc.client.connector.model.Policy;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
 import io.thinkit.edc.client.connector.model.TerminateNegotiation;
-import io.thinkit.edc.client.connector.model.jsonld.JsonLdCallbackAddress;
+import io.thinkit.edc.client.connector.model.pojo.PojoContractRequest;
+import io.thinkit.edc.client.connector.model.pojo.PojoPolicy;
 import java.net.http.HttpClient;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,8 +22,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.ValueSource;
-import static jakarta.json.Json.createObjectBuilder;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ParameterizedClass
 @ValueSource(strings = {V3, V4BETA})
@@ -287,23 +283,16 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
 
     private ContractRequest shouldCreateAContractNegotiationRequest() {
 
-        var policy = Policy.Builder.newInstance()
+        var policy = PojoPolicy.Builder.newInstance()
                 .id("offer-id")
-                .raw(createObjectBuilder().add("assigner", "providerId").build())
-                .raw(createObjectBuilder().add("target", "assetId").build())
+                .assigner("providerId")
+                .target("assetId")
                 .build();
-        var callbackAddresses = JsonLdCallbackAddress.Builder.newInstance()
-                .transactional(false)
-                .uri("http://callback/url")
-                .authKey("auth-key")
-                .authCodeId("auth-code-id")
-                .events(Arrays.asList("contract.negotiation", "transfer.process"))
-                .build();
-        return ContractRequest.Builder.newInstance()
+
+        return PojoContractRequest.Builder.newInstance()
                 .counterPartyAddress("http://provider-address")
                 .protocol("dataspace-protocol-http")
                 .policy(policy)
-                .callbackAddresses(List.of(callbackAddresses, callbackAddresses))
                 .build();
     }
 
