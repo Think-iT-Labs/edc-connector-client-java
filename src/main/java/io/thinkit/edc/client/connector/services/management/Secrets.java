@@ -1,6 +1,5 @@
 package io.thinkit.edc.client.connector.services.management;
 
-import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
 import static io.thinkit.edc.client.connector.utils.Constants.ID;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.compact;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
@@ -30,20 +29,16 @@ public class Secrets extends ManagementResource {
 
     public Result<Secret> get(String id) {
         var requestBuilder = getRequestBuilder(id);
-        Function<InputStream, Result<Secret>> function = managementVersion.equals(V3)
-                ? stream -> Result.succeded(stream).map(JsonLdUtil::expand).map(this::getSecret)
-                : stream -> Result.succeded(stream).map(deserializeSecret());
+        var deserialize = responseDeserializer(this::getSecret, deserializeSecret());
 
-        return context.httpClient().send(requestBuilder).compose(function);
+        return context.httpClient().send(requestBuilder).flatMap(deserialize);
     }
 
     public CompletableFuture<Result<Secret>> getAsync(String id) {
         var requestBuilder = getRequestBuilder(id);
-        Function<Result<InputStream>, Result<Secret>> function = managementVersion.equals(V3)
-                ? result -> result.map(JsonLdUtil::expand).map(this::getSecret)
-                : result -> result.map(deserializeSecret());
+        var deserialize = responseDeserializer(this::getSecret, deserializeSecret());
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(function);
+        return context.httpClient().sendAsync(requestBuilder).thenApply(deserialize);
     }
 
     public Result<String> create(Secret input) {

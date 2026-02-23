@@ -3,11 +3,15 @@ package io.thinkit.edc.client.connector.resource.management;
 import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
 
 import io.thinkit.edc.client.connector.EdcClientContext;
+import io.thinkit.edc.client.connector.model.Result;
 import io.thinkit.edc.client.connector.resource.EdcResource;
 import io.thinkit.edc.client.connector.utils.JsonLdObject;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.Json;
+import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
+import java.io.InputStream;
+import java.util.function.Function;
 
 public class ManagementResource extends EdcResource {
 
@@ -42,5 +46,12 @@ public class ManagementResource extends EdcResource {
                             .add("https://w3id.org/edc/connector/management/v2")
                             .build());
         }
+    }
+
+    protected <T> Function<Result<InputStream>, Result<T>> responseDeserializer(
+            Function<JsonArray, T> v3Mapper, Function<InputStream, T> v4Mapper) {
+        return managementVersion.equals(V3)
+                ? result -> result.map(JsonLdUtil::expand).map(v3Mapper)
+                : result -> result.map(v4Mapper);
     }
 }
