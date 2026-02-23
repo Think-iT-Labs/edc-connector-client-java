@@ -1,6 +1,5 @@
 package io.thinkit.edc.client.connector.services.management;
 
-import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
 import static io.thinkit.edc.client.connector.utils.Constants.ID;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
@@ -32,20 +31,15 @@ public class ContractDefinitions extends ManagementResource {
 
     public Result<ContractDefinition> get(String id) {
         var requestBuilder = getRequestBuilder(id);
-        Function<InputStream, Result<ContractDefinition>> function = managementVersion.equals(V3)
-                ? stream -> Result.succeded(stream).map(JsonLdUtil::expand).map(this::getContractDefinition)
-                : stream -> Result.succeded(stream).map(deserializeContractDefinition());
-
-        return context.httpClient().send(requestBuilder).compose(function);
+        var deserialize = responseDeserializer(this::getContractDefinition, deserializeContractDefinition());
+        return context.httpClient().send(requestBuilder).flatMap(deserialize);
     }
 
     public CompletableFuture<Result<ContractDefinition>> getAsync(String id) {
         var requestBuilder = getRequestBuilder(id);
-        Function<Result<InputStream>, Result<ContractDefinition>> function = managementVersion.equals(V3)
-                ? result -> result.map(JsonLdUtil::expand).map(this::getContractDefinition)
-                : result -> result.map(deserializeContractDefinition());
+        var deserialize = responseDeserializer(this::getContractDefinition, deserializeContractDefinition());
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(function);
+        return context.httpClient().sendAsync(requestBuilder).thenApply(deserialize);
     }
 
     public Result<String> create(ContractDefinition input) {
@@ -77,21 +71,17 @@ public class ContractDefinitions extends ManagementResource {
     public Result<List<ContractDefinition>> request(QuerySpec input) {
 
         var requestBuilder = getContractDefinitionsRequestBuilder(input);
-        Function<Result<InputStream>, Result<List<ContractDefinition>>> function = managementVersion.equals(V3)
-                ? result -> result.map(JsonLdUtil::expand).map(this::getContractDefinitions)
-                : result -> result.map(deserializeContractDefinitions());
+        var deserialize = responseDeserializer(this::getContractDefinitions, deserializeContractDefinitions());
 
-        return function.apply(context.httpClient().send(requestBuilder));
+        return context.httpClient().send(requestBuilder).flatMap(deserialize);
     }
 
     public CompletableFuture<Result<List<ContractDefinition>>> requestAsync(QuerySpec input) {
 
         var requestBuilder = getContractDefinitionsRequestBuilder(input);
-        Function<Result<InputStream>, Result<List<ContractDefinition>>> function = managementVersion.equals(V3)
-                ? result -> result.map(JsonLdUtil::expand).map(this::getContractDefinitions)
-                : result -> result.map(deserializeContractDefinitions());
+        var deserialize = responseDeserializer(this::getContractDefinitions, deserializeContractDefinitions());
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(function);
+        return context.httpClient().sendAsync(requestBuilder).thenApply(deserialize);
     }
 
     public Result<String> update(ContractDefinition input) {
