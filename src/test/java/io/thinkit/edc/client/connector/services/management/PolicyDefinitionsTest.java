@@ -6,10 +6,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.ManagementApiTestBase;
-import io.thinkit.edc.client.connector.model.Policy;
 import io.thinkit.edc.client.connector.model.PolicyDefinition;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdPolicy;
 import jakarta.json.Json;
 import java.net.http.HttpClient;
 import java.util.List;
@@ -239,7 +239,7 @@ public class PolicyDefinitionsTest extends ManagementApiTestBase {
                         .add("constraints", constraints))
                 .build();
 
-        var policy = Policy.Builder.newInstance()
+        var policy = JsonLdPolicy.Builder.newInstance()
                 .raw(createObjectBuilder().add("permission", permissions).build())
                 .build();
 

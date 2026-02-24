@@ -2,6 +2,7 @@ package io.thinkit.edc.client.connector.model;
 
 import static io.thinkit.edc.client.connector.utils.Constants.*;
 
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdPolicy;
 import io.thinkit.edc.client.connector.utils.JsonLdObject;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
@@ -14,8 +15,8 @@ public class PolicyDefinition extends JsonLdObject {
         super(raw);
     }
 
-    public Policy policy() {
-        return new Policy(object(POLICY_DEFINITION_POLICY));
+    public JsonLdPolicy policy() {
+        return new JsonLdPolicy(object(POLICY_DEFINITION_POLICY));
     }
 
     public long createdAt() {
@@ -33,7 +34,7 @@ public class PolicyDefinition extends JsonLdObject {
                     builder.add(TYPE, EDC_NAMESPACE + "PolicyDefinition").build());
         }
 
-        public PolicyDefinition.Builder policy(Policy policy) {
+        public PolicyDefinition.Builder policy(JsonLdPolicy policy) {
             builder.add(POLICY_DEFINITION_POLICY, Json.createObjectBuilder(policy.raw()));
             return this;
         }

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.ManagementApiTestBase;
 import io.thinkit.edc.client.connector.model.*;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdCallbackAddress;
 import java.net.http.HttpClient;
 import java.util.Arrays;
 import java.util.List;
@@ -244,7 +245,7 @@ class TransferProcessesTest extends ManagementApiTestBase {
     private TransferRequest shouldCreateATransferProcessRequest() {
         var privateProperties = Map.of("private-key", "data-destination-type");
         var dataDestination = Map.of("type", "data-destination-type");
-        var callbackAddresses = CallbackAddress.Builder.newInstance()
+        var callbackAddresses = JsonLdCallbackAddress.Builder.newInstance()
                 .transactional(false)
                 .uri("http://callback/url")
                 .authKey("auth-key")

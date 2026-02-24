@@ -5,6 +5,7 @@ import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
 import static jakarta.json.stream.JsonCollectors.toJsonArray;
 
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdPolicy;
 import io.thinkit.edc.client.connector.utils.JsonLdObject;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
@@ -24,8 +25,10 @@ public class Dataset extends JsonLdObject {
         return stringValue(DATASET_DESCRIPTION);
     }
 
-    public Policy hasPolicy() {
-        return Policy.Builder.newInstance().raw(object(DATASET_HAS_POLICY)).build();
+    public JsonLdPolicy hasPolicy() {
+        return JsonLdPolicy.Builder.newInstance()
+                .raw(object(DATASET_HAS_POLICY))
+                .build();
     }
 
     public List<Distribution> distribution() {
@@ -49,7 +52,7 @@ public class Dataset extends JsonLdObject {
             return this;
         }
 
-        public Dataset.Builder hasPolicy(Policy hasPolicy) {
+        public Dataset.Builder hasPolicy(JsonLdPolicy hasPolicy) {
             builder.add(DATASET_HAS_POLICY, Json.createObjectBuilder(hasPolicy.raw()));
             return this;
         }
