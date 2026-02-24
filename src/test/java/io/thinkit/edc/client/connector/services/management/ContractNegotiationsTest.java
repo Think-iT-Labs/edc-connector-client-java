@@ -11,6 +11,8 @@ import io.thinkit.edc.client.connector.model.ContractRequest;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
 import io.thinkit.edc.client.connector.model.TerminateNegotiation;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdContractRequest;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdPolicy;
 import io.thinkit.edc.client.connector.model.pojo.PojoContractRequest;
 import io.thinkit.edc.client.connector.model.pojo.PojoPolicy;
 import java.net.http.HttpClient;
@@ -282,18 +284,33 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
     }
 
     private ContractRequest shouldCreateAContractNegotiationRequest() {
+        if (V3.equals(managementVersion)) {
+            // Return the original JsonLD-based object for V3 compatibility
+            var policy = JsonLdPolicy.Builder.newInstance() // Assuming this is your legacy class
+                    .id("offer-id")
+                    .assigner("providerId")
+                    .target("assetId")
+                    .build();
 
-        var policy = PojoPolicy.Builder.newInstance()
-                .id("offer-id")
-                .assigner("providerId")
-                .target("assetId")
-                .build();
+            return JsonLdContractRequest.Builder.newInstance()
+                    .counterPartyAddress("http://provider-address")
+                    .protocol("dataspace-protocol-http")
+                    .policy(policy)
+                    .build();
+        } else {
+            // Return the new POJO for V4BETA
+            var policy = PojoPolicy.Builder.newInstance()
+                    .id("offer-id")
+                    .assigner("providerId")
+                    .target("assetId")
+                    .build();
 
-        return PojoContractRequest.Builder.newInstance()
-                .counterPartyAddress("http://provider-address")
-                .protocol("dataspace-protocol-http")
-                .policy(policy)
-                .build();
+            return PojoContractRequest.Builder.newInstance()
+                    .counterPartyAddress("http://provider-address")
+                    .protocol("dataspace-protocol-http")
+                    .policy(policy)
+                    .build();
+        }
     }
 
     private TerminateNegotiation shouldTerminateAContractNegotiationRequest() {

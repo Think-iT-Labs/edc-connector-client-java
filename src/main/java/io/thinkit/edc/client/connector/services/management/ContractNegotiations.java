@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import io.thinkit.edc.client.connector.EdcClientContext;
 import io.thinkit.edc.client.connector.model.*;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdContractNegotiation;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdContractRequest;
 import io.thinkit.edc.client.connector.model.pojo.PojoContractNegotiation;
 import io.thinkit.edc.client.connector.resource.management.ManagementResource;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
@@ -140,8 +141,14 @@ public class ContractNegotiations extends ManagementResource {
 
     private HttpRequest.Builder createRequestBuilder(ContractRequest input) {
         String requestBody = null;
+
         try {
-            requestBody = context.objectMapper().writeValueAsString(input);
+            String body;
+            if (managementVersion.equals(V3)) {
+                requestBody = compact((JsonLdContractRequest) input).toString();
+            } else {
+                requestBody = context.objectMapper().writeValueAsString(input);
+            }
             return HttpRequest.newBuilder()
                     .uri(URI.create(this.url))
                     .header("content-type", "application/json")
