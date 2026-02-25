@@ -9,8 +9,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.thinkit.edc.client.connector.EdcClientContext;
 import io.thinkit.edc.client.connector.model.*;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdContractAgreement;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdContractNegotiation;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdContractRequest;
+import io.thinkit.edc.client.connector.model.pojo.PojoContractAgreement;
 import io.thinkit.edc.client.connector.model.pojo.PojoContractNegotiation;
 import io.thinkit.edc.client.connector.resource.management.ManagementResource;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
@@ -34,20 +36,15 @@ public class ContractNegotiations extends ManagementResource {
 
     public Result<ContractNegotiation> get(String id) {
         var requestBuilder = getRequestBuilder(id);
-        Function<InputStream, Result<ContractNegotiation>> function = managementVersion.equals(V3)
-                ? stream -> Result.succeded(stream).map(JsonLdUtil::expand).map(this::getContractNegotiation)
-                : stream -> Result.succeded(stream).map(deserializeContractNegotiation());
-
-        return context.httpClient().send(requestBuilder).compose(function);
+        var deserialize = responseDeserializer(this::getContractNegotiation, deserializeContractNegotiation());
+        return context.httpClient().send(requestBuilder).flatMap(deserialize);
     }
 
     public CompletableFuture<Result<ContractNegotiation>> getAsync(String id) {
         var requestBuilder = getRequestBuilder(id);
-        Function<Result<InputStream>, Result<ContractNegotiation>> function = managementVersion.equals(V3)
-                ? result -> result.map(JsonLdUtil::expand).map(this::getContractNegotiation)
-                : result -> result.map(deserializeContractNegotiation());
+        var deserialize = responseDeserializer(this::getContractNegotiation, deserializeContractNegotiation());
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(function);
+        return context.httpClient().sendAsync(requestBuilder).thenApply(deserialize);
     }
 
     public Result<String> create(ContractRequest input) {
@@ -68,14 +65,15 @@ public class ContractNegotiations extends ManagementResource {
 
     public Result<ContractAgreement> getAgreement(String id) {
         var requestBuilder = getContractAgreementRequestBuilder(id);
-
-        return context.httpClient().send(requestBuilder).map(JsonLdUtil::expand).map(this::getContractAgreement);
+        var deserialize = responseDeserializer(this::getContractAgreement, deserializeContractAgreement());
+        return context.httpClient().send(requestBuilder).flatMap(deserialize);
     }
 
     public CompletableFuture<Result<ContractAgreement>> getAgreementAsync(String id) {
         var requestBuilder = getContractAgreementRequestBuilder(id);
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
-                .map(this::getContractAgreement));
+        var deserialize = responseDeserializer(this::getContractAgreement, deserializeContractAgreement());
+
+        return context.httpClient().sendAsync(requestBuilder).thenApply(deserialize);
     }
 
     public Result<String> terminate(TerminateNegotiation input) {
@@ -95,21 +93,16 @@ public class ContractNegotiations extends ManagementResource {
     public Result<List<ContractNegotiation>> request(QuerySpec input) {
 
         var requestBuilder = getContractNegotiationsRequestBuilder(input);
-        Function<Result<InputStream>, Result<List<ContractNegotiation>>> function = managementVersion.equals(V3)
-                ? result -> result.map(JsonLdUtil::expand).map(this::getContractNegotiations)
-                : result -> result.map(deserializeContractNegotiations());
-
-        return function.apply(context.httpClient().send(requestBuilder));
+        var deserialize = responseDeserializer(this::getContractNegotiations, deserializeContractNegotiations());
+        return context.httpClient().send(requestBuilder).flatMap(deserialize);
     }
 
     public CompletableFuture<Result<List<ContractNegotiation>>> requestAsync(QuerySpec input) {
 
         var requestBuilder = getContractNegotiationsRequestBuilder(input);
-        Function<Result<InputStream>, Result<List<ContractNegotiation>>> function = managementVersion.equals(V3)
-                ? result -> result.map(JsonLdUtil::expand).map(this::getContractNegotiations)
-                : result -> result.map(deserializeContractNegotiations());
+        var deserialize = responseDeserializer(this::getContractNegotiations, deserializeContractNegotiations());
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(function);
+        return context.httpClient().sendAsync(requestBuilder).thenApply(deserialize);
     }
 
     public Result<String> getState(String id) {
@@ -187,7 +180,7 @@ public class ContractNegotiations extends ManagementResource {
     }
 
     private ContractAgreement getContractAgreement(JsonArray array) {
-        return ContractAgreement.Builder.newInstance()
+        return JsonLdContractAgreement.Builder.newInstance()
                 .raw(array.getJsonObject(0))
                 .build();
     }
@@ -224,6 +217,16 @@ public class ContractNegotiations extends ManagementResource {
         return stream -> {
             try {
                 return context.objectMapper().readValue(stream, PojoContractNegotiation.class);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    private Function<InputStream, ContractAgreement> deserializeContractAgreement() {
+        return stream -> {
+            try {
+                return context.objectMapper().readValue(stream, PojoContractAgreement.class);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
