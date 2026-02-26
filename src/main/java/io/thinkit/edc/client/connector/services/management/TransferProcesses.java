@@ -6,12 +6,19 @@ import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import io.thinkit.edc.client.connector.EdcClientContext;
 import io.thinkit.edc.client.connector.model.*;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdTransferProcess;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdTransferState;
+import io.thinkit.edc.client.connector.model.pojo.PojoTransferProcess;
+import io.thinkit.edc.client.connector.model.pojo.PojoTransferState;
 import io.thinkit.edc.client.connector.resource.management.ManagementResource;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 public class TransferProcesses extends ManagementResource {
     private final String url;
@@ -23,14 +30,16 @@ public class TransferProcesses extends ManagementResource {
 
     public Result<TransferProcess> get(String id) {
         var requestBuilder = getContractAgreementRequestBuilder(id);
-        return context.httpClient().send(requestBuilder).map(JsonLdUtil::expand).map(this::getTransferProcess);
+        var deserialize = responseDeserializer(this::getTransferProcess, deserializeTransferProcess());
+
+        return context.httpClient().send(requestBuilder).flatMap(deserialize);
     }
 
     public CompletableFuture<Result<TransferProcess>> getAsync(String id) {
         var requestBuilder = getContractAgreementRequestBuilder(id);
+        var deserialize = responseDeserializer(this::getTransferProcess, deserializeTransferProcess());
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
-                .map(this::getTransferProcess));
+        return context.httpClient().sendAsync(requestBuilder).thenApply(deserialize);
     }
 
     public Result<String> create(TransferRequest input) {
@@ -50,14 +59,16 @@ public class TransferProcesses extends ManagementResource {
 
     public Result<TransferState> getState(String id) {
         var requestBuilder = getStateRequestBuilder(id);
+        var deserialize = responseDeserializer(this::getTransferState, deserializeTransferState());
 
-        return context.httpClient().send(requestBuilder).map(JsonLdUtil::expand).map(this::getTransferState);
+        return context.httpClient().send(requestBuilder).flatMap(deserialize);
     }
 
     public CompletableFuture<Result<TransferState>> getStateAsync(String id) {
         var requestBuilder = getStateRequestBuilder(id);
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
-                .map(this::getTransferState));
+        var deserialize = responseDeserializer(this::getTransferState, deserializeTransferState());
+
+        return context.httpClient().sendAsync(requestBuilder).thenApply(deserialize);
     }
 
     public Result<String> terminate(TerminateTransfer input) {
@@ -121,10 +132,34 @@ public class TransferProcesses extends ManagementResource {
     }
 
     private TransferProcess getTransferProcess(JsonArray array) {
-        return TransferProcess.Builder.newInstance().raw(array.getJsonObject(0)).build();
+        return JsonLdTransferProcess.Builder.newInstance()
+                .raw(array.getJsonObject(0))
+                .build();
     }
 
     private TransferState getTransferState(JsonArray array) {
-        return TransferState.Builder.newInstance().raw(array.getJsonObject(0)).build();
+        return JsonLdTransferState.Builder.newInstance()
+                .raw(array.getJsonObject(0))
+                .build();
+    }
+
+    private Function<InputStream, TransferProcess> deserializeTransferProcess() {
+        return stream -> {
+            try {
+                return context.objectMapper().readValue(stream, PojoTransferProcess.class);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    private Function<InputStream, TransferState> deserializeTransferState() {
+        return stream -> {
+            try {
+                return context.objectMapper().readValue(stream, PojoTransferState.class);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        };
     }
 }
