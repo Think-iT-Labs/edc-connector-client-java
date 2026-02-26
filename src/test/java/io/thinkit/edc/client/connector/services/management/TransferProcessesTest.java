@@ -119,6 +119,51 @@ class TransferProcessesTest extends ManagementApiTestBase {
             var result = transferProcesses.deprovision("");
             assertThat(result).satisfies(TransferProcessesTest.this::errorResponse);
         }
+
+        @Test
+        void should_resume_a_transfer_process() {
+            var resumed = transferProcesses.resume("process-id");
+
+            assertThat(resumed.isSucceeded()).isTrue();
+            assertThat(resumed.getContent()).isNotNull();
+        }
+
+        @Test
+        void should_not_resume_a_transfer_process_when_id_is_empty() {
+
+            var resumed = transferProcesses.resume("");
+            assertThat(resumed).satisfies(TransferProcessesTest.this::errorResponse);
+        }
+
+        @Test
+        void should_suspend_a_transfer_process() {
+            var suspended = transferProcesses.suspend(terminateATransferProcessRequest("process-id"));
+
+            assertThat(suspended.isSucceeded()).isTrue();
+            assertThat(suspended.getContent()).isNotNull();
+        }
+
+        @Test
+        void should_not_suspend_a_transfer_process_when_id_is_empty() {
+
+            var suspended = transferProcesses.suspend(terminateATransferProcessRequest(""));
+            assertThat(suspended).satisfies(TransferProcessesTest.this::errorResponse);
+        }
+
+        @Test
+        void should_get_transfer_Processes() {
+
+            var transferProcessList = transferProcesses.request(shouldGetTransferProcessesQuery());
+            assertThat(transferProcessList).satisfies(TransferProcessesTest.this::shouldGetTransferProcessesResponse);
+        }
+
+        @Test
+        void should_not_get_contract_negotiations() {
+            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+
+            var result = transferProcesses.request(input);
+            assertThat(result).satisfies(TransferProcessesTest.this::errorResponse);
+        }
     }
 
     @Nested
@@ -212,6 +257,63 @@ class TransferProcessesTest extends ManagementApiTestBase {
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
                     .satisfies(TransferProcessesTest.this::errorResponse);
         }
+
+        @Test
+        void should_resume_a_transfer_process_async() {
+
+            var result = transferProcesses.resumeAsync("process-id");
+            assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(resumed -> {
+                assertThat(resumed.isSucceeded()).isTrue();
+                assertThat(resumed.getContent()).isNotNull();
+            });
+        }
+
+        @Test
+        void should_not_resume_a_transfer_process_when_id_is_empty_async() {
+
+            var resumed = transferProcesses.resumeAsync("");
+            assertThat(resumed)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(TransferProcessesTest.this::errorResponse);
+        }
+
+        @Test
+        void should_suspend_a_transfer_process_async() {
+
+            var result = transferProcesses.suspendAsync(terminateATransferProcessRequest("process-id"));
+            assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(suspended -> {
+                assertThat(suspended.isSucceeded()).isTrue();
+                assertThat(suspended.getContent()).isNotNull();
+            });
+        }
+
+        @Test
+        void should_not_suspend_a_transfer_process_when_id_is_empty_async() {
+
+            var suspended = transferProcesses.suspendAsync(terminateATransferProcessRequest(""));
+            assertThat(suspended)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(TransferProcessesTest.this::errorResponse);
+        }
+
+        @Test
+        void should_get_transfer_processes_async() {
+
+            var result = transferProcesses.requestAsync(shouldGetTransferProcessesQuery());
+            assertThat(result)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(TransferProcessesTest.this::shouldGetTransferProcessesResponse);
+        }
+
+        @Test
+        void should_not_get_transfer_processes_async() {
+            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+
+            var result = transferProcesses.requestAsync(input);
+            assertThat(result)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(TransferProcessesTest.this::errorResponse);
+        }
     }
 
     private <T> void errorResponse(Result<T> error) {
@@ -291,5 +393,41 @@ class TransferProcessesTest extends ManagementApiTestBase {
                 .id(id)
                 .reason("a reason to terminate")
                 .build();
+    }
+
+    private QuerySpec shouldGetTransferProcessesQuery() {
+        return QuerySpec.Builder.newInstance()
+                .offset(5)
+                .limit(10)
+                .sortOrder("DESC")
+                .sortField("fieldName")
+                .build();
+    }
+
+    private void shouldGetTransferProcessesResponse(Result<List<TransferProcess>> transferProcessList) {
+
+        assertThat(transferProcessList.isSucceeded()).isTrue();
+        assertThat(transferProcessList.getContent()).isNotNull().first().satisfies(transferProcess -> {
+            assertThat(transferProcess.id()).isNotBlank();
+            assertThat(transferProcess.correlationId()).isNotNull().isNotBlank();
+            assertThat(transferProcess.type()).isNotNull().isNotBlank();
+            assertThat(transferProcess.state()).isNotNull().isNotBlank();
+            assertThat(transferProcess.stateTimestamp()).isGreaterThan(-1);
+            assertThat(transferProcess.assetId()).isNotNull().isNotBlank();
+            assertThat(transferProcess.contractId()).isNotNull().isNotBlank();
+
+            assertThat(transferProcess.errorDetail()).isNotNull().isNotBlank();
+            assertThat(transferProcess.callbackAddresses()).isNotNull().first().satisfies(callbackAddress -> {
+                assertThat(callbackAddress.authCodeId()).isNotNull().isNotBlank();
+                assertThat(callbackAddress.authKey()).isNotNull().isNotBlank();
+                assertThat(callbackAddress.transactional()).isNotNull();
+                assertThat(callbackAddress.uri()).isNotNull().isNotBlank();
+                assertThat(callbackAddress.events()).isNotNull().satisfies(uri -> {
+                    assertThat(uri.get(0)).isNotBlank();
+                    assertThat(uri.get(1)).isNotBlank();
+                });
+            });
+            assertThat(transferProcess.createdAt()).isGreaterThan(-1);
+        });
     }
 }

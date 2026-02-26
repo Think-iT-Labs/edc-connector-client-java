@@ -4,6 +4,7 @@ import static io.thinkit.edc.client.connector.utils.Constants.ID;
 import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.thinkit.edc.client.connector.EdcClientContext;
 import io.thinkit.edc.client.connector.model.*;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdTransferProcess;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpRequest;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
@@ -96,6 +98,46 @@ public class TransferProcesses extends ManagementResource {
         return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
     }
 
+    public Result<String> resume(String id) {
+        var requestBuilder = resumeRequestBuilder(id);
+
+        return context.httpClient().send(requestBuilder).map(result -> id);
+    }
+
+    public CompletableFuture<Result<String>> resumeAsync(String id) {
+        var requestBuilder = resumeRequestBuilder(id);
+        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> id));
+    }
+
+    public Result<String> suspend(TerminateTransfer input) {
+        var requestBuilder = suspendRequestBuilder(input);
+
+        return context.httpClient().send(requestBuilder).map(result -> input.id());
+    }
+
+    public CompletableFuture<Result<String>> suspendAsync(TerminateTransfer input) {
+
+        var requestBuilder = suspendRequestBuilder(input);
+
+        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(content -> input.id()));
+    }
+
+    public Result<List<TransferProcess>> request(QuerySpec input) {
+
+        var requestBuilder = getTransferProcessesRequestBuilder(input);
+        var deserialize = responseDeserializer(this::getTransferProcesses, deserializeTransferProcesses());
+
+        return context.httpClient().send(requestBuilder).flatMap(deserialize);
+    }
+
+    public CompletableFuture<Result<List<TransferProcess>>> requestAsync(QuerySpec input) {
+
+        var requestBuilder = getTransferProcessesRequestBuilder(input);
+        var deserialize = responseDeserializer(this::getTransferProcesses, deserializeTransferProcesses());
+
+        return context.httpClient().sendAsync(requestBuilder).thenApply(deserialize);
+    }
+
     private HttpRequest.Builder getContractAgreementRequestBuilder(String id) {
         return HttpRequest.newBuilder()
                 .uri(URI.create("%s/%s".formatted(this.url, id)))
@@ -131,6 +173,29 @@ public class TransferProcesses extends ManagementResource {
                 .POST(HttpRequest.BodyPublishers.noBody());
     }
 
+    private HttpRequest.Builder resumeRequestBuilder(String id) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/%s/resume".formatted(this.url, id)))
+                .header("content-type", "application/json")
+                .POST(HttpRequest.BodyPublishers.noBody());
+    }
+
+    private HttpRequest.Builder suspendRequestBuilder(TerminateTransfer input) {
+        var requestBody = compact(input);
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/%s/suspend".formatted(this.url, input.id())))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+    }
+
+    private HttpRequest.Builder getTransferProcessesRequestBuilder(QuerySpec input) {
+        var requestBody = compact(input);
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/request".formatted(this.url)))
+                .header("content-type", "application/json")
+                .POST(ofString(requestBody.toString()));
+    }
+
     private TransferProcess getTransferProcess(JsonArray array) {
         return JsonLdTransferProcess.Builder.newInstance()
                 .raw(array.getJsonObject(0))
@@ -157,6 +222,30 @@ public class TransferProcesses extends ManagementResource {
         return stream -> {
             try {
                 return context.objectMapper().readValue(stream, PojoTransferState.class);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    private List<TransferProcess> getTransferProcesses(JsonArray array) {
+        return array.stream()
+                .map(s -> JsonLdTransferProcess.Builder.newInstance()
+                        .raw(s.asJsonObject())
+                        .build())
+                .map(TransferProcess.class::cast)
+                .toList();
+    }
+
+    private Function<InputStream, List<TransferProcess>> deserializeTransferProcesses() {
+        return stream -> {
+            try {
+                return context
+                        .objectMapper()
+                        .readValue(stream, new TypeReference<List<PojoTransferProcess>>() {})
+                        .stream()
+                        .map(TransferProcess.class::cast)
+                        .toList();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
