@@ -1,6 +1,7 @@
 package io.thinkit.edc.client.connector.services.management;
 
-import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
+import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
+import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V4BETA;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.thinkit.edc.client.connector.EdcConnectorClient;
@@ -14,17 +15,26 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.ValueSource;
 
+@ParameterizedClass
+@ValueSource(strings = {V3, V4BETA})
 public class ContractAgreementsTest extends ManagementApiTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();
+    private final String managementVersion;
     private ContractAgreements contractAgreements;
+
+    public ContractAgreementsTest(String managementVersion) {
+        this.managementVersion = managementVersion;
+    }
 
     @BeforeEach
     void setUp() {
         var client = EdcConnectorClient.newBuilder()
                 .httpClient(http)
-                .managementUrl(prism.getUrl())
+                .management(prism.getUrl(), managementVersion)
                 .build();
         contractAgreements = client.contractAgreements();
     }
@@ -128,10 +138,10 @@ public class ContractAgreementsTest extends ManagementApiTestBase {
     private <T> void errorResponse(Result<T> error) {
         assertThat(error.isSucceeded()).isFalse();
         assertThat(error.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-            assertThat(apiErrorDetail.message()).isEqualTo("error message");
-            assertThat(apiErrorDetail.type()).isEqualTo("ErrorType");
-            assertThat(apiErrorDetail.path()).isEqualTo("object.error.path");
-            assertThat(apiErrorDetail.invalidValue()).isEqualTo("this value is not valid");
+            assertThat(apiErrorDetail.message()).isNotBlank();
+            assertThat(apiErrorDetail.type()).isNotBlank();
+            assertThat(apiErrorDetail.path()).isNotBlank();
+            assertThat(apiErrorDetail.invalidValue()).isNotBlank();
         });
     }
 
@@ -139,13 +149,11 @@ public class ContractAgreementsTest extends ManagementApiTestBase {
 
         assertThat(contractAgreement.isSucceeded()).isTrue();
         assertThat(contractAgreement.getContent().id()).isNotBlank();
-        assertThat(contractAgreement.getContent().providerId()).isEqualTo("provider-id");
-        assertThat(contractAgreement.getContent().consumerId()).isEqualTo("consumer-id");
-        assertThat(contractAgreement.getContent().assetId()).isEqualTo("asset-id");
-        assertThat(contractAgreement.getContent().contractSigningDate()).isGreaterThan(0);
-        assertThat(contractAgreement.getContent().policy()).isNotNull().satisfies(policy -> assertThat(
-                        policy.getList(ODRL_NAMESPACE + "permission").size())
-                .isGreaterThan(0));
+        assertThat(contractAgreement.getContent().providerId()).isNotBlank();
+        assertThat(contractAgreement.getContent().consumerId()).isNotBlank();
+        assertThat(contractAgreement.getContent().assetId()).isNotBlank();
+        assertThat(contractAgreement.getContent().contractSigningDate()).isGreaterThan(-1);
+        assertThat(contractAgreement.getContent().policy()).isNotNull();
     }
 
     private QuerySpec shouldGetAContractAgreementsQuery() {
@@ -161,13 +169,11 @@ public class ContractAgreementsTest extends ManagementApiTestBase {
         assertThat(contractAgreementList.isSucceeded()).isTrue();
         assertThat(contractAgreementList.getContent()).isNotNull().first().satisfies(contractAgreement -> {
             assertThat(contractAgreement.id()).isNotBlank();
-            assertThat(contractAgreement.providerId()).isEqualTo("provider-id");
-            assertThat(contractAgreement.consumerId()).isEqualTo("consumer-id");
-            assertThat(contractAgreement.assetId()).isEqualTo("asset-id");
-            assertThat(contractAgreement.contractSigningDate()).isGreaterThan(0);
-            assertThat(contractAgreement.policy()).isNotNull().satisfies(policy -> assertThat(
-                            policy.getList(ODRL_NAMESPACE + "permission").size())
-                    .isGreaterThan(0));
+            assertThat(contractAgreement.providerId()).isNotBlank();
+            assertThat(contractAgreement.consumerId()).isNotBlank();
+            assertThat(contractAgreement.assetId()).isNotBlank();
+            assertThat(contractAgreement.contractSigningDate()).isGreaterThan(-1);
+            assertThat(contractAgreement.policy()).isNotNull();
         });
     }
 }

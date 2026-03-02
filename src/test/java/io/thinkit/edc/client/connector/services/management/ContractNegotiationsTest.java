@@ -19,7 +19,6 @@ import java.net.http.HttpClient;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedClass;
@@ -68,7 +67,6 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
         }
 
         @Test
-        @Disabled
         void should_get_a_contract_negotiation_attached_agreement() {
             var contractAgreement = contractNegotiations.getAgreement("negotiation-id");
             assertThat(contractAgreement).satisfies(ContractAgreementsTest::shouldGetAContractAgreementResponse);
@@ -156,7 +154,6 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
         }
 
         @Test
-        @Disabled
         void should_get_a_contract_negotiation_attached_agreement_async() {
             var contractAgreement = contractNegotiations.getAgreementAsync("negotiation-id");
             assertThat(contractAgreement)
