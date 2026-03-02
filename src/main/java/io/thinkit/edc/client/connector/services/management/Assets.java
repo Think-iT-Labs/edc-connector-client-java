@@ -9,6 +9,7 @@ import io.thinkit.edc.client.connector.model.Asset;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdAsset;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdQuerySpec;
 import io.thinkit.edc.client.connector.model.pojo.PojoAsset;
 import io.thinkit.edc.client.connector.resource.management.ManagementResource;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
@@ -151,7 +152,7 @@ public class Assets extends ManagementResource {
     }
 
     private HttpRequest.Builder getAssetsRequestBuilder(QuerySpec input) {
-        var requestBody = compact(input);
+        var requestBody = compact((JsonLdQuerySpec) input);
         return HttpRequest.newBuilder()
                 .uri(URI.create("%s/request".formatted(this.url)))
                 .header("content-type", "application/json")

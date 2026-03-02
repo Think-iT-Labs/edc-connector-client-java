@@ -7,6 +7,8 @@ import io.thinkit.edc.client.connector.EdcClientContext;
 import io.thinkit.edc.client.connector.model.Catalog;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdCatalog;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdQuerySpec;
 import io.thinkit.edc.client.connector.resource.catalog.CatalogCacheResource;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonValue;
@@ -39,12 +41,13 @@ public class CatalogCache extends CatalogCacheResource {
     private Result<List<Catalog>> handleOutput(Result<InputStream> output) {
         return output.map(JsonLdUtil::expand).map(it -> it.stream()
                 .map(JsonValue::asJsonObject)
-                .map(a -> Catalog.Builder.newInstance().raw(a).build())
+                .map(a -> JsonLdCatalog.Builder.newInstance().raw(a).build())
+                .map(Catalog.class::cast)
                 .toList());
     }
 
     private HttpRequest.Builder queryCatalogsRequestBuilder(QuerySpec query) {
-        var requestBody = compact(query);
+        var requestBody = compact((JsonLdQuerySpec) query);
 
         return HttpRequest.newBuilder()
                 .uri(URI.create("%s/query".formatted(this.url)))

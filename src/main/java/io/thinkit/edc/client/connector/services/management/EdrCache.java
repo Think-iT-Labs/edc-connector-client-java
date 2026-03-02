@@ -7,6 +7,7 @@ import io.thinkit.edc.client.connector.EdcClientContext;
 import io.thinkit.edc.client.connector.model.*;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdDataAddress;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdEdr;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdQuerySpec;
 import io.thinkit.edc.client.connector.model.pojo.PojoDataAddress;
 import io.thinkit.edc.client.connector.model.pojo.PojoEdr;
 import io.thinkit.edc.client.connector.resource.management.ManagementResource;
@@ -82,7 +83,7 @@ public class EdrCache extends ManagementResource {
     }
 
     private HttpRequest.Builder getRequestBuilder(QuerySpec input) {
-        var requestBody = compact(input);
+        var requestBody = compact((JsonLdQuerySpec) input);
         return HttpRequest.newBuilder()
                 .uri(URI.create("%s/request".formatted(this.url)))
                 .header("content-type", "application/json")

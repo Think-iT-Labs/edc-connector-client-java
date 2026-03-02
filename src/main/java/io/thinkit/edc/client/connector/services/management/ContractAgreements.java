@@ -9,6 +9,7 @@ import io.thinkit.edc.client.connector.model.ContractNegotiation;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdContractNegotiation;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdQuerySpec;
 import io.thinkit.edc.client.connector.resource.management.ManagementResource;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
@@ -74,7 +75,7 @@ public class ContractAgreements extends ManagementResource {
     }
 
     private HttpRequest.Builder ContractAgreementsRequestBuilder(QuerySpec input) {
-        var requestBody = compact(input);
+        var requestBody = compact((JsonLdQuerySpec) input);
         return HttpRequest.newBuilder()
                 .uri(URI.create("%s/request".formatted(this.url)))
                 .header("content-type", "application/json")
