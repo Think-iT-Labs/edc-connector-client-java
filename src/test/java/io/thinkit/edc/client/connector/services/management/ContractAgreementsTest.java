@@ -8,6 +8,7 @@ import io.thinkit.edc.client.connector.ManagementApiTestBase;
 import io.thinkit.edc.client.connector.model.ContractAgreement;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdQuerySpec;
 import java.net.http.HttpClient;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -64,7 +65,7 @@ public class ContractAgreementsTest extends ManagementApiTestBase {
 
         @Test
         void should_not_get_contract_agreements() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = JsonLdQuerySpec.Builder.newInstance().sortOrder("wrong").build();
 
             var result = contractAgreements.request(input);
             assertThat(result).satisfies(ContractAgreementsTest.this::errorResponse);
@@ -117,7 +118,7 @@ public class ContractAgreementsTest extends ManagementApiTestBase {
 
         @Test
         void should_not_get_contract_agreements_async() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = JsonLdQuerySpec.Builder.newInstance().sortOrder("wrong").build();
             var result = contractAgreements.requestAsync(input);
             assertThat(result)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
@@ -149,7 +150,7 @@ public class ContractAgreementsTest extends ManagementApiTestBase {
     }
 
     private QuerySpec shouldGetAContractAgreementsQuery() {
-        return QuerySpec.Builder.newInstance()
+        return JsonLdQuerySpec.Builder.newInstance()
                 .offset(5)
                 .limit(10)
                 .sortOrder("DESC")

@@ -1,7 +1,6 @@
 package io.thinkit.edc.client.connector.services.management;
 
 import static io.thinkit.edc.client.connector.utils.Constants.ID;
-import static io.thinkit.edc.client.connector.utils.JsonLdUtil.*;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -12,6 +11,7 @@ import io.thinkit.edc.client.connector.model.jsonld.JsonLdTransferState;
 import io.thinkit.edc.client.connector.model.pojo.PojoTransferProcess;
 import io.thinkit.edc.client.connector.model.pojo.PojoTransferState;
 import io.thinkit.edc.client.connector.resource.management.ManagementResource;
+import io.thinkit.edc.client.connector.utils.JsonLdObject;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
 import java.io.IOException;
@@ -189,7 +189,7 @@ public class TransferProcesses extends ManagementResource {
     }
 
     private HttpRequest.Builder getTransferProcessesRequestBuilder(QuerySpec input) {
-        var requestBody = compact(input);
+        var requestBody = compact((JsonLdObject) input);
         return HttpRequest.newBuilder()
                 .uri(URI.create("%s/request".formatted(this.url)))
                 .header("content-type", "application/json")

@@ -13,6 +13,7 @@ import io.thinkit.edc.client.connector.model.Result;
 import io.thinkit.edc.client.connector.model.TerminateNegotiation;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdContractRequest;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdPolicy;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdQuerySpec;
 import io.thinkit.edc.client.connector.model.pojo.PojoContractRequest;
 import io.thinkit.edc.client.connector.model.pojo.PojoPolicy;
 import java.net.http.HttpClient;
@@ -104,7 +105,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
 
         @Test
         void should_not_get_contract_negotiations() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = JsonLdQuerySpec.Builder.newInstance().sortOrder("wrong").build();
 
             var result = contractNegotiations.request(input);
             assertThat(result).satisfies(ContractNegotiationsTest.this::errorResponse);
@@ -202,7 +203,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
 
         @Test
         void should_not_get_contract_negotiations_async() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = JsonLdQuerySpec.Builder.newInstance().sortOrder("wrong").build();
 
             var result = contractNegotiations.requestAsync(input);
             assertThat(result)
@@ -328,7 +329,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
     }
 
     private QuerySpec shouldGetContractNegotiationsQuery() {
-        return QuerySpec.Builder.newInstance()
+        return JsonLdQuerySpec.Builder.newInstance()
                 .offset(5)
                 .limit(10)
                 .sortOrder("DESC")

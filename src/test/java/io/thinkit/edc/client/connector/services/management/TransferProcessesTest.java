@@ -9,6 +9,7 @@ import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.ManagementApiTestBase;
 import io.thinkit.edc.client.connector.model.*;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdCallbackAddress;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdQuerySpec;
 import java.net.http.HttpClient;
 import java.util.Arrays;
 import java.util.List;
@@ -159,7 +160,7 @@ class TransferProcessesTest extends ManagementApiTestBase {
 
         @Test
         void should_not_get_contract_negotiations() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = JsonLdQuerySpec.Builder.newInstance().sortOrder("wrong").build();
 
             var result = transferProcesses.request(input);
             assertThat(result).satisfies(TransferProcessesTest.this::errorResponse);
@@ -307,7 +308,7 @@ class TransferProcessesTest extends ManagementApiTestBase {
 
         @Test
         void should_not_get_transfer_processes_async() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = JsonLdQuerySpec.Builder.newInstance().sortOrder("wrong").build();
 
             var result = transferProcesses.requestAsync(input);
             assertThat(result)
@@ -396,7 +397,7 @@ class TransferProcessesTest extends ManagementApiTestBase {
     }
 
     private QuerySpec shouldGetTransferProcessesQuery() {
-        return QuerySpec.Builder.newInstance()
+        return JsonLdQuerySpec.Builder.newInstance()
                 .offset(5)
                 .limit(10)
                 .sortOrder("DESC")
