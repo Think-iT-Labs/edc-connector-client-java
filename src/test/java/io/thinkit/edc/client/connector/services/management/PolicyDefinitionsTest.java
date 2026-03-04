@@ -10,6 +10,7 @@ import io.thinkit.edc.client.connector.model.PolicyDefinition;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdPolicy;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdQuerySpec;
 import jakarta.json.Json;
 import java.net.http.HttpClient;
 import java.util.List;
@@ -105,7 +106,7 @@ public class PolicyDefinitionsTest extends ManagementApiTestBase {
 
         @Test
         void should_not_get_policy_definitions() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = JsonLdQuerySpec.Builder.newInstance().sortOrder("wrong").build();
             var result = policyDefinitions.request(input);
             assertThat(result).satisfies(PolicyDefinitionsTest.this::errorResponse);
         }
@@ -195,7 +196,7 @@ public class PolicyDefinitionsTest extends ManagementApiTestBase {
 
         @Test
         void should_not_get_policy_definitions_async() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = JsonLdQuerySpec.Builder.newInstance().sortOrder("wrong").build();
 
             var result = policyDefinitions.requestAsync(input);
 
@@ -250,7 +251,7 @@ public class PolicyDefinitionsTest extends ManagementApiTestBase {
     }
 
     private QuerySpec shouldGetPolicyDefinitionsRequest() {
-        return QuerySpec.Builder.newInstance()
+        return JsonLdQuerySpec.Builder.newInstance()
                 .offset(0)
                 .limit(10)
                 .sortOrder("DESC")

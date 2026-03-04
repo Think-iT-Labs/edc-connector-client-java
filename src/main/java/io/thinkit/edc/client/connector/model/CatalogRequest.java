@@ -1,72 +1,17 @@
 package io.thinkit.edc.client.connector.model;
 
-import static io.thinkit.edc.client.connector.utils.Constants.*;
-import static jakarta.json.Json.createArrayBuilder;
-import static jakarta.json.Json.createObjectBuilder;
+import static io.thinkit.edc.client.connector.utils.Constants.EDC_NAMESPACE;
 
-import io.thinkit.edc.client.connector.utils.JsonLdObject;
-import jakarta.json.Json;
-import jakarta.json.JsonObject;
+public interface CatalogRequest {
+    String TYPE_CATALOG_REQUEST = EDC_NAMESPACE + "CatalogRequest";
 
-public class CatalogRequest extends JsonLdObject {
-    private static final String TYPE_CATALOG_REQUEST = EDC_NAMESPACE + "CatalogRequest";
-    private static final String CATALOG_REQUEST_PROTOCOL = EDC_NAMESPACE + "protocol";
-    private static final String CATALOG_REQUEST_COUNTER_PARTY_ADDRESS = EDC_NAMESPACE + "counterPartyAddress";
-    private static final String CATALOG_REQUEST_COUNTER_PARTY_ID = EDC_NAMESPACE + "counterPartyId";
-    private static final String CATALOG_REQUEST_QUERY_SPEC = EDC_NAMESPACE + "querySpec";
+    String id();
 
-    private CatalogRequest(JsonObject raw) {
-        super(raw);
-    }
+    String protocol();
 
-    public String protocol() {
-        return stringValue(CATALOG_REQUEST_PROTOCOL);
-    }
+    String counterPartyAddress();
 
-    public String counterPartyAddress() {
-        return stringValue(CATALOG_REQUEST_COUNTER_PARTY_ADDRESS);
-    }
+    String counterPartyId();
 
-    public QuerySpec querySpec() {
-        return QuerySpec.Builder.newInstance()
-                .raw(object(CATALOG_REQUEST_QUERY_SPEC))
-                .build();
-    }
-
-    public static class Builder extends AbstractBuilder<CatalogRequest, CatalogRequest.Builder> {
-
-        public static CatalogRequest.Builder newInstance() {
-            return new CatalogRequest.Builder();
-        }
-
-        public CatalogRequest build() {
-            return new CatalogRequest(builder.add(TYPE, TYPE_CATALOG_REQUEST).build());
-        }
-
-        public CatalogRequest.Builder protocol(String protocol) {
-            builder.add(
-                    CATALOG_REQUEST_PROTOCOL,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, protocol)));
-            return this;
-        }
-
-        public CatalogRequest.Builder counterPartyAddress(String counterPartyAddress) {
-            builder.add(
-                    CATALOG_REQUEST_COUNTER_PARTY_ADDRESS,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, counterPartyAddress)));
-            return this;
-        }
-
-        public CatalogRequest.Builder querySpec(QuerySpec querySpec) {
-            builder.add(CATALOG_REQUEST_QUERY_SPEC, Json.createObjectBuilder(querySpec.raw()));
-            return this;
-        }
-
-        public CatalogRequest.Builder counterPartyId(String counterPartyId) {
-            builder.add(
-                    CATALOG_REQUEST_COUNTER_PARTY_ID,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, counterPartyId)));
-            return this;
-        }
-    }
+    QuerySpec querySpec();
 }

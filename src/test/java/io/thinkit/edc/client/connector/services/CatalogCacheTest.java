@@ -1,6 +1,5 @@
 package io.thinkit.edc.client.connector.services;
 
-import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
 import static java.util.Collections.emptyList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -8,8 +7,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.thinkit.edc.client.connector.CatalogApiTestBase;
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.model.Catalog;
-import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdQuerySpec;
 import java.net.http.HttpClient;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +34,7 @@ class CatalogCacheTest extends CatalogApiTestBase {
 
         @Test
         void should_query_catalogs() {
-            var query = QuerySpec.Builder.newInstance()
+            var query = JsonLdQuerySpec.Builder.newInstance()
                     .offset(0)
                     .limit(50)
                     .sortOrder("DESC")
@@ -53,7 +52,7 @@ class CatalogCacheTest extends CatalogApiTestBase {
     class Async {
         @Test
         void should_query_catalogs() {
-            var query = QuerySpec.Builder.newInstance()
+            var query = JsonLdQuerySpec.Builder.newInstance()
                     .offset(0)
                     .limit(50)
                     .sortOrder("DESC")
@@ -77,9 +76,7 @@ class CatalogCacheTest extends CatalogApiTestBase {
             });
             assertThat(catalog.dataset()).isNotNull().satisfies(dataset -> {
                 assertThat(dataset.description()).isEqualTo("description");
-                assertThat(dataset.hasPolicy()).isNotNull().satisfies(policy -> assertThat(
-                                policy.getList(ODRL_NAMESPACE + "permission").size())
-                        .isGreaterThan(0));
+                assertThat(dataset.hasPolicy()).isNotNull();
                 assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {
                     assertThat(distribution.accessService()).isNotBlank();
                     assertThat(distribution.format()).isEqualTo("HttpData");

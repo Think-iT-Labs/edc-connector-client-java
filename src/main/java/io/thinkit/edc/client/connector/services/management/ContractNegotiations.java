@@ -13,6 +13,7 @@ import io.thinkit.edc.client.connector.model.jsonld.JsonLdContractAgreement;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdContractNegotiation;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdContractRequest;
 import io.thinkit.edc.client.connector.model.pojo.PojoContractAgreement;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdQuerySpec;
 import io.thinkit.edc.client.connector.model.pojo.PojoContractNegotiation;
 import io.thinkit.edc.client.connector.resource.management.ManagementResource;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
@@ -160,7 +161,7 @@ public class ContractNegotiations extends ManagementResource {
     }
 
     private HttpRequest.Builder getContractNegotiationsRequestBuilder(QuerySpec input) {
-        var requestBody = compact(input);
+        var requestBody = compact((JsonLdQuerySpec) input);
         return HttpRequest.newBuilder()
                 .uri(URI.create("%s/request".formatted(this.url)))
                 .header("content-type", "application/json")

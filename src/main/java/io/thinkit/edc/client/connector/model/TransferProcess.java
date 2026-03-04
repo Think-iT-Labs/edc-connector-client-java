@@ -1,164 +1,30 @@
 package io.thinkit.edc.client.connector.model;
 
-import static io.thinkit.edc.client.connector.utils.Constants.EDC_NAMESPACE;
-import static io.thinkit.edc.client.connector.utils.Constants.TYPE;
-import static io.thinkit.edc.client.connector.utils.Constants.VALUE;
-import static jakarta.json.Json.createArrayBuilder;
-import static jakarta.json.Json.createObjectBuilder;
-import static jakarta.json.stream.JsonCollectors.toJsonArray;
-
-import io.thinkit.edc.client.connector.model.jsonld.JsonLdCallbackAddress;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdProperties;
-import io.thinkit.edc.client.connector.utils.JsonLdObject;
-import jakarta.json.JsonObject;
 import java.util.List;
-import java.util.Map;
 
-public class TransferProcess extends JsonLdObject {
-    private static final String TYPE_TRANSFER_PROCESS = EDC_NAMESPACE + "TransferProcess";
-    private static final String TRANSFER_PROCESS_CORRELATION_ID = EDC_NAMESPACE + "correlationId";
-    private static final String TRANSFER_PROCESS_TYPE = EDC_NAMESPACE + "type";
-    private static final String TRANSFER_PROCESS_STATE = EDC_NAMESPACE + "state";
-    private static final String TRANSFER_PROCESS_STATE_TIMESTAMP = EDC_NAMESPACE + "stateTimestamp";
-    private static final String TRANSFER_PROCESS_ASSET_ID = EDC_NAMESPACE + "assetId";
-    private static final String TRANSFER_PROCESS_CONTRACT_ID = EDC_NAMESPACE + "contractId";
-    private static final String TRANSFER_PROCESS_DATA_DESTINATION = EDC_NAMESPACE + "dataDestination";
-    private static final String TRANSFER_PROCESS_PRIVATE_PROPERTIES = EDC_NAMESPACE + "privateProperties";
-    private static final String TRANSFER_PROCESS_ERROR_DETAIL = EDC_NAMESPACE + "errorDetail";
-    private static final String TRANSFER_PROCESS_CALLBACK_ADDRESSES = EDC_NAMESPACE + "callbackAddresses";
-    private static final String TRANSFER_PROCESS_CREATED_AT = EDC_NAMESPACE + "createdAt";
+public interface TransferProcess {
+    String id();
 
-    private TransferProcess(JsonObject raw) {
-        super(raw);
-    }
+    String correlationId();
 
-    public String correlationId() {
-        return stringValue(TRANSFER_PROCESS_CORRELATION_ID);
-    }
+    String type();
 
-    public String type() {
-        return stringValue(TRANSFER_PROCESS_TYPE);
-    }
+    String state();
 
-    public String state() {
-        return stringValue(TRANSFER_PROCESS_STATE);
-    }
+    Long stateTimestamp();
 
-    public Long stateTimestamp() {
-        return longValue(TRANSFER_PROCESS_STATE_TIMESTAMP);
-    }
+    String assetId();
 
-    public String assetId() {
-        return stringValue(TRANSFER_PROCESS_ASSET_ID);
-    }
+    String contractId();
 
-    public String contractId() {
-        return stringValue(TRANSFER_PROCESS_CONTRACT_ID);
-    }
+    JsonLdProperties dataDestination();
 
-    public JsonLdProperties dataDestination() {
-        return new JsonLdProperties(object(TRANSFER_PROCESS_DATA_DESTINATION));
-    }
+    JsonLdProperties privateProperties();
 
-    public JsonLdProperties privateProperties() {
-        return new JsonLdProperties(object(TRANSFER_PROCESS_PRIVATE_PROPERTIES));
-    }
+    String errorDetail();
 
-    public String errorDetail() {
-        return stringValue(TRANSFER_PROCESS_ERROR_DETAIL);
-    }
+    List<? extends CallbackAddress> callbackAddresses();
 
-    public List<JsonLdCallbackAddress> callbackAddresses() {
-        return objects(TRANSFER_PROCESS_CALLBACK_ADDRESSES)
-                .map(it -> JsonLdCallbackAddress.Builder.newInstance().raw(it).build())
-                .toList();
-    }
-
-    public long createdAt() {
-        return longValue(TRANSFER_PROCESS_CREATED_AT);
-    }
-
-    public static class Builder extends AbstractBuilder<TransferProcess, TransferProcess.Builder> {
-
-        public static TransferProcess.Builder newInstance() {
-            return new TransferProcess.Builder();
-        }
-
-        public TransferProcess build() {
-            return new TransferProcess(builder.add(TYPE, TYPE_TRANSFER_PROCESS).build());
-        }
-
-        public TransferProcess.Builder correlationId(String correlationId) {
-            builder.add(
-                    TRANSFER_PROCESS_CORRELATION_ID,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, correlationId)));
-            return this;
-        }
-
-        public TransferProcess.Builder type(String type) {
-            builder.add(
-                    TRANSFER_PROCESS_TYPE,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, type)));
-            return this;
-        }
-
-        public TransferProcess.Builder state(String state) {
-            builder.add(
-                    TRANSFER_PROCESS_STATE,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, state)));
-            return this;
-        }
-
-        public TransferProcess.Builder stateTimestamp(Long stateTimestamp) {
-            builder.add(
-                    TRANSFER_PROCESS_STATE_TIMESTAMP,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, stateTimestamp)));
-            return this;
-        }
-
-        public TransferProcess.Builder assetId(String assetId) {
-            builder.add(
-                    TRANSFER_PROCESS_ASSET_ID,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, assetId)));
-            return this;
-        }
-
-        public TransferProcess.Builder contractId(String contractId) {
-            builder.add(
-                    TRANSFER_PROCESS_CONTRACT_ID,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, contractId)));
-            return this;
-        }
-
-        public TransferProcess.Builder dataDestination(Map<String, ?> dataDestination) {
-            var propertiesBuilder = JsonLdProperties.Builder.newInstance();
-            dataDestination.forEach(propertiesBuilder::property);
-            builder.add(
-                    TRANSFER_PROCESS_DATA_DESTINATION, propertiesBuilder.build().raw());
-            return this;
-        }
-
-        public TransferProcess.Builder privateProperties(Map<String, ?> properties) {
-            var propertiesBuilder = JsonLdProperties.Builder.newInstance();
-            properties.forEach(propertiesBuilder::property);
-            builder.add(
-                    TRANSFER_PROCESS_PRIVATE_PROPERTIES,
-                    propertiesBuilder.build().raw());
-            return this;
-        }
-
-        public TransferProcess.Builder errorDetail(String errorDetail) {
-            builder.add(
-                    TRANSFER_PROCESS_ERROR_DETAIL,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, errorDetail)));
-            return this;
-        }
-
-        public TransferProcess.Builder callbackAddresses(List<JsonLdCallbackAddress> callbackAddresses) {
-            builder.add(
-                    TRANSFER_PROCESS_CALLBACK_ADDRESSES,
-                    callbackAddresses.stream().map(JsonLdCallbackAddress::raw).collect(toJsonArray()));
-            return this;
-        }
-    }
+    long createdAt();
 }

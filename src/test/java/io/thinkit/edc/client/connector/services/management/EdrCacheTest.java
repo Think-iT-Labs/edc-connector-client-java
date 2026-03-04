@@ -10,6 +10,7 @@ import io.thinkit.edc.client.connector.ManagementApiTestBase;
 import io.thinkit.edc.client.connector.model.Edr;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdQuerySpec;
 import java.net.http.HttpClient;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +50,7 @@ class EdrCacheTest extends ManagementApiTestBase {
 
         @Test
         void should__not_request_an_edr() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = JsonLdQuerySpec.Builder.newInstance().sortOrder("wrong").build();
 
             var result = edrCache.request(input);
             assertThat(result).satisfies(EdrCacheTest.this::errorResponse);
@@ -86,7 +87,7 @@ class EdrCacheTest extends ManagementApiTestBase {
 
         @Test
         void should__not_request_an_edr_async() {
-            var input = QuerySpec.Builder.newInstance().sortOrder("wrong").build();
+            var input = JsonLdQuerySpec.Builder.newInstance().sortOrder("wrong").build();
 
             var result = edrCache.requestAsync(input);
             assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(EdrCacheTest.this::errorResponse);
@@ -139,7 +140,7 @@ class EdrCacheTest extends ManagementApiTestBase {
     }
 
     private QuerySpec shouldRequestQuery() {
-        return QuerySpec.Builder.newInstance()
+        return JsonLdQuerySpec.Builder.newInstance()
                 .offset(5)
                 .limit(10)
                 .sortOrder("DESC")
