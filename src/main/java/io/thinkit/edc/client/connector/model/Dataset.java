@@ -7,7 +7,7 @@ public interface Dataset {
 
     String description();
 
-    Policy hasPolicy();
+    List<? extends Policy> hasPolicy();
 
     List<? extends Distribution> distribution();
 }

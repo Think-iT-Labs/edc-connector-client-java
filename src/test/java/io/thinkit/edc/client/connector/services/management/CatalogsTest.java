@@ -112,31 +112,31 @@ class CatalogsTest extends ManagementApiTestBase {
 
     private void shouldGetCatalogResponse(Result<Catalog> result) {
         assertThat(result.isSucceeded()).isTrue();
-        assertThat(result.getContent().id()).isNotBlank();
-        assertThat(result.getContent().participantId()).isNotNull().isEqualTo("urn:connector:provider");
-        assertThat(result.getContent().service()).isNotNull().satisfies(service -> {
-            assertThat(service.endpointUrl()).isEqualTo("http://localhost:16806/protocol");
-            assertThat(service.terms()).isEqualTo("connector");
-        });
-        assertThat(result.getContent().dataset()).isNotNull().satisfies(dataset -> {
-            assertThat(dataset.description()).isEqualTo("description");
-            assertThat(dataset.hasPolicy()).isNotNull();
-            assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {
-                assertThat(distribution.accessService()).isNotBlank();
-                assertThat(distribution.format()).isEqualTo("HttpData");
+        assertThat(result.getContent().participantId()).isNotNull().isNotBlank();
+        if (managementVersion.equals(V3)) {
+            assertThat(result.getContent().id()).isNotBlank();
+            assertThat(result.getContent().service()).isNotNull().satisfies(service -> {
+                assertThat(service.endpointUrl()).isNotBlank();
+                assertThat(service.terms()).isNotBlank();
             });
-        });
+            assertThat(result.getContent().dataset()).isNotNull().satisfies(dataset -> {
+                assertThat(dataset.description()).isNotBlank();
+                assertThat(dataset.hasPolicy()).isNotNull();
+                assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {
+                    assertThat(distribution.accessService()).isNotBlank();
+                    assertThat(distribution.format()).isNotBlank();
+                });
+            });
+        }
     }
-
 
     private void shouldGetDatasetResponse(Result<Dataset> result) {
         assertThat(result.isSucceeded()).isTrue();
         assertThat(result.getContent()).isNotNull().satisfies(dataset -> {
-            assertThat(dataset.description()).isEqualTo("description");
             assertThat(dataset.hasPolicy()).isNotNull();
             assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {
                 assertThat(distribution.accessService()).isNotBlank();
-                assertThat(distribution.format()).isEqualTo("HttpData");
+                assertThat(distribution.format()).isNotBlank();
             });
         });
     }

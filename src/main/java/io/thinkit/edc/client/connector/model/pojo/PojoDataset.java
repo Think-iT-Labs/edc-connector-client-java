@@ -14,7 +14,7 @@ public class PojoDataset implements Dataset {
     private String description;
 
     @JsonProperty("hasPolicy")
-    private PojoPolicy hasPolicy;
+    private List<PojoPolicy> hasPolicy;
 
     @JsonProperty("distribution")
     private List<PojoDistribution> distribution;
@@ -30,8 +30,8 @@ public class PojoDataset implements Dataset {
     }
 
     @Override
-    public Policy hasPolicy() {
-        return hasPolicy;
+    public List<? extends Policy> hasPolicy() {
+        return hasPolicy != null ? hasPolicy : List.of();
     }
 
     @Override
