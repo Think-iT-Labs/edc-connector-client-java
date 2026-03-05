@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.ManagementApiTestBase;
 import io.thinkit.edc.client.connector.model.PolicyDefinition;
+import io.thinkit.edc.client.connector.model.PolicyValidationResult;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdPolicy;
@@ -124,6 +125,12 @@ public class PolicyDefinitionsTest extends ManagementApiTestBase {
             var result = policyDefinitions.request(input);
             assertThat(result).satisfies(PolicyDefinitionsTest.this::errorResponse);
         }
+
+        @Test
+        void should_validate_a_policy_definition() {
+            var policyDefinition = policyDefinitions.validate("definition-id");
+            assertThat(policyDefinition).satisfies(PolicyDefinitionsTest.this::shouldValidateAPolicyDefinitionResponse);
+        }
     }
 
     @Nested
@@ -220,6 +227,14 @@ public class PolicyDefinitionsTest extends ManagementApiTestBase {
                     .succeedsWithin(timeout, TimeUnit.SECONDS)
                     .satisfies(PolicyDefinitionsTest.this::errorResponse);
         }
+
+        @Test
+        void should_validate_a_policy_definition_async() {
+            var policyDefinition = policyDefinitions.validateAsync("definition-id");
+            assertThat(policyDefinition)
+                    .succeedsWithin(timeout, TimeUnit.SECONDS)
+                    .satisfies(PolicyDefinitionsTest.this::shouldValidateAPolicyDefinitionResponse);
+        }
     }
 
     private <T> void errorResponse(Result<T> error) {
@@ -236,6 +251,12 @@ public class PolicyDefinitionsTest extends ManagementApiTestBase {
         assertThat(policyDefinition.isSucceeded()).isTrue();
         assertThat(policyDefinition.getContent().policy()).isNotNull();
         assertThat(policyDefinition.getContent().createdAt()).isGreaterThan(-1);
+    }
+
+    private void shouldValidateAPolicyDefinitionResponse(Result<PolicyValidationResult> policyValidationResult) {
+        assertThat(policyValidationResult.isSucceeded()).isTrue();
+        assertThat(policyValidationResult.getContent().isValid()).isNotNull();
+        assertThat(policyValidationResult.getContent().errors()).isNotNull();
     }
 
     private PolicyDefinition shouldCreateAPolicyDefinitionRequest() {

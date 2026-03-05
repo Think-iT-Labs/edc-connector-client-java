@@ -7,11 +7,14 @@ import static java.net.http.HttpRequest.BodyPublishers.ofString;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.thinkit.edc.client.connector.EdcClientContext;
 import io.thinkit.edc.client.connector.model.PolicyDefinition;
+import io.thinkit.edc.client.connector.model.PolicyValidationResult;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdPolicyDefinition;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdPolicyValidationResult;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdQuerySpec;
 import io.thinkit.edc.client.connector.model.pojo.PojoPolicyDefinition;
+import io.thinkit.edc.client.connector.model.pojo.PojoPolicyValidationResult;
 import io.thinkit.edc.client.connector.resource.management.ManagementResource;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
 import jakarta.json.JsonArray;
@@ -105,6 +108,19 @@ public class PolicyDefinitions extends ManagementResource {
         return context.httpClient().sendAsync(requestBuilder).thenApply(deserialize);
     }
 
+    public Result<PolicyValidationResult> validate(String id) {
+        var requestBuilder = validateRequestBuilder(id);
+        var deserialize = responseDeserializer(this::getPolicyValidationResult, deserializePolicyValidationResult());
+        return context.httpClient().send(requestBuilder).flatMap(deserialize);
+    }
+
+    public CompletableFuture<Result<PolicyValidationResult>> validateAsync(String id) {
+        var requestBuilder = validateRequestBuilder(id);
+        var deserialize = responseDeserializer(this::getPolicyValidationResult, deserializePolicyValidationResult());
+
+        return context.httpClient().sendAsync(requestBuilder).thenApply(deserialize);
+    }
+
     private HttpRequest.Builder getRequestBuilder(String id) {
         return HttpRequest.newBuilder()
                 .uri(URI.create("%s/%s".formatted(this.url, id)))
@@ -141,8 +157,21 @@ public class PolicyDefinitions extends ManagementResource {
                 .POST(ofString(requestBody.toString()));
     }
 
+    private HttpRequest.Builder validateRequestBuilder(String id) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create("%s/%s/validate".formatted(this.url, id)))
+                .header("content-type", "application/json")
+                .POST(HttpRequest.BodyPublishers.noBody());
+    }
+
     private PolicyDefinition getPolicyDefinition(JsonArray array) {
         return JsonLdPolicyDefinition.Builder.newInstance()
+                .raw(array.getJsonObject(0))
+                .build();
+    }
+
+    private PolicyValidationResult getPolicyValidationResult(JsonArray array) {
+        return JsonLdPolicyValidationResult.Builder.newInstance()
                 .raw(array.getJsonObject(0))
                 .build();
     }
@@ -175,6 +204,16 @@ public class PolicyDefinitions extends ManagementResource {
         return stream -> {
             try {
                 return context.objectMapper().readValue(stream, PojoPolicyDefinition.class);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    private Function<InputStream, PolicyValidationResult> deserializePolicyValidationResult() {
+        return stream -> {
+            try {
+                return context.objectMapper().readValue(stream, PojoPolicyValidationResult.class);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
