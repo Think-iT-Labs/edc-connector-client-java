@@ -11,16 +11,15 @@ import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.Result;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdContractAgreement;
 import io.thinkit.edc.client.connector.model.jsonld.JsonLdContractNegotiation;
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdQuerySpec;
 import io.thinkit.edc.client.connector.model.pojo.PojoContractAgreement;
 import io.thinkit.edc.client.connector.model.pojo.PojoContractNegotiation;
-import io.thinkit.edc.client.connector.model.jsonld.JsonLdQuerySpec;
 import io.thinkit.edc.client.connector.resource.management.ManagementResource;
 import jakarta.json.JsonArray;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpRequest;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -130,11 +129,6 @@ public class ContractAgreements extends ManagementResource {
     private Function<InputStream, ContractAgreement> deserializeContractAgreement() {
         return stream -> {
             try {
-                byte[] bytes = stream.readAllBytes();
-                String json = new String(bytes, StandardCharsets.UTF_8);
-
-                // Print/Log the value
-                System.out.println("Stream Content: " + json);
                 return context.objectMapper().readValue(stream, PojoContractAgreement.class);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -145,11 +139,6 @@ public class ContractAgreements extends ManagementResource {
     private Function<InputStream, ContractNegotiation> deserializeContractNegotiation() {
         return stream -> {
             try {
-                byte[] bytes = stream.readAllBytes();
-                String json = new String(bytes, StandardCharsets.UTF_8);
-
-                // Print/Log the value
-                System.out.println("Stream Content: " + json);
                 return context.objectMapper().readValue(stream, PojoContractNegotiation.class);
             } catch (IOException e) {
                 throw new RuntimeException(e);

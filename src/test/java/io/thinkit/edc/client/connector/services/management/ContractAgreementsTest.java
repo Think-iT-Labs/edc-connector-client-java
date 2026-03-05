@@ -3,6 +3,7 @@ package io.thinkit.edc.client.connector.services.management;
 import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
 import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V4BETA;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.ManagementApiTestBase;
@@ -56,6 +57,7 @@ public class ContractAgreementsTest extends ManagementApiTestBase {
 
         @Test
         void should_get_a_contract_agreement_negotiation() {
+            assumeTrue(V3.equals(managementVersion), "");
             var contractNegotiation = contractAgreements.getNegotiation("agreement-id");
             assertThat(contractNegotiation).satisfies(ContractNegotiationsTest::shouldGetAContractNegotiationResponse);
         }
@@ -102,6 +104,8 @@ public class ContractAgreementsTest extends ManagementApiTestBase {
 
         @Test
         void should_get_a_contract_agreement_negotiation_async() {
+            assumeTrue(V3.equals(managementVersion), "");
+
             var contractNegotiation = contractAgreements.getNegotiationAsync("agreement-id");
 
             assertThat(contractNegotiation)

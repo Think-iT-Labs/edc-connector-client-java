@@ -2,7 +2,6 @@ package io.thinkit.edc.client.connector.model.pojo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.thinkit.edc.client.connector.model.ContractAgreement;
-import io.thinkit.edc.client.connector.model.Policy;
 
 public class PojoContractAgreement implements ContractAgreement {
     @JsonProperty("@id")
@@ -21,7 +20,7 @@ public class PojoContractAgreement implements ContractAgreement {
     private long contractSigningDate;
 
     @JsonProperty("policy")
-    private Policy policy;
+    private PojoPolicy policy;
 
     @Override
     public String id() {
@@ -49,7 +48,7 @@ public class PojoContractAgreement implements ContractAgreement {
     }
 
     @Override
-    public Policy policy() {
+    public PojoPolicy policy() {
         return policy;
     }
 }
