@@ -58,6 +58,7 @@ public class JsonLdObject {
     }
 
     protected Boolean booleanValue(String key) {
+        System.out.println(key);
         return raw.getJsonArray(key).getJsonObject(0).getBoolean(VALUE);
     }
 
