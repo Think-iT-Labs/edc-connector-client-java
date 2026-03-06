@@ -25,7 +25,7 @@ public class PojoAsset implements Asset {
 
     @Override
     public String id() {
-        return "id";
+        return id;
     }
 
     @Override
