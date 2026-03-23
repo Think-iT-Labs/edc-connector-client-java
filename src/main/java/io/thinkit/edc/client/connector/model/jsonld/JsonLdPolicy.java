@@ -12,6 +12,7 @@ import java.util.List;
 public class JsonLdPolicy extends JsonLdObject implements Policy {
     private static final String POLICY_TARGET = EDC_NAMESPACE + "target";
     private static final String POLICY_ASSIGNER = EDC_NAMESPACE + "assigner";
+    private static final String TYPE_POLICY = ODRL_NAMESPACE + "Set";
 
     public JsonLdPolicy(JsonObject raw) {
         super(raw);
