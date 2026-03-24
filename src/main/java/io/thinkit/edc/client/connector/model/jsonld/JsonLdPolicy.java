@@ -28,17 +28,18 @@ public class JsonLdPolicy extends JsonLdObject implements Policy {
 
     @Override
     public List<JsonObject> permissions() {
-        return List.of();
+        return objects(ODRL_NAMESPACE + "permissions").toList();
     }
 
     @Override
     public List<JsonObject> prohibitions() {
-        return List.of();
+        return objects(ODRL_NAMESPACE + "prohibitions").toList();
     }
 
     @Override
     public List<JsonObject> obligations() {
-        return List.of();
+
+        return objects(ODRL_NAMESPACE + "obligations").toList();
     }
 
     public String getStringValue(String key) {
