@@ -2,6 +2,8 @@ package io.thinkit.edc.client.connector.endtoend;
 
 import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
 import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V4BETA;
+import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
+import static io.thinkit.edc.client.connector.utils.Constants.TYPE;
 import static jakarta.json.Json.createObjectBuilder;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -284,14 +286,23 @@ class PolicyDefinitionEndToEndTest extends RealTimeConnectorApiTestBase {
             var updated = policyDefinitions.update(shouldUpdateAPolicyDefinitionRequest(id));
 
             assertThat(updated.isSucceeded()).isTrue();
-            var fetched = policyDefinitions.get(id);
 
+            var fetched = policyDefinitions.get(id);
+            assertThat(fetched.isSucceeded()).isTrue();
             assertThat(fetched.getContent()).isNotNull();
+
+            System.out.println("fetched" + fetched);
 
             var policy = fetched.getContent().policy();
             var permissions = policy.permissions();
 
-            ///  check on the values changed
+            // assertThat(permissions).isNotEmpty();
+
+            System.out.println(policy + "policy" + permissions + "permissions");
+            var targets =
+                    permissions.stream().map(p -> p.getString("target", "")).toList();
+
+            System.out.println(targets + "targets");
         }
         // TODO : finish update tests
         //                @Test
@@ -335,20 +346,30 @@ class PolicyDefinitionEndToEndTest extends RealTimeConnectorApiTestBase {
     private PolicyDefinition shouldCreateAPolicyDefinitionRequest(String id) {
         var constraints = Json.createArrayBuilder()
                 .add(createObjectBuilder()
-                        .add("leftOperand", "https://www.wikidata.org/wiki/Q183") // use a real IRI
-                        .add("operator", "eq")
-                        .add("rightOperand", "https://www.wikidata.org/wiki/Q183"))
+                        .add(ODRL_NAMESPACE + "leftOperand", "https://www.wikidata.org/wiki/Q183") // use a real IRI
+                        .add(ODRL_NAMESPACE + "operator", "eq")
+                        .add(ODRL_NAMESPACE + "rightOperand", "https://www.wikidata.org/wiki/Q183"))
                 .build();
 
+        var membershipConstraint = Json.createObjectBuilder()
+                .add(TYPE, "Constraint")
+                .add(ODRL_NAMESPACE + "leftOperand", "MembershipCredential")
+                .add(ODRL_NAMESPACE + "operator", "=")
+                .add(ODRL_NAMESPACE + "rightOperand", "active")
+                .build();
+
+        System.out.println(constraints + "membership constraint " + membershipConstraint);
         var permissions = Json.createArrayBuilder()
                 .add(createObjectBuilder()
-                        .add("target", "http://example.com/asset:9898.movie")
-                        .add("action", "use")
-                        .add("constraint", constraints))
+                        .add(ODRL_NAMESPACE + "target", "http://example.com/asset:9898.movie")
+                        .add(ODRL_NAMESPACE + "action", "use")
+                        .add(ODRL_NAMESPACE + "constraint", membershipConstraint))
                 .build();
 
         var policy = JsonLdPolicy.Builder.newInstance()
-                .raw(createObjectBuilder().add("permission", permissions).build())
+                .raw(createObjectBuilder()
+                        .add(ODRL_NAMESPACE + "permission", permissions)
+                        .build())
                 .build();
 
         return JsonLdPolicyDefinition.Builder.newInstance()
@@ -359,10 +380,18 @@ class PolicyDefinitionEndToEndTest extends RealTimeConnectorApiTestBase {
 
     private PolicyDefinition shouldUpdateAPolicyDefinitionRequest(String id) {
 
+        var constraints = Json.createArrayBuilder()
+                .add(createObjectBuilder()
+                        .add("leftOperand", "https://www.wikidata.org/wiki/Q183")
+                        .add("operator", "eq")
+                        .add("rightOperand", "https://www.wikidata.org/wiki/Q183"))
+                .build();
+
         var permissions = Json.createArrayBuilder()
                 .add(createObjectBuilder()
-                        .add("target", "http://example.com/asset:9898.movie/test") // change
-                        .add("action", "use"))
+                        .add("target", "http://example.com/asset:9898.movie/test")
+                        .add("action", "use")
+                        .add("constraint", constraints))
                 .build();
 
         var policy = JsonLdPolicy.Builder.newInstance()
