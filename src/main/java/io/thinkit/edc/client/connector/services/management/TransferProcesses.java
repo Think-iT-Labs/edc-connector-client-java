@@ -12,7 +12,7 @@ import io.thinkit.edc.client.connector.model.pojo.PojoTransferProcess;
 import io.thinkit.edc.client.connector.model.pojo.PojoTransferState;
 import io.thinkit.edc.client.connector.resource.management.ManagementResource;
 import io.thinkit.edc.client.connector.utils.JsonLdObject;
-import io.thinkit.edc.client.connector.utils.JsonLdUtil;
+import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,16 +47,19 @@ public class TransferProcesses extends ManagementResource {
     public Result<String> create(TransferRequest input) {
         var requestBuilder = createRequestBuilder(input);
 
-        return context.httpClient().send(requestBuilder).map(JsonLdUtil::expand).map(content -> content.getJsonObject(0)
-                .getString(ID));
+        return context.httpClient()
+                .send(requestBuilder)
+                .map(body -> Json.createReader(body).readObject().getString(ID));
     }
 
     public CompletableFuture<Result<String>> createAsync(TransferRequest input) {
 
         var requestBuilder = createRequestBuilder(input);
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
-                .map(content -> content.getJsonObject(0).getString(ID)));
+        return context.httpClient()
+                .sendAsync(requestBuilder)
+                .thenApply(result ->
+                        result.map(body -> Json.createReader(body).readObject().getString(ID)));
     }
 
     public Result<TransferState> getState(String id) {
