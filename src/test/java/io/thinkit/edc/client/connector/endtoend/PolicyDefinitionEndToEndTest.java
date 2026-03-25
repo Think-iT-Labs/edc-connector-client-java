@@ -14,8 +14,10 @@ import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.jsonld.*;
 import io.thinkit.edc.client.connector.services.management.PolicyDefinitions;
 import jakarta.json.Json;
+
 import java.net.http.HttpClient;
 import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -111,7 +113,7 @@ class PolicyDefinitionEndToEndTest extends RealTimeConnectorApiTestBase {
                     .anyMatch(policy -> policy.id().equals(created.getContent()));
         }
 
-        // TODO : finish update tests
+
         @Test
         void should_update_a_policy_definition() {
             var id = "policyId-" + UUID.randomUUID();
@@ -123,26 +125,25 @@ class PolicyDefinitionEndToEndTest extends RealTimeConnectorApiTestBase {
             assertThat(updated.isSucceeded()).isTrue();
 
             var fetched = policyDefinitions.get(id);
-            // assertThat(fetched.isSucceeded()).isTrue();
-            // assertThat(fetched.getContent()).isNotNull();
+            assertThat(fetched.isSucceeded()).isTrue();
+            assertThat(fetched.getContent()).isNotNull();
 
             var policy = fetched.getContent().policy();
             var obligations = policy.obligations();
 
-            System.out.println(obligations + policy);
+            assertThat(obligations).isNotNull();
         }
-        // TODO : finish update tests
-        //                @Test
-        //                void should_fail_to_update_a_non_existent_policy_definition() {
-        //                    var nonExistentId = "non-existent-" + UUID.randomUUID();
-        //                    var updated =
-        // policyDefinitions.update(shouldUpdateAPolicyDefinitionRequest(nonExistentId));
-        //
-        //                    assertThat(updated.isSucceeded()).isFalse();
-        //                    assertThat(updated.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-        //                        assertThat(apiErrorDetail.type()).isEqualTo("ObjectNotFound");
-        //                    });
-        //                }
+
+        @Test
+        void should_fail_to_update_a_non_existent_policy_definition() {
+            var nonExistentId = "non-existent-" + UUID.randomUUID();
+            var updated = policyDefinitions.update(shouldUpdateAPolicyDefinitionRequest(nonExistentId));
+
+            assertThat(updated.isSucceeded()).isFalse();
+            assertThat(updated.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+                assertThat(apiErrorDetail.type()).isEqualTo("ObjectNotFound");
+            });
+        }
 
         @Test
         void should_delete_a_policy_definition() {
