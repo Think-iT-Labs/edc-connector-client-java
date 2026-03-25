@@ -56,10 +56,7 @@ class PolicyDefinitionEndToEndTest extends RealTimeConnectorApiTestBase {
 
             var fetched = policyDefinitions.get(id);
 
-            System.out.println(fetched);
-
             assertThat(fetched.getContent().id()).isEqualTo(id);
-
             assertThat(created.isSucceeded()).isTrue();
             assertThat(created.getContent()).isNotNull();
             assertThat(created.getContent()).isEqualTo(id);
