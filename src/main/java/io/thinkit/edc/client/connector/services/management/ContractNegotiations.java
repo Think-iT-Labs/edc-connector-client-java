@@ -17,6 +17,7 @@ import io.thinkit.edc.client.connector.model.pojo.PojoContractAgreement;
 import io.thinkit.edc.client.connector.model.pojo.PojoContractNegotiation;
 import io.thinkit.edc.client.connector.resource.management.ManagementResource;
 import io.thinkit.edc.client.connector.utils.JsonLdUtil;
+import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import java.io.IOException;
@@ -52,16 +53,19 @@ public class ContractNegotiations extends ManagementResource {
 
         var requestBuilder = createRequestBuilder(input);
 
-        return context.httpClient().send(requestBuilder).map(JsonLdUtil::expand).map(content -> content.getJsonObject(0)
-                .getString(ID));
+        return context.httpClient()
+                .send(requestBuilder)
+                .map(body -> Json.createReader(body).readObject().getString(ID));
     }
 
     public CompletableFuture<Result<String>> createAsync(ContractRequest input) {
 
         var requestBuilder = createRequestBuilder(input);
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
-                .map(content -> content.getJsonObject(0).getString(ID)));
+        return context.httpClient()
+                .sendAsync(requestBuilder)
+                .thenApply(result ->
+                        result.map(body -> Json.createReader(body).readObject().getString(ID)));
     }
 
     public Result<ContractAgreement> getAgreement(String id) {

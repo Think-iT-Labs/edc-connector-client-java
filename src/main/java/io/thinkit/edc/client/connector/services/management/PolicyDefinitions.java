@@ -16,7 +16,7 @@ import io.thinkit.edc.client.connector.model.jsonld.JsonLdQuerySpec;
 import io.thinkit.edc.client.connector.model.pojo.PojoPolicyDefinition;
 import io.thinkit.edc.client.connector.model.pojo.PojoPolicyValidationResult;
 import io.thinkit.edc.client.connector.resource.management.ManagementResource;
-import io.thinkit.edc.client.connector.utils.JsonLdUtil;
+import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,16 +52,19 @@ public class PolicyDefinitions extends ManagementResource {
 
         var requestBuilder = createRequestBuilder(input);
 
-        return context.httpClient().send(requestBuilder).map(JsonLdUtil::expand).map(content -> content.getJsonObject(0)
-                .getString(ID));
+        return context.httpClient()
+                .send(requestBuilder)
+                .map(body -> Json.createReader(body).readObject().getString(ID));
     }
 
     public CompletableFuture<Result<String>> createAsync(PolicyDefinition input) {
 
         var requestBuilder = createRequestBuilder(input);
 
-        return context.httpClient().sendAsync(requestBuilder).thenApply(result -> result.map(JsonLdUtil::expand)
-                .map(content -> content.getJsonObject(0).getString(ID)));
+        return context.httpClient()
+                .sendAsync(requestBuilder)
+                .thenApply(result ->
+                        result.map(body -> Json.createReader(body).readObject().getString(ID)));
     }
 
     public Result<String> update(PolicyDefinition input) {
