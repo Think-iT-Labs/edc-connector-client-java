@@ -9,17 +9,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.RealTimeConnectorApiTestBase;
-import io.thinkit.edc.client.connector.model.PolicyDefinition;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import io.thinkit.edc.client.connector.model.jsonld.*;
 import io.thinkit.edc.client.connector.services.management.PolicyDefinitions;
 import jakarta.json.Json;
-
 import java.net.http.HttpClient;
 import java.util.UUID;
-
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -45,128 +41,173 @@ class PolicyDefinitionEndToEndTest extends RealTimeConnectorApiTestBase {
         policyDefinitions = client.policyDefinitions();
     }
 
-    @Nested
-    class Sync {
+    @Test
+    void should_create_a_policy_definition() {
+        var id = "policyId-" + UUID.randomUUID();
 
-        @Test
-        void should_create_a_policy_definition() {
-            var id = "policyId-" + UUID.randomUUID();
+        var policyDefinition = JsonLdPolicyDefinition.Builder.newInstance()
+                .id(id)
+                .policy(policyWithPermission())
+                .build();
 
-            var created = policyDefinitions.create(shouldCreateAPolicyDefinitionRequest(id));
+        var created = policyDefinitions.create(policyDefinition);
 
-            var fetched = policyDefinitions.get(id);
+        var fetched = policyDefinitions.get(id);
 
-            assertThat(fetched.getContent().id()).isEqualTo(id);
-            assertThat(created.isSucceeded()).isTrue();
-            assertThat(created.getContent()).isEqualTo(id);
-        }
-
-        @Test
-        void should_fail_creating_two_policy_definitions_with_the_same_id() {
-            var id = "policyId-" + UUID.randomUUID();
-            var firstCreate = policyDefinitions.create(shouldCreateAPolicyDefinitionRequest(id));
-            assertThat(firstCreate.isSucceeded()).isTrue();
-
-            var secondCreate = policyDefinitions.create(shouldCreateAPolicyDefinitionRequest(id));
-
-            assertThat(secondCreate.isSucceeded()).isFalse();
-            assertThat(secondCreate.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-                assertThat(apiErrorDetail.type()).isEqualTo("ObjectConflict");
-            });
-        }
-
-        @Test
-        void should_get_a_policy_definition() {
-            var id = "policyId-" + UUID.randomUUID();
-            var created = policyDefinitions.create(shouldCreateAPolicyDefinitionRequest(id));
-
-            var policyDefinition = policyDefinitions.get(created.getContent());
-
-            assertThat(policyDefinition.getContent().id()).isEqualTo(created.getContent());
-            assertThat(policyDefinition.getContent().policy()).isNotNull();
-        }
-
-        @Test
-        void should_fail_to_get_a_non_existent_policy_definition() {
-            var policyDefinition = policyDefinitions.get("non-existent-" + UUID.randomUUID());
-
-            assertThat(policyDefinition.isSucceeded()).isFalse();
-            assertThat(policyDefinition.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-                assertThat(apiErrorDetail.type()).isEqualTo("ObjectNotFound");
-            });
-        }
-
-        @Test
-        void should_query_all_policy_definitions() {
-            var id = "policyId-" + UUID.randomUUID();
-            var created = policyDefinitions.create(shouldCreateAPolicyDefinitionRequest(id));
-
-            var policyDefinitionList = policyDefinitions.request(shouldGetPolicyDefinitionsQuery());
-
-            assertThat(policyDefinitionList.isSucceeded()).isTrue();
-            assertThat(policyDefinitionList.getContent())
-                    .anyMatch(policy -> policy.id().equals(created.getContent()));
-        }
-
-
-        @Test
-        void should_update_a_policy_definition() {
-            var id = "policyId-" + UUID.randomUUID();
-            var created = policyDefinitions.create(shouldCreateAPolicyDefinitionRequest(id));
-            assertThat(created.isSucceeded()).isTrue();
-
-            var updated = policyDefinitions.update(shouldUpdateAPolicyDefinitionRequest(id));
-
-            assertThat(updated.isSucceeded()).isTrue();
-
-            var fetched = policyDefinitions.get(id);
-            assertThat(fetched.isSucceeded()).isTrue();
-            assertThat(fetched.getContent()).isNotNull();
-
-            var policy = fetched.getContent().policy();
-            var obligations = policy.obligations();
-
-            assertThat(obligations).isNotNull();
-        }
-
-        @Test
-        void should_fail_to_update_a_non_existent_policy_definition() {
-            var nonExistentId = "non-existent-" + UUID.randomUUID();
-            var updated = policyDefinitions.update(shouldUpdateAPolicyDefinitionRequest(nonExistentId));
-
-            assertThat(updated.isSucceeded()).isFalse();
-            assertThat(updated.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-                assertThat(apiErrorDetail.type()).isEqualTo("ObjectNotFound");
-            });
-        }
-
-        @Test
-        void should_delete_a_policy_definition() {
-            var id = "policyId-" + UUID.randomUUID();
-            var created = policyDefinitions.create(shouldCreateAPolicyDefinitionRequest(id));
-
-            var deleted = policyDefinitions.delete(created.getContent());
-            var policyDefinition = policyDefinitions.get(created.getContent());
-
-            assertThat(deleted.isSucceeded()).isTrue();
-            assertThat(policyDefinition.isSucceeded()).isFalse();
-            assertThat(policyDefinition.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-                assertThat(apiErrorDetail.type()).isEqualTo("ObjectNotFound");
-            });
-        }
-
-        @Test
-        void should_fail_to_delete_a_non_existent_policy_definition() {
-            var deleted = policyDefinitions.delete("non-existent-" + UUID.randomUUID());
-
-            assertThat(deleted.isSucceeded()).isFalse();
-            assertThat(deleted.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
-                assertThat(apiErrorDetail.type()).isEqualTo("ObjectNotFound");
-            });
-        }
+        assertThat(fetched.getContent().id()).isEqualTo(id);
+        assertThat(created.isSucceeded()).isTrue();
+        assertThat(created.getContent()).isEqualTo(id);
     }
 
-    private PolicyDefinition shouldCreateAPolicyDefinitionRequest(String id) {
+    @Test
+    void should_fail_creating_two_policy_definitions_with_the_same_id() {
+        var id = "policyId-" + UUID.randomUUID();
+        var policyDefinition = JsonLdPolicyDefinition.Builder.newInstance()
+                .id(id)
+                .policy(policyWithPermission())
+                .build();
+
+        var firstCreate = policyDefinitions.create(policyDefinition);
+        assertThat(firstCreate.isSucceeded()).isTrue();
+
+        var secondCreate = policyDefinitions.create(policyDefinition);
+
+        assertThat(secondCreate.isSucceeded()).isFalse();
+        assertThat(secondCreate.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.type()).isEqualTo("ObjectConflict");
+        });
+    }
+
+    @Test
+    void should_get_a_policy_definition() {
+        var id = "policyId-" + UUID.randomUUID();
+
+        var policyDefinition = JsonLdPolicyDefinition.Builder.newInstance()
+                .id(id)
+                .policy(policyWithPermission())
+                .build();
+        var created = policyDefinitions.create(policyDefinition);
+
+        var fetchedPolicyDefinition = policyDefinitions.get(created.getContent());
+
+        assertThat(fetchedPolicyDefinition.getContent().id()).isEqualTo(created.getContent());
+        assertThat(fetchedPolicyDefinition.getContent().policy()).isNotNull();
+    }
+
+    @Test
+    void should_fail_to_get_a_non_existent_policy_definition() {
+        var policyDefinition = policyDefinitions.get("non-existent-" + UUID.randomUUID());
+
+        assertThat(policyDefinition.isSucceeded()).isFalse();
+        assertThat(policyDefinition.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.type()).isEqualTo("ObjectNotFound");
+        });
+    }
+
+    @Test
+    void should_query_all_policy_definitions() {
+        var id = "policyId-" + UUID.randomUUID();
+
+        var policyDefinition = JsonLdPolicyDefinition.Builder.newInstance()
+                .id(id)
+                .policy(policyWithPermission())
+                .build();
+
+        var created = policyDefinitions.create(policyDefinition);
+
+        var policyDefinitionList = policyDefinitions.request(PolicyDefinitionsQuery());
+
+        assertThat(policyDefinitionList.isSucceeded()).isTrue();
+        assertThat(policyDefinitionList.getContent())
+                .anyMatch(policy -> policy.id().equals(created.getContent()));
+    }
+
+    @Test
+    void should_update_a_policy_definition() {
+        var id = "policyId-" + UUID.randomUUID();
+        var policyDefinition = JsonLdPolicyDefinition.Builder.newInstance()
+                .id(id)
+                .policy(policyWithPermission())
+                .build();
+
+        var created = policyDefinitions.create(policyDefinition);
+        assertThat(created.isSucceeded()).isTrue();
+
+        var updateRequest = JsonLdPolicyDefinition.Builder.newInstance()
+                .id(id)
+                .policy(policyWithObligation())
+                .build();
+        var updated = policyDefinitions.update(updateRequest);
+
+        assertThat(updated.isSucceeded()).isTrue();
+
+        var fetched = policyDefinitions.get(id);
+        assertThat(fetched.isSucceeded()).isTrue();
+        assertThat(fetched.getContent()).isNotNull();
+
+        var policy = fetched.getContent().policy();
+        var obligations = policy.obligations();
+
+        assertThat(obligations).isNotNull();
+    }
+
+    @Test
+    void should_fail_to_update_a_non_existent_policy_definition() {
+        var nonExistentId = "non-existent-" + UUID.randomUUID();
+
+        var updateRequest = JsonLdPolicyDefinition.Builder.newInstance()
+                .id(nonExistentId)
+                .policy(policyWithObligation())
+                .build();
+
+        var updated = policyDefinitions.update(updateRequest);
+
+        assertThat(updated.isSucceeded()).isFalse();
+        assertThat(updated.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.type()).isEqualTo("ObjectNotFound");
+        });
+    }
+
+    @Test
+    void should_delete_a_policy_definition() {
+        var id = "policyId-" + UUID.randomUUID();
+
+        var policyDefinition = JsonLdPolicyDefinition.Builder.newInstance()
+                .id(id)
+                .policy(policyWithPermission())
+                .build();
+
+        var created = policyDefinitions.create(policyDefinition);
+
+        var deleted = policyDefinitions.delete(created.getContent());
+        var fetchedPolicyDefinition = policyDefinitions.get(created.getContent());
+
+        assertThat(deleted.isSucceeded()).isTrue();
+        assertThat(fetchedPolicyDefinition.isSucceeded()).isFalse();
+        assertThat(fetchedPolicyDefinition.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.type()).isEqualTo("ObjectNotFound");
+        });
+    }
+
+    @Test
+    void should_fail_to_delete_a_non_existent_policy_definition() {
+        var deleted = policyDefinitions.delete("non-existent-" + UUID.randomUUID());
+
+        assertThat(deleted.isSucceeded()).isFalse();
+        assertThat(deleted.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
+            assertThat(apiErrorDetail.type()).isEqualTo("ObjectNotFound");
+        });
+    }
+
+    private QuerySpec PolicyDefinitionsQuery() {
+        return JsonLdQuerySpec.Builder.newInstance()
+                .limit(10)
+                .sortOrder("DESC")
+                .filterExpression(emptyList())
+                .build();
+    }
+
+    private JsonLdPolicy policyWithPermission() {
         var permissions = Json.createArrayBuilder()
                 .add(createObjectBuilder()
                         .add(
@@ -176,20 +217,15 @@ class PolicyDefinitionEndToEndTest extends RealTimeConnectorApiTestBase {
                                 ODRL_NAMESPACE + "constraint",
                                 Json.createArrayBuilder().build()))
                 .build();
-        var policy = JsonLdPolicy.Builder.newInstance()
+
+        return JsonLdPolicy.Builder.newInstance()
                 .raw(createObjectBuilder()
                         .add(ODRL_NAMESPACE + "permission", permissions)
                         .build())
                 .build();
-
-        return JsonLdPolicyDefinition.Builder.newInstance()
-                .id(id)
-                .policy(policy)
-                .build();
     }
 
-    private PolicyDefinition shouldUpdateAPolicyDefinitionRequest(String id) {
-
+    private JsonLdPolicy policyWithObligation() {
         var obligations = Json.createArrayBuilder()
                 .add(createObjectBuilder()
                         .add(
@@ -200,23 +236,10 @@ class PolicyDefinitionEndToEndTest extends RealTimeConnectorApiTestBase {
                                 Json.createArrayBuilder().build()))
                 .build();
 
-        var policy = JsonLdPolicy.Builder.newInstance()
+        return JsonLdPolicy.Builder.newInstance()
                 .raw(createObjectBuilder()
                         .add(ODRL_NAMESPACE + "obligation", obligations)
                         .build())
-                .build();
-
-        return JsonLdPolicyDefinition.Builder.newInstance()
-                .id(id)
-                .policy(policy)
-                .build();
-    }
-
-    private QuerySpec shouldGetPolicyDefinitionsQuery() {
-        return JsonLdQuerySpec.Builder.newInstance()
-                .limit(10)
-                .sortOrder("DESC")
-                .filterExpression(emptyList())
                 .build();
     }
 }
