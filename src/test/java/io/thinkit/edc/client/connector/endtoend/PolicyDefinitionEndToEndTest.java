@@ -58,7 +58,6 @@ class PolicyDefinitionEndToEndTest extends RealTimeConnectorApiTestBase {
 
             assertThat(fetched.getContent().id()).isEqualTo(id);
             assertThat(created.isSucceeded()).isTrue();
-            assertThat(created.getContent()).isNotNull();
             assertThat(created.getContent()).isEqualTo(id);
         }
 
@@ -83,7 +82,6 @@ class PolicyDefinitionEndToEndTest extends RealTimeConnectorApiTestBase {
 
             var policyDefinition = policyDefinitions.get(created.getContent());
 
-            assertThat(policyDefinition.getContent()).isNotNull();
             assertThat(policyDefinition.getContent().id()).isEqualTo(created.getContent());
             assertThat(policyDefinition.getContent().policy()).isNotNull();
         }
