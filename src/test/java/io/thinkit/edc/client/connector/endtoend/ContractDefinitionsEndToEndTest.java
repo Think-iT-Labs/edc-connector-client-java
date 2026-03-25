@@ -51,7 +51,6 @@ class ContractDefinitionsEndToEndTest extends RealTimeConnectorApiTestBase {
             var created = contractDefinitions.create(shouldCreateAContractDefinitionRequest(id));
 
             assertThat(created.isSucceeded()).isTrue();
-            assertThat(created.getContent()).isNotNull();
             assertThat(created.getContent()).isEqualTo(id);
         }
 
@@ -61,7 +60,6 @@ class ContractDefinitionsEndToEndTest extends RealTimeConnectorApiTestBase {
             var created = contractDefinitions.create(shouldNotCreateAContractDefinitionRequest(id));
 
             assertThat(created.isSucceeded()).isFalse();
-            assertThat(created.getErrors()).isNotNull();
             assertThat(created.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
                 assertThat(apiErrorDetail.type()).isEqualTo("ValidationFailure");
             });
