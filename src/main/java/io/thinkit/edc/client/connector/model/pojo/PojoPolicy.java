@@ -1,5 +1,6 @@
 package io.thinkit.edc.client.connector.model.pojo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.thinkit.edc.client.connector.model.Policy;
@@ -7,6 +8,7 @@ import jakarta.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonDeserialize(builder = PojoPolicy.Builder.class)
 public class PojoPolicy implements Policy {
 
