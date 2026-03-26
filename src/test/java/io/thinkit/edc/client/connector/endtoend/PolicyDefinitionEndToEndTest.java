@@ -115,7 +115,7 @@ class PolicyDefinitionEndToEndTest extends RealTimeConnectorApiTestBase {
 
         var created = policyDefinitions.create(policyDefinition);
 
-        var policyDefinitionList = policyDefinitions.request(PolicyDefinitionsQuery());
+        var policyDefinitionList = policyDefinitions.request(policyDefinitionsQuery());
 
         assertThat(policyDefinitionList.isSucceeded()).isTrue();
         assertThat(policyDefinitionList.getContent())
@@ -146,9 +146,13 @@ class PolicyDefinitionEndToEndTest extends RealTimeConnectorApiTestBase {
         assertThat(fetched.getContent()).isNotNull();
 
         var policy = fetched.getContent().policy();
+
+        var permissions = policy.permissions();
+        assertThat(permissions).isNullOrEmpty();
+
         var obligations = policy.obligations();
 
-        assertThat(obligations).isNotNull();
+        assertThat(obligations).isNotNull().hasSize(1);
     }
 
     @Test
@@ -199,7 +203,7 @@ class PolicyDefinitionEndToEndTest extends RealTimeConnectorApiTestBase {
         });
     }
 
-    private QuerySpec PolicyDefinitionsQuery() {
+    private QuerySpec policyDefinitionsQuery() {
         return JsonLdQuerySpec.Builder.newInstance()
                 .limit(10)
                 .sortOrder("DESC")
