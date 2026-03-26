@@ -43,6 +43,21 @@ public class JsonLdCriterion extends JsonLdObject implements Criterion {
             return new JsonLdCriterion(raw.build());
         }
 
+        public Builder operator(String operator) {
+            raw.add(CRITERION_OPERATOR, operator);
+            return this;
+        }
+
+        public Builder operandLeft(String operandLeft) {
+            raw.add(CRITERION_OPERAND_LEFT, operandLeft);
+            return this;
+        }
+
+        public Builder operandRight(String operandRight) {
+            raw.add(CRITERION_OPERAND_RIGHT, operandRight);
+            return this;
+        }
+
         public Builder raw(JsonObject raw) {
             this.raw.addAll(createObjectBuilder(raw));
             return this;
