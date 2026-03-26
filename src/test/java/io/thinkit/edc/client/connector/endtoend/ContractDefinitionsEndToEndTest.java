@@ -43,21 +43,19 @@ class ContractDefinitionsEndToEndTest extends RealTimeConnectorApiTestBase {
         contractDefinitions = client.contractDefinitions();
     }
 
-    @Nested
-    class Sync {
         @Test
         void should_create_a_contract_definition() {
             var id = "contractDefinitionId-" + UUID.randomUUID();
-            var created = contractDefinitions.create(shouldCreateAContractDefinitionRequest(id));
+            var created = contractDefinitions.create(createAContractDefinitionRequest(id));
 
             assertThat(created.isSucceeded()).isTrue();
             assertThat(created.getContent()).isEqualTo(id);
         }
 
         @Test
-        void should_not_create_a_contract_definition() {
+        void should_not_create_a_contract_definition_when_request_is_invalid() {
             var id = "contractDefinitionId-" + UUID.randomUUID();
-            var created = contractDefinitions.create(shouldNotCreateAContractDefinitionRequest(id));
+            var created = contractDefinitions.create(createInvalidContractDefinition(id));
 
             assertThat(created.isSucceeded()).isFalse();
             assertThat(created.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
@@ -68,7 +66,7 @@ class ContractDefinitionsEndToEndTest extends RealTimeConnectorApiTestBase {
         @Test
         void should_get_a_contract_definition() {
             var id = "contractDefinitionId-" + UUID.randomUUID();
-            var created = contractDefinitions.create(shouldCreateAContractDefinitionRequest(id));
+            var created = contractDefinitions.create(createAContractDefinitionRequest(id));
 
             var contractDefinition = contractDefinitions.get(id);
 
@@ -80,9 +78,8 @@ class ContractDefinitionsEndToEndTest extends RealTimeConnectorApiTestBase {
 
         @Test
         void should_not_get_a_contract_definition() {
-            var id = "contractDefinitionId-" + UUID.randomUUID();
 
-            var contractDefinition = contractDefinitions.get(id);
+            var contractDefinition = contractDefinitions.get("unexistent-id");
 
             assertThat(contractDefinition.isSucceeded()).isFalse();
             assertThat(contractDefinition.getErrors()).isNotNull().first().satisfies(apiErrorDetail -> {
@@ -93,7 +90,7 @@ class ContractDefinitionsEndToEndTest extends RealTimeConnectorApiTestBase {
         @Test
         void should_delete_a_contract_definition() {
             var id = "contractDefinitionId-" + UUID.randomUUID();
-            var created = contractDefinitions.create(shouldCreateAContractDefinitionRequest(id));
+            var created = contractDefinitions.create(createAContractDefinitionRequest(id));
             var deleted = contractDefinitions.delete(created.getContent());
             var contractDefinition = contractDefinitions.get(id);
             assertThat(deleted.isSucceeded()).isTrue();
@@ -116,8 +113,8 @@ class ContractDefinitionsEndToEndTest extends RealTimeConnectorApiTestBase {
         @Test
         void should_get_contract_definitions() {
             var id = "contractDefinitionId-" + UUID.randomUUID();
-            var created = contractDefinitions.create(shouldCreateAContractDefinitionRequest(id));
-            var ContractDefinitionList = contractDefinitions.request(shouldGetContractDefinitionsQuery());
+            var created = contractDefinitions.create(createAContractDefinitionRequest(id));
+            var ContractDefinitionList = contractDefinitions.request(getContractDefinitionsQuery());
 
             assertThat(ContractDefinitionList.getContent())
                     .anyMatch(asset -> asset.id().equals(created.getContent()));
@@ -127,8 +124,8 @@ class ContractDefinitionsEndToEndTest extends RealTimeConnectorApiTestBase {
         void should_update_a_contract_definition() {
             var id = "contractDefinitionId-" + UUID.randomUUID();
 
-            var created = contractDefinitions.create(shouldCreateAContractDefinitionRequest(id));
-            var updated = contractDefinitions.update(shouldUpdateAContractDefinitionRequest(created.getContent()));
+            var created = contractDefinitions.create(createAContractDefinitionRequest(id));
+            var updated = contractDefinitions.update(updateAContractDefinitionRequest(created.getContent()));
 
             var contractDefinition = contractDefinitions.get(created.getContent());
 
@@ -138,11 +135,11 @@ class ContractDefinitionsEndToEndTest extends RealTimeConnectorApiTestBase {
             assertThat(contractDefinition.getContent().assetsSelector())
                     .isNotNull()
                     .first()
-                    .satisfies(criterion -> assertThat(criterion.operator().equals("=")));
+                    .satisfies(criterion -> assertThat(criterion.operator()).isEqualTo("="));
         }
-    }
 
-    private ContractDefinition shouldCreateAContractDefinitionRequest(String id) {
+
+    private ContractDefinition createAContractDefinitionRequest(String id) {
         var assetPolicyId = "asset-policy-id-" + UUID.randomUUID();
         return JsonLdContractDefinition.Builder.newInstance()
                 .id(id)
@@ -152,7 +149,7 @@ class ContractDefinitionsEndToEndTest extends RealTimeConnectorApiTestBase {
                 .build();
     }
 
-    private ContractDefinition shouldNotCreateAContractDefinitionRequest(String id) {
+    private ContractDefinition createInvalidContractDefinition(String id) {
         var contractPolicyId = "contract-policy-id-" + UUID.randomUUID();
         return JsonLdContractDefinition.Builder.newInstance()
                 .id(id)
@@ -161,7 +158,7 @@ class ContractDefinitionsEndToEndTest extends RealTimeConnectorApiTestBase {
                 .build();
     }
 
-    private ContractDefinition shouldUpdateAContractDefinitionRequest(String id) {
+    private ContractDefinition updateAContractDefinitionRequest(String id) {
         var assetsSelector = JsonLdCriterion.Builder.newInstance()
                 .operandLeft("spatial")
                 .operator("=")
@@ -175,7 +172,7 @@ class ContractDefinitionsEndToEndTest extends RealTimeConnectorApiTestBase {
                 .build();
     }
 
-    private QuerySpec shouldGetContractDefinitionsQuery() {
+    private QuerySpec getContractDefinitionsQuery() {
         return JsonLdQuerySpec.Builder.newInstance()
                 .limit(10)
                 .sortOrder("DESC")
