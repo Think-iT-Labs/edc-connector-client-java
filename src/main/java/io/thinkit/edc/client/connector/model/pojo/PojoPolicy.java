@@ -22,13 +22,13 @@ public class PojoPolicy implements Policy {
     @JsonProperty("assigner")
     private String assigner;
 
-    @JsonProperty("permissions")
+    @JsonProperty("permission")
     private List<JsonObject> permissions = new ArrayList<>();
 
-    @JsonProperty("prohibitions")
+    @JsonProperty("prohibition")
     private List<JsonObject> prohibitions = new ArrayList<>();
 
-    @JsonProperty("obligations")
+    @JsonProperty("obligation")
     private List<JsonObject> obligations = new ArrayList<>();
 
     private PojoPolicy() {}
@@ -82,16 +82,19 @@ public class PojoPolicy implements Policy {
             return this;
         }
 
+        @JsonProperty("permission")
         public Builder permissions(List<JsonObject> permissions) {
             policy.permissions = permissions;
             return this;
         }
 
+        @JsonProperty("prohibition")
         public Builder prohibitions(List<JsonObject> prohibitions) {
             policy.prohibitions = prohibitions;
             return this;
         }
 
+        @JsonProperty("obligation")
         public Builder obligations(List<JsonObject> obligations) {
             policy.obligations = obligations;
             return this;

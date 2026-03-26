@@ -4,6 +4,7 @@ import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.thinkit.edc.client.connector.resource.EdcResource;
 import io.thinkit.edc.client.connector.resource.VersionedApi;
 import io.thinkit.edc.client.connector.services.ApplicationObservability;
@@ -24,6 +25,8 @@ import io.thinkit.edc.client.connector.services.management.EdrCache;
 import io.thinkit.edc.client.connector.services.management.PolicyDefinitions;
 import io.thinkit.edc.client.connector.services.management.Secrets;
 import io.thinkit.edc.client.connector.services.management.TransferProcesses;
+import io.thinkit.edc.client.connector.utils.JsonObjectDeserializer;
+import jakarta.json.JsonObject;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.util.HashMap;
@@ -148,6 +151,9 @@ public class EdcConnectorClient {
 
         public Builder() {
             client.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            var module = new SimpleModule();
+            module.addDeserializer(JsonObject.class, new JsonObjectDeserializer());
+            client.objectMapper.registerModule(module);
         }
 
         public Builder management(String url, String version) {
