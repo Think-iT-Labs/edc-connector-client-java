@@ -47,6 +47,12 @@ public class PojoPolicyDefinition implements PolicyDefinition {
             return new Builder();
         }
 
+        @JsonProperty("@id")
+        public Builder id(String id) {
+            request.id = id;
+            return this;
+        }
+
         public Builder policy(PojoPolicy policy) {
             request.policy = policy;
             return this;

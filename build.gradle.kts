@@ -21,6 +21,7 @@ dependencies {
     implementation(libs.jakarta.json)
     implementation(libs.parsson)
     implementation(libs.jackson.databind)
+    implementation(libs.jackson.datatype.jakarta.jsonp)
 
     testImplementation(platform(libs.junit.bom))
     testRuntimeOnly(libs.junit.platform.launcher)

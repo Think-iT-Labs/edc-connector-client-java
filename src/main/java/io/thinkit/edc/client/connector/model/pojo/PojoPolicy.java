@@ -1,5 +1,6 @@
 package io.thinkit.edc.client.connector.model.pojo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.thinkit.edc.client.connector.model.Policy;
@@ -7,6 +8,7 @@ import jakarta.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonDeserialize(builder = PojoPolicy.Builder.class)
 public class PojoPolicy implements Policy {
 
@@ -22,13 +24,13 @@ public class PojoPolicy implements Policy {
     @JsonProperty("assigner")
     private String assigner;
 
-    @JsonProperty("permissions")
+    @JsonProperty("permission")
     private List<JsonObject> permissions = new ArrayList<>();
 
-    @JsonProperty("prohibitions")
+    @JsonProperty("prohibition")
     private List<JsonObject> prohibitions = new ArrayList<>();
 
-    @JsonProperty("obligations")
+    @JsonProperty("obligation")
     private List<JsonObject> obligations = new ArrayList<>();
 
     private PojoPolicy() {}
@@ -82,16 +84,19 @@ public class PojoPolicy implements Policy {
             return this;
         }
 
+        @JsonProperty("permission")
         public Builder permissions(List<JsonObject> permissions) {
             policy.permissions = permissions;
             return this;
         }
 
+        @JsonProperty("prohibition")
         public Builder prohibitions(List<JsonObject> prohibitions) {
             policy.prohibitions = prohibitions;
             return this;
         }
 
+        @JsonProperty("obligation")
         public Builder obligations(List<JsonObject> obligations) {
             policy.obligations = obligations;
             return this;

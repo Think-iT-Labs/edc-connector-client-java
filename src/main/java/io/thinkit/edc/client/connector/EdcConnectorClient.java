@@ -4,6 +4,7 @@ import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
 import io.thinkit.edc.client.connector.resource.EdcResource;
 import io.thinkit.edc.client.connector.resource.VersionedApi;
 import io.thinkit.edc.client.connector.services.ApplicationObservability;
@@ -148,6 +149,7 @@ public class EdcConnectorClient {
 
         public Builder() {
             client.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            client.objectMapper.registerModule(new JSONPModule());
         }
 
         public Builder management(String url, String version) {
