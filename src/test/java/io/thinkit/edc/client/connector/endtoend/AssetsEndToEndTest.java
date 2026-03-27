@@ -37,7 +37,7 @@ class AssetsEndToEndTest extends RealTimeConnectorApiTestBase {
     void setUp() {
         var client = EdcConnectorClient.newBuilder()
                 .httpClient(http)
-                .management(getManagementUrl(), managementVersion)
+                .management(getProviderManagementUrl(), managementVersion)
                 .build();
         assets = client.assets();
     }
