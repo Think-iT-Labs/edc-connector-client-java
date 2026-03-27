@@ -36,7 +36,7 @@ class PolicyDefinitionEndToEndTest extends RealTimeConnectorApiTestBase {
     void setUp() {
         var client = EdcConnectorClient.newBuilder()
                 .httpClient(http)
-                .management(getManagementUrl(), managementVersion)
+                .management(getProviderManagementUrl(), managementVersion)
                 .build();
         policyDefinitions = client.policyDefinitions();
     }
