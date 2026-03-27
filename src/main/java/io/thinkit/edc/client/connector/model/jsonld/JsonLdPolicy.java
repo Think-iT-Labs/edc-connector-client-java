@@ -12,6 +12,7 @@ import java.util.List;
 public class JsonLdPolicy extends JsonLdObject implements Policy {
     private static final String POLICY_TARGET = EDC_NAMESPACE + "target";
     private static final String POLICY_ASSIGNER = EDC_NAMESPACE + "assigner";
+    private static final String TYPE_POLICY = ODRL_NAMESPACE + "Set";
 
     public JsonLdPolicy(JsonObject raw) {
         super(raw);
@@ -27,17 +28,18 @@ public class JsonLdPolicy extends JsonLdObject implements Policy {
 
     @Override
     public List<JsonObject> permissions() {
-        return List.of();
+        return objects(ODRL_NAMESPACE + "permission").toList();
     }
 
     @Override
     public List<JsonObject> prohibitions() {
-        return List.of();
+        return objects(ODRL_NAMESPACE + "prohibition").toList();
     }
 
     @Override
     public List<JsonObject> obligations() {
-        return List.of();
+
+        return objects(ODRL_NAMESPACE + "obligation").toList();
     }
 
     public String getStringValue(String key) {
