@@ -115,4 +115,8 @@ public abstract class RealTimeConnectorApiTestBase {
     public String getConsumerManagementUrl() {
         return getServiceUrl(consumerContainer, 9193) + "/management";
     }
+
+    public String getConsumerCatalogCacheUrl() {
+        return getServiceUrl(consumerContainer, 9393) + "/catalog";
+    }
 }

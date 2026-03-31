@@ -123,7 +123,7 @@ class CatalogsTest extends ManagementApiTestBase {
                 assertThat(dataset.description()).isNotBlank();
                 assertThat(dataset.hasPolicy()).isNotNull();
                 assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {
-                    assertThat(distribution.accessService()).isNotBlank();
+                    assertThat(distribution.accessService()).isNotNull();
                     assertThat(distribution.format()).isNotBlank();
                 });
             });
@@ -135,7 +135,7 @@ class CatalogsTest extends ManagementApiTestBase {
         assertThat(result.getContent()).isNotNull().satisfies(dataset -> {
             assertThat(dataset.hasPolicy()).isNotNull();
             assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {
-                assertThat(distribution.accessService()).isNotBlank();
+                assertThat(distribution.accessService()).isNotNull();
                 assertThat(distribution.format()).isNotBlank();
             });
         });

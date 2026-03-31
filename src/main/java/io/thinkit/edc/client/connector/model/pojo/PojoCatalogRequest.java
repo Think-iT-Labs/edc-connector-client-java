@@ -1,11 +1,13 @@
 package io.thinkit.edc.client.connector.model.pojo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import io.thinkit.edc.client.connector.model.CatalogRequest;
 import io.thinkit.edc.client.connector.model.QuerySpec;
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class PojoCatalogRequest implements CatalogRequest {
     @JsonProperty("@context")
     private List<String> context;
@@ -87,9 +89,9 @@ public class PojoCatalogRequest implements CatalogRequest {
         }
 
         public PojoCatalogRequest build() {
-            request.type = TYPE_CATALOG_REQUEST;
+            request.type = "CatalogRequest";
             request.context = List.of(
-                    "https://w3id.org/edc/v0.0.1/ns/context.jsonld", "https://w3id.org/edc/connector/management/v2");
+                    "https://w3id.org/edc/connector/management/v2", "https://w3id.org/edc/connector/management/v2");
             return request;
         }
     }

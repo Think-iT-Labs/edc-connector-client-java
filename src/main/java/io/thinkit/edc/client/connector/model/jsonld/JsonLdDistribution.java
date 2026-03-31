@@ -3,6 +3,7 @@ package io.thinkit.edc.client.connector.model.jsonld;
 import static io.thinkit.edc.client.connector.utils.Constants.*;
 
 import io.thinkit.edc.client.connector.model.Distribution;
+import io.thinkit.edc.client.connector.model.Service;
 import io.thinkit.edc.client.connector.utils.JsonLdObject;
 import jakarta.json.JsonObject;
 
@@ -14,8 +15,11 @@ public class JsonLdDistribution extends JsonLdObject implements Distribution {
         super(raw);
     }
 
-    public String accessService() {
-        return stringValue(DISTRIBUTION_ACCESS_SERVICE);
+    public Service accessService() {
+        var serviceObject = object(DISTRIBUTION_ACCESS_SERVICE);
+        return serviceObject != null
+                ? JsonLdService.Builder.newInstance().raw(serviceObject).build()
+                : null;
     }
 
     public String format() {

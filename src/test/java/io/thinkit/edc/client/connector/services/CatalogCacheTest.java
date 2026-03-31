@@ -78,7 +78,7 @@ class CatalogCacheTest extends CatalogApiTestBase {
                 assertThat(dataset.description()).isEqualTo("description");
                 assertThat(dataset.hasPolicy()).isNotNull();
                 assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {
-                    assertThat(distribution.accessService()).isNotBlank();
+                    assertThat(distribution.accessService()).isNotNull();
                     assertThat(distribution.format()).isEqualTo("HttpData");
                 });
             });

@@ -79,9 +79,9 @@ public class PojoContractRequest implements ContractRequest {
         }
 
         public PojoContractRequest build() {
-            request.type = TYPE_CONTRACT_REQUEST;
+            request.type = "ContractRequest";
             request.context = List.of(
-                    "https://w3id.org/edc/v0.0.1/ns/context.jsonld", "https://w3id.org/edc/connector/management/v2");
+                    "https://w3id.org/edc/connector/management/v2", "https://w3id.org/edc/connector/management/v2");
             return request;
         }
     }

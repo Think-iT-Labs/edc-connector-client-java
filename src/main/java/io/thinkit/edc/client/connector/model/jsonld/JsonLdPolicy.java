@@ -10,8 +10,10 @@ import jakarta.json.JsonObject;
 import java.util.List;
 
 public class JsonLdPolicy extends JsonLdObject implements Policy {
-    private static final String POLICY_TARGET = EDC_NAMESPACE + "target";
-    private static final String POLICY_ASSIGNER = EDC_NAMESPACE + "assigner";
+    private static final String POLICY_TARGET = ODRL_NAMESPACE + "target";
+    private static final String POLICY_ASSIGNER = ODRL_NAMESPACE + "assigner";
+    // private static final String POLICY_TARGET = EDC_NAMESPACE + "target";
+    // private static final String POLICY_ASSIGNER = EDC_NAMESPACE + "assigner";
     private static final String TYPE_POLICY = ODRL_NAMESPACE + "Set";
 
     public JsonLdPolicy(JsonObject raw) {
@@ -52,25 +54,35 @@ public class JsonLdPolicy extends JsonLdObject implements Policy {
 
     public static class Builder extends AbstractBuilder<JsonLdPolicy, JsonLdPolicy.Builder> {
 
+        private String type = TYPE_POLICY;
+
         public static JsonLdPolicy.Builder newInstance() {
             return new JsonLdPolicy.Builder();
         }
 
+        public JsonLdPolicy.Builder type(String type) {
+            this.type = type;
+            return this;
+        }
+
         public JsonLdPolicy build() {
-            return new JsonLdPolicy(builder.add(TYPE, TYPE_POLICY).build());
+            if (type == null) {
+                type = TYPE_POLICY;
+            }
+            return new JsonLdPolicy(builder.add(TYPE, type).build());
         }
 
         public JsonLdPolicy.Builder target(String target) {
             builder.add(
                     POLICY_TARGET,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, target)));
+                    createArrayBuilder().add(createObjectBuilder().add(ID, target)));
             return this;
         }
 
         public JsonLdPolicy.Builder assigner(String assigner) {
             builder.add(
                     POLICY_ASSIGNER,
-                    createArrayBuilder().add(createObjectBuilder().add(VALUE, assigner)));
+                    createArrayBuilder().add(createObjectBuilder().add(ID, assigner)));
             return this;
         }
     }

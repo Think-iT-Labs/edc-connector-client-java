@@ -4,7 +4,7 @@ public interface Distribution {
 
     String id();
 
-    String accessService();
+    Service accessService();
 
     String format();
 }
