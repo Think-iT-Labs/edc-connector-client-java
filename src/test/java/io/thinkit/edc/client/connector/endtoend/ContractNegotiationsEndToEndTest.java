@@ -69,9 +69,28 @@ class ContractNegotiationsEndToEndTest extends RealTimeConnectorApiTestBase {
     @Test
     void should_initiate_a_contract_negotiation() {
         var assetId = prepareProviderCatalog();
+        var offer = findOfferForAsset(assetId);
+        var negotiationId = initiateNegotiation(offer, assetId);
 
+        assertThat(negotiationId).isNotNull();
+    }
+
+    @Test
+    void should_get_a_contract_negotiation() {
+        var assetId = prepareProviderCatalog();
+        var offer = findOfferForAsset(assetId);
+        var negotiationId = initiateNegotiation(offer, assetId);
+
+        var negotiation = contractNegotiations.get(negotiationId);
+        assertThat(negotiation.isSucceeded()).isTrue();
+        assertThat(negotiation.getContent()).isNotNull();
+
+        var state = waitForState(negotiationId, "FINALIZED");
+        assertThat(state).isEqualTo("FINALIZED");
+    }
+
+    private Policy findOfferForAsset(String assetId) {
         var catalog = consumerCatalogs.request(catalogRequest());
-
         assertThat(catalog.isSucceeded()).isTrue();
         assertThat(catalog.getContent()).isNotNull();
 
@@ -83,34 +102,36 @@ class ContractNegotiationsEndToEndTest extends RealTimeConnectorApiTestBase {
 
         var offer = dataset.hasPolicy().get(0);
         assertThat(offer).isNotNull();
+        return offer;
+    }
 
-        var negotiation = contractNegotiations.create(contractRequest(offer, assetId));
-
-        assertThat(negotiation.isSucceeded()).isTrue();
-        assertThat(negotiation.getContent()).isNotNull();
+    private String initiateNegotiation(Policy offer, String assetId) {
+        var created = contractNegotiations.create(contractRequest(offer, assetId));
+        assertThat(created.isSucceeded()).isTrue();
+        assertThat(created.getContent()).isNotNull();
+        return created.getContent();
     }
 
     private String prepareProviderCatalog() {
         var assetId = "assetId-" + UUID.randomUUID();
-        var createdAsset = providerAssets.create(JsonLdAsset.Builder.newInstance()
+        providerAssets.create(JsonLdAsset.Builder.newInstance()
                 .id(assetId)
                 .properties(Map.of("key1", "value1"))
                 .dataAddress(Map.of("type", "HttpData", "baseUrl", "https://jsonplaceholder.typicode.com/users"))
                 .build());
 
         var policyId = "policyId-" + UUID.randomUUID();
-        var createdPolicy = providerPolicyDefinitions.create(JsonLdPolicyDefinition.Builder.newInstance()
+        providerPolicyDefinitions.create(JsonLdPolicyDefinition.Builder.newInstance()
                 .id(policyId)
                 .policy(JsonLdPolicy.Builder.newInstance().build())
                 .build());
 
-        var createdContractDefinition =
-                providerContractDefinitions.create(JsonLdContractDefinition.Builder.newInstance()
-                        .id("contractDefinitionId-" + UUID.randomUUID())
-                        .accessPolicyId(policyId)
-                        .contractPolicyId(policyId)
-                        .assetsSelector(emptyList())
-                        .build());
+        providerContractDefinitions.create(JsonLdContractDefinition.Builder.newInstance()
+                .id("contractDefinitionId-" + UUID.randomUUID())
+                .accessPolicyId(policyId)
+                .contractPolicyId(policyId)
+                .assetsSelector(emptyList())
+                .build());
 
         return assetId;
     }
@@ -129,6 +150,27 @@ class ContractNegotiationsEndToEndTest extends RealTimeConnectorApiTestBase {
                     .protocol(DSP_PROTOCOL)
                     .build();
         }
+    }
+
+    private String waitForState(String negotiationId, String expectedState) {
+        var deadline = System.currentTimeMillis() + timeout * 1000L;
+        String state = null;
+        while (System.currentTimeMillis() < deadline) {
+            var result = contractNegotiations.getState(negotiationId);
+            if (result.isSucceeded()) {
+                state = result.getContent();
+                if (expectedState.equals(state)) {
+                    return state;
+                }
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return state;
+            }
+        }
+        return state;
     }
 
     private ContractRequest contractRequest(Policy offer, String assetId) {

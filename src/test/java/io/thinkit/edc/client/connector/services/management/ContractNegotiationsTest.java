@@ -63,6 +63,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
 
         @Test
         void should_create_a_contract_negotiation() {
+            assumeTrue(V4BETA.equals(managementVersion), "");
             var created = contractNegotiations.create(shouldCreateAContractNegotiationRequest());
             assertThat(created.isSucceeded()).isTrue();
             assertThat(created.getContent()).isNotNull();
@@ -149,6 +150,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
 
         @Test
         void should_create_a_contract_negotiation_async() {
+            assumeTrue(V4BETA.equals(managementVersion), "");
 
             var result = contractNegotiations.createAsync(shouldCreateAContractNegotiationRequest());
             assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(created -> {
