@@ -5,11 +5,9 @@ import java.util.List;
 public interface Catalog {
     String id();
 
-    Dataset dataset();
-
-    List<? extends Dataset> datasets();
+    List<? extends Dataset> dataset();
 
     String participantId();
 
-    Service service();
+    List<? extends Service> service();
 }
