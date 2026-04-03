@@ -63,7 +63,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
 
         @Test
         void should_create_a_contract_negotiation() {
-            assumeTrue(V4BETA.equals(managementVersion), "");
+            assumeTrue(V4BETA.equals(managementVersion));
             var created = contractNegotiations.create(shouldCreateAContractNegotiationRequest());
             assertThat(created.isSucceeded()).isTrue();
             assertThat(created.getContent()).isNotNull();
@@ -71,7 +71,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
 
         @Test
         void should_get_a_contract_negotiation_attached_agreement() {
-            assumeTrue(V3.equals(managementVersion), "");
+            assumeTrue(V3.equals(managementVersion));
 
             var contractAgreement = contractNegotiations.getAgreement("negotiation-id");
             assertThat(contractAgreement).satisfies(ContractAgreementsTest::shouldGetAContractAgreementResponse);
@@ -150,7 +150,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
 
         @Test
         void should_create_a_contract_negotiation_async() {
-            assumeTrue(V4BETA.equals(managementVersion), "");
+            assumeTrue(V4BETA.equals(managementVersion));
 
             var result = contractNegotiations.createAsync(shouldCreateAContractNegotiationRequest());
             assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(created -> {
@@ -161,7 +161,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
 
         @Test
         void should_get_a_contract_negotiation_attached_agreement_async() {
-            assumeTrue(V3.equals(managementVersion), "");
+            assumeTrue(V3.equals(managementVersion));
 
             var contractAgreement = contractNegotiations.getAgreementAsync("negotiation-id");
             assertThat(contractAgreement)
@@ -291,7 +291,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
     private ContractRequest shouldCreateAContractNegotiationRequest() {
         if (V3.equals(managementVersion)) {
             // Return the original JsonLD-based object for V3 compatibility
-            var policy = JsonLdPolicy.Builder.newInstance() // Assuming this is your legacy class
+            var policy = JsonLdPolicy.Builder.newInstance()
                     .id("offer-id")
                     .assigner("providerId")
                     .target("assetId")

@@ -67,15 +67,6 @@ class ContractNegotiationsEndToEndTest extends RealTimeConnectorApiTestBase {
     }
 
     @Test
-    void should_initiate_a_contract_negotiation() {
-        var assetId = prepareProviderCatalog();
-        var offer = findOfferForAsset(assetId);
-        var negotiationId = initiateNegotiation(offer, assetId);
-
-        assertThat(negotiationId).isNotNull();
-    }
-
-    @Test
     void should_get_a_contract_negotiation() {
         var assetId = prepareProviderCatalog();
         var offer = findOfferForAsset(assetId);
@@ -91,18 +82,14 @@ class ContractNegotiationsEndToEndTest extends RealTimeConnectorApiTestBase {
 
     private Policy findOfferForAsset(String assetId) {
         var catalog = consumerCatalogs.request(catalogRequest());
-        assertThat(catalog.isSucceeded()).isTrue();
-        assertThat(catalog.getContent()).isNotNull();
 
-        var dataset = catalog.getContent().datasets().stream()
+        var dataset = catalog.getContent().dataset().stream()
                 .filter(d -> assetId.equals(d.id()))
                 .findFirst()
-                .orElse(null);
-        assertThat(dataset).isNotNull();
+                .orElseThrow();
 
-        var offer = dataset.hasPolicy().get(0);
-        assertThat(offer).isNotNull();
-        return offer;
+        assertThat(dataset.hasPolicy()).isNotEmpty().first().isNotNull();
+        return dataset.hasPolicy().get(0);
     }
 
     private String initiateNegotiation(Policy offer, String assetId) {
