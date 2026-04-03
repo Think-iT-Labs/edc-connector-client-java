@@ -1,5 +1,7 @@
 package io.thinkit.edc.client.connector.model.pojo;
 
+import static io.thinkit.edc.client.connector.utils.Constants.MANAGEMENT_V2_CONTEXT_ARRAY;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
@@ -90,8 +92,7 @@ public class PojoCatalogRequest implements CatalogRequest {
 
         public PojoCatalogRequest build() {
             request.type = "CatalogRequest";
-            request.context = List.of(
-                    "https://w3id.org/edc/connector/management/v2", "https://w3id.org/edc/connector/management/v2");
+            request.context = MANAGEMENT_V2_CONTEXT_ARRAY;
             return request;
         }
     }
