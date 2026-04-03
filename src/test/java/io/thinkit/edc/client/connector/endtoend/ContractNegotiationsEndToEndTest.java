@@ -4,7 +4,9 @@ import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
 import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V4BETA;
 import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
 import static java.util.Collections.emptyList;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.RealTimeConnectorApiTestBase;
@@ -76,8 +78,9 @@ class ContractNegotiationsEndToEndTest extends RealTimeConnectorApiTestBase {
         assertThat(negotiation.isSucceeded()).isTrue();
         assertThat(negotiation.getContent()).isNotNull();
 
-        var state = waitForState(negotiationId, "FINALIZED");
-        assertThat(state).isEqualTo("FINALIZED");
+        await().atMost(timeout, SECONDS).untilAsserted(() -> assertThat(
+                        contractNegotiations.getState(negotiationId).getContent())
+                .isEqualTo("FINALIZED"));
     }
 
     private Policy findOfferForAsset(String assetId) {
@@ -137,27 +140,6 @@ class ContractNegotiationsEndToEndTest extends RealTimeConnectorApiTestBase {
                     .protocol(DSP_PROTOCOL)
                     .build();
         }
-    }
-
-    private String waitForState(String negotiationId, String expectedState) {
-        var deadline = System.currentTimeMillis() + timeout * 1000L;
-        String state = null;
-        while (System.currentTimeMillis() < deadline) {
-            var result = contractNegotiations.getState(negotiationId);
-            if (result.isSucceeded()) {
-                state = result.getContent();
-                if (expectedState.equals(state)) {
-                    return state;
-                }
-            }
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return state;
-            }
-        }
-        return state;
     }
 
     private ContractRequest contractRequest(Policy offer, String assetId) {
