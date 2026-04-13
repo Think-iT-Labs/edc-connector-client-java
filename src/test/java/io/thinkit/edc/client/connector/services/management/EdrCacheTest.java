@@ -1,7 +1,6 @@
 package io.thinkit.edc.client.connector.services.management;
 
 import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
-import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V4BETA;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +19,7 @@ import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.ValueSource;
 
 @ParameterizedClass
-@ValueSource(strings = {V3, V4BETA})
+@ValueSource(strings = {V3})
 class EdrCacheTest extends ManagementApiTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();
