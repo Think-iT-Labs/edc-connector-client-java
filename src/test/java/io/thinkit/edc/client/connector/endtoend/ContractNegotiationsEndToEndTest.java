@@ -17,11 +17,6 @@ import io.thinkit.edc.client.connector.model.jsonld.*;
 import io.thinkit.edc.client.connector.model.pojo.PojoCatalogRequest;
 import io.thinkit.edc.client.connector.model.pojo.PojoContractRequest;
 import io.thinkit.edc.client.connector.model.pojo.PojoPolicy;
-import io.thinkit.edc.client.connector.services.management.Assets;
-import io.thinkit.edc.client.connector.services.management.Catalogs;
-import io.thinkit.edc.client.connector.services.management.ContractDefinitions;
-import io.thinkit.edc.client.connector.services.management.ContractNegotiations;
-import io.thinkit.edc.client.connector.services.management.PolicyDefinitions;
 import java.net.http.HttpClient;
 import java.util.Map;
 import java.util.UUID;
@@ -40,11 +35,8 @@ class ContractNegotiationsEndToEndTest extends RealTimeConnectorApiTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();
     private final String managementVersion;
-    private ContractNegotiations contractNegotiations;
-    private Assets providerAssets;
-    private PolicyDefinitions providerPolicyDefinitions;
-    private ContractDefinitions providerContractDefinitions;
-    private Catalogs consumerCatalogs;
+    private EdcConnectorClient providerClient;
+    private EdcConnectorClient consumerClient;
 
     ContractNegotiationsEndToEndTest(String managementVersion) {
         this.managementVersion = managementVersion;
@@ -52,20 +44,14 @@ class ContractNegotiationsEndToEndTest extends RealTimeConnectorApiTestBase {
 
     @BeforeEach
     void setUp() {
-        var providerClient = EdcConnectorClient.newBuilder()
+        providerClient = EdcConnectorClient.newBuilder()
                 .httpClient(http)
                 .management(getProviderManagementUrl(), managementVersion)
                 .build();
-        var consumerClient = EdcConnectorClient.newBuilder()
+        consumerClient = EdcConnectorClient.newBuilder()
                 .httpClient(http)
                 .management(getConsumerManagementUrl(), managementVersion)
                 .build();
-
-        providerAssets = providerClient.assets();
-        providerPolicyDefinitions = providerClient.policyDefinitions();
-        providerContractDefinitions = providerClient.contractDefinitions();
-        consumerCatalogs = consumerClient.catalogs();
-        contractNegotiations = consumerClient.contractNegotiations();
     }
 
     @Test
@@ -74,19 +60,22 @@ class ContractNegotiationsEndToEndTest extends RealTimeConnectorApiTestBase {
         var offer = findOfferForAsset(assetId);
         var negotiationId = initiateNegotiation(offer, assetId);
 
-        var negotiation = contractNegotiations.get(negotiationId);
+        await().atMost(timeout, SECONDS).untilAsserted(() -> assertThat(consumerClient
+                        .contractNegotiations()
+                        .getState(negotiationId)
+                        .getContent())
+                .isEqualTo("FINALIZED"));
+
+        var negotiation = consumerClient.contractNegotiations().get(negotiationId);
         assertThat(negotiation.isSucceeded()).isTrue();
         assertThat(negotiation.getContent()).isNotNull();
-
-        await().atMost(timeout, SECONDS).untilAsserted(() -> assertThat(
-                        contractNegotiations.getState(negotiationId).getContent())
-                .isEqualTo("FINALIZED"));
+        assertThat(negotiation.getContent().contractAgreementId()).isNotBlank();
     }
 
     private Policy findOfferForAsset(String assetId) {
-        var catalog = consumerCatalogs.request(catalogRequest());
+        var catalog = consumerClient.catalogs().request(catalogRequest());
 
-        var dataset = catalog.getContent().dataset().stream()
+        var dataset = catalog.getContent().datasets().stream()
                 .filter(d -> assetId.equals(d.id()))
                 .findFirst()
                 .orElseThrow();
@@ -96,7 +85,7 @@ class ContractNegotiationsEndToEndTest extends RealTimeConnectorApiTestBase {
     }
 
     private String initiateNegotiation(Policy offer, String assetId) {
-        var created = contractNegotiations.create(contractRequest(offer, assetId));
+        var created = consumerClient.contractNegotiations().create(contractRequest(offer, assetId));
         assertThat(created.isSucceeded()).isTrue();
         assertThat(created.getContent()).isNotNull();
         return created.getContent();
@@ -104,24 +93,31 @@ class ContractNegotiationsEndToEndTest extends RealTimeConnectorApiTestBase {
 
     private String prepareProviderCatalog() {
         var assetId = "assetId-" + UUID.randomUUID();
-        providerAssets.create(JsonLdAsset.Builder.newInstance()
-                .id(assetId)
-                .properties(Map.of("key1", "value1"))
-                .dataAddress(Map.of("type", "HttpData", "baseUrl", "https://jsonplaceholder.typicode.com/users"))
-                .build());
+        providerClient
+                .assets()
+                .create(JsonLdAsset.Builder.newInstance()
+                        .id(assetId)
+                        .properties(Map.of("key1", "value1"))
+                        .dataAddress(
+                                Map.of("type", "HttpData", "baseUrl", "https://jsonplaceholder.typicode.com/users"))
+                        .build());
 
         var policyId = "policyId-" + UUID.randomUUID();
-        providerPolicyDefinitions.create(JsonLdPolicyDefinition.Builder.newInstance()
-                .id(policyId)
-                .policy(JsonLdPolicy.Builder.newInstance().build())
-                .build());
+        providerClient
+                .policyDefinitions()
+                .create(JsonLdPolicyDefinition.Builder.newInstance()
+                        .id(policyId)
+                        .policy(JsonLdPolicy.Builder.newInstance().build())
+                        .build());
 
-        providerContractDefinitions.create(JsonLdContractDefinition.Builder.newInstance()
-                .id("contractDefinitionId-" + UUID.randomUUID())
-                .accessPolicyId(policyId)
-                .contractPolicyId(policyId)
-                .assetsSelector(emptyList())
-                .build());
+        providerClient
+                .contractDefinitions()
+                .create(JsonLdContractDefinition.Builder.newInstance()
+                        .id("contractDefinitionId-" + UUID.randomUUID())
+                        .accessPolicyId(policyId)
+                        .contractPolicyId(policyId)
+                        .assetsSelector(emptyList())
+                        .build());
 
         return assetId;
     }

@@ -115,11 +115,11 @@ class CatalogsTest extends ManagementApiTestBase {
         assertThat(result.getContent().participantId()).isNotNull().isNotBlank();
         if (managementVersion.equals(V3)) {
             assertThat(result.getContent().id()).isNotBlank();
-            assertThat(result.getContent().service()).isNotEmpty().first().satisfies(service -> {
+            assertThat(result.getContent().services()).isNotEmpty().first().satisfies(service -> {
                 assertThat(service.endpointUrl()).isNotBlank();
                 assertThat(service.terms()).isNotBlank();
             });
-            assertThat(result.getContent().dataset()).isNotEmpty().first().satisfies(dataset -> {
+            assertThat(result.getContent().datasets()).isNotEmpty().first().satisfies(dataset -> {
                 assertThat(dataset.description()).isNotBlank();
                 assertThat(dataset.hasPolicy()).isNotNull();
                 assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {

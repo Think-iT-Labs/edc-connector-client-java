@@ -1,6 +1,9 @@
 package io.thinkit.edc.client.connector.utils;
 
-import static io.thinkit.edc.client.connector.utils.Constants.*;
+import static io.thinkit.edc.client.connector.utils.Constants.CONTEXT;
+import static io.thinkit.edc.client.connector.utils.Constants.EDC_NAMESPACE;
+import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
+import static io.thinkit.edc.client.connector.utils.Constants.VOCAB;
 
 import com.apicatalog.jsonld.JsonLd;
 import com.apicatalog.jsonld.JsonLdError;

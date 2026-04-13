@@ -1,7 +1,7 @@
 package io.thinkit.edc.client.connector.resource.management;
 
 import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
-import static io.thinkit.edc.client.connector.utils.Constants.MANAGEMENT_V2_CONTEXT;
+import static io.thinkit.edc.client.connector.utils.Constants.MANAGEMENT_V2_CONTEXT_ARRAY;
 
 import io.thinkit.edc.client.connector.EdcClientContext;
 import io.thinkit.edc.client.connector.model.Result;
@@ -35,11 +35,7 @@ public class ManagementResource extends EdcResource {
             return JsonLdUtil.compact(input);
         } else {
             return JsonLdUtil.compact(
-                    input,
-                    Json.createArrayBuilder()
-                            .add(MANAGEMENT_V2_CONTEXT)
-                            .add(MANAGEMENT_V2_CONTEXT)
-                            .build());
+                    input, Json.createArrayBuilder(MANAGEMENT_V2_CONTEXT_ARRAY).build());
         }
     }
 

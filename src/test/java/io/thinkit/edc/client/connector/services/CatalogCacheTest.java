@@ -70,11 +70,11 @@ class CatalogCacheTest extends CatalogApiTestBase {
         assertThat(result.isSucceeded()).isTrue();
         assertThat(result.getContent()).isNotNull().isNotEmpty().first().satisfies(catalog -> {
             assertThat(catalog.participantId()).isNotNull().isEqualTo("urn:connector:provider");
-            assertThat(catalog.service()).isNotEmpty().first().satisfies(service -> {
+            assertThat(catalog.services()).isNotEmpty().first().satisfies(service -> {
                 assertThat(service.endpointUrl()).isEqualTo("http://localhost:16806/protocol");
                 assertThat(service.terms()).isEqualTo("connector");
             });
-            assertThat(catalog.dataset()).isNotEmpty().first().satisfies(dataset -> {
+            assertThat(catalog.datasets()).isNotEmpty().first().satisfies(dataset -> {
                 assertThat(dataset.description()).isEqualTo("description");
                 assertThat(dataset.hasPolicy()).isNotNull();
                 assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {

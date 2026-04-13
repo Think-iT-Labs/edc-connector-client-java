@@ -9,10 +9,10 @@ public class PojoCatalog implements Catalog {
     private String id;
 
     @JsonProperty("dataset")
-    private List<PojoDataset> dataset;
+    private List<PojoDataset> datasets;
 
     @JsonProperty("service")
-    private List<PojoService> service;
+    private List<PojoService> services;
 
     @JsonProperty("participantId")
     private String participantId;
@@ -26,8 +26,8 @@ public class PojoCatalog implements Catalog {
     }
 
     @Override
-    public List<? extends Dataset> dataset() {
-        return dataset != null ? dataset : List.of();
+    public List<? extends Dataset> datasets() {
+        return datasets != null ? datasets : List.of();
     }
 
     @Override
@@ -36,7 +36,7 @@ public class PojoCatalog implements Catalog {
     }
 
     @Override
-    public List<? extends Service> service() {
-        return service != null ? service : List.of();
+    public List<? extends Service> services() {
+        return services != null ? services : List.of();
     }
 }

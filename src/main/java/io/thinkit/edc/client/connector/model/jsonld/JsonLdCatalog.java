@@ -23,14 +23,14 @@ public class JsonLdCatalog extends JsonLdObject implements Catalog {
         super(raw);
     }
 
-    public List<Dataset> dataset() {
+    public List<Dataset> datasets() {
         return objects(CATALOG_DATASET)
                 .map(obj ->
                         (Dataset) JsonLdDataset.Builder.newInstance().raw(obj).build())
                 .toList();
     }
 
-    public List<Service> service() {
+    public List<Service> services() {
         return objects(CATALOG_SERVICE)
                 .map(obj ->
                         (Service) JsonLdService.Builder.newInstance().raw(obj).build())

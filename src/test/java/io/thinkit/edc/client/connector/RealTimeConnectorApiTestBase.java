@@ -33,9 +33,15 @@ public abstract class RealTimeConnectorApiTestBase {
 
     @AfterAll
     static void tearDownContainers() {
-        if (consumerContainer != null) consumerContainer.stop();
-        if (providerContainer != null) providerContainer.stop();
-        if (network != null) network.close();
+        if (consumerContainer != null) {
+            consumerContainer.stop();
+        }
+        if (providerContainer != null) {
+            providerContainer.stop();
+        }
+        if (network != null) {
+            network.close();
+        }
     }
 
     static void ensureDockerImageIsBuilt() {
@@ -68,8 +74,12 @@ public abstract class RealTimeConnectorApiTestBase {
     }
 
     private static File findBuildRootRecursive(File path) {
-        if (path == null) return null;
-        if (new File(path, GRADLE_WRAPPER).exists()) return path;
+        if (path == null) {
+            return null;
+        }
+        if (new File(path, GRADLE_WRAPPER).exists()) {
+            return path;
+        }
         return findBuildRootRecursive(path.getParentFile());
     }
 
