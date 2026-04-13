@@ -7,6 +7,7 @@ import java.time.Duration;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.MountableFile;
 
@@ -16,39 +17,44 @@ public abstract class RealTimeConnectorApiTestBase {
     private static final String DOCKER_IMAGE_NAME = "connector:test";
     private static final String GRADLE_WRAPPER = "gradlew";
 
-    protected static GenericContainer<?> myContainer;
+    private static Network network;
+    protected static GenericContainer<?> providerContainer;
+    protected static GenericContainer<?> consumerContainer;
 
     @BeforeAll
-    static void setUpContainer() {
+    static void setUpContainers() {
         ensureDockerImageIsBuilt();
-        myContainer = createContainer();
-        myContainer.start();
+        network = Network.newNetwork();
+        providerContainer = createContainer("provider-connector.config", "provider-connector");
+        consumerContainer = createContainer("consumer-connector.config", "consumer-connector");
+        providerContainer.start();
+        consumerContainer.start();
     }
 
     @AfterAll
-    static void tearDownContainer() {
-        if (myContainer != null) {
-            myContainer.stop();
+    static void tearDownContainers() {
+        if (consumerContainer != null) {
+            consumerContainer.stop();
+        }
+        if (providerContainer != null) {
+            providerContainer.stop();
+        }
+        if (network != null) {
+            network.close();
         }
     }
 
     static void ensureDockerImageIsBuilt() {
         try {
             var gradleRoot = findBuildRoot();
-            var gradleCommand = "./gradlew";
-
-            var processBuilder = new ProcessBuilder(gradleCommand, "dockerBuild", "--no-daemon")
+            var processBuilder = new ProcessBuilder("./gradlew", "dockerBuild", "--no-daemon")
                     .directory(gradleRoot)
                     .inheritIO();
-
-            var process = processBuilder.start();
-            var exitCode = process.waitFor();
-
+            var exitCode = processBuilder.start().waitFor();
             if (exitCode != 0) {
                 throw new IllegalStateException(
                         "Failed to build Docker image. Gradle dockerBuild task exited with code: " + exitCode);
             }
-
         } catch (IOException | InterruptedException e) {
             throw new IllegalStateException("Failed to execute Gradle dockerBuild task", e);
         }
@@ -71,18 +77,10 @@ public abstract class RealTimeConnectorApiTestBase {
         if (path == null) {
             return null;
         }
-
-        var gradlew = new File(path, GRADLE_WRAPPER);
-        if (gradlew.exists()) {
+        if (new File(path, GRADLE_WRAPPER).exists()) {
             return path;
         }
-
-        var parent = path.getParentFile();
-        if (parent != null) {
-            return findBuildRootRecursive(parent);
-        }
-
-        return null;
+        return findBuildRootRecursive(path.getParentFile());
     }
 
     public static Path getConnectorFolder() {
@@ -91,36 +89,44 @@ public abstract class RealTimeConnectorApiTestBase {
         if (!connectorPath.toFile().exists()) {
             throw new IllegalStateException("Connector directory does not exist: " + connectorPath);
         }
-
         return connectorPath;
     }
 
-    private static GenericContainer<?> createContainer() {
-        var configFile = getConnectorFolder().resolve("conf/consumer-connector.config");
-        if (!configFile.toFile().exists()) {
-            throw new IllegalStateException("Configuration file not found: " + configFile);
+    private static GenericContainer<?> createContainer(String configDirName, String networkAlias) {
+        var configDir = getConnectorFolder().resolve("conf/" + configDirName);
+        if (!configDir.toFile().exists()) {
+            throw new IllegalStateException("Configuration directory not found: " + configDir);
         }
 
         return new GenericContainer<>(DOCKER_IMAGE_NAME)
-                .withExposedPorts(9193)
+                .withNetwork(network)
+                .withNetworkAliases(networkAlias)
+                .withExposedPorts(9191, 9192, 9193, 9194, 9291, 9393)
                 .withEnv("EDC_FS_CONFIG", "/config/configuration.properties")
                 .withCopyFileToContainer(
-                        MountableFile.forHostPath(configFile.resolve("configuration.properties")),
+                        MountableFile.forHostPath(configDir.resolve("configuration.properties")),
                         "/config/configuration.properties")
-                .withLogConsumer(frame -> System.out.print(frame.getUtf8String()))
+                .withLogConsumer(frame -> System.out.print("[" + networkAlias + "] " + frame.getUtf8String()))
                 .waitingFor(Wait.forHealthcheck().withStartupTimeout(STARTUP_TIMEOUT))
                 .withStartupTimeout(STARTUP_TIMEOUT);
     }
 
-    protected String getServiceUrl(int port) {
-        if (myContainer == null || !myContainer.isRunning()) {
-            throw new IllegalStateException(
-                    "Container is not running. Make sure the test base class is properly initialized");
+    protected String getServiceUrl(GenericContainer<?> container, int port) {
+        if (container == null || !container.isRunning()) {
+            throw new IllegalStateException("Container is not running.");
         }
-        return "http://127.0.0.1:" + myContainer.getMappedPort(port);
+        return "http://127.0.0.1:" + container.getMappedPort(port);
     }
 
-    public String getManagementUrl() {
-        return getServiceUrl(9193) + "/management";
+    public String getProviderManagementUrl() {
+        return getServiceUrl(providerContainer, 9193) + "/management";
+    }
+
+    public String getConsumerManagementUrl() {
+        return getServiceUrl(consumerContainer, 9193) + "/management";
+    }
+
+    public String getConsumerCatalogCacheUrl() {
+        return getServiceUrl(consumerContainer, 9393) + "/catalog";
     }
 }

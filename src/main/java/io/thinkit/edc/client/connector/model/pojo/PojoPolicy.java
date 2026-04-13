@@ -102,9 +102,15 @@ public class PojoPolicy implements Policy {
             return this;
         }
 
-        public PojoPolicy build() {
+        public Builder type(String type) {
+            policy.type = type;
+            return this;
+        }
 
-            policy.type = TYPE_POLICY;
+        public PojoPolicy build() {
+            if (policy.type == null) {
+                policy.type = TYPE_POLICY;
+            }
             return policy;
         }
     }

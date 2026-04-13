@@ -8,6 +8,8 @@ import java.util.List;
 public interface Policy {
     static final String TYPE_POLICY = EDC_NAMESPACE + "Policy";
 
+    String id();
+
     String target();
 
     String assigner();

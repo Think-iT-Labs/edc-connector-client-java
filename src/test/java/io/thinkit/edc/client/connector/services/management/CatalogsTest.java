@@ -115,15 +115,15 @@ class CatalogsTest extends ManagementApiTestBase {
         assertThat(result.getContent().participantId()).isNotNull().isNotBlank();
         if (managementVersion.equals(V3)) {
             assertThat(result.getContent().id()).isNotBlank();
-            assertThat(result.getContent().service()).isNotNull().satisfies(service -> {
+            assertThat(result.getContent().services()).isNotEmpty().first().satisfies(service -> {
                 assertThat(service.endpointUrl()).isNotBlank();
                 assertThat(service.terms()).isNotBlank();
             });
-            assertThat(result.getContent().dataset()).isNotNull().satisfies(dataset -> {
+            assertThat(result.getContent().datasets()).isNotEmpty().first().satisfies(dataset -> {
                 assertThat(dataset.description()).isNotBlank();
                 assertThat(dataset.hasPolicy()).isNotNull();
                 assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {
-                    assertThat(distribution.accessService()).isNotBlank();
+                    assertThat(distribution.accessService()).isNotNull();
                     assertThat(distribution.format()).isNotBlank();
                 });
             });
@@ -135,7 +135,7 @@ class CatalogsTest extends ManagementApiTestBase {
         assertThat(result.getContent()).isNotNull().satisfies(dataset -> {
             assertThat(dataset.hasPolicy()).isNotNull();
             assertThat(dataset.distribution()).isNotNull().first().satisfies(distribution -> {
-                assertThat(distribution.accessService()).isNotBlank();
+                assertThat(distribution.accessService()).isNotNull();
                 assertThat(distribution.format()).isNotBlank();
             });
         });

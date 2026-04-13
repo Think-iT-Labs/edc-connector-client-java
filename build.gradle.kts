@@ -28,6 +28,7 @@ dependencies {
     testImplementation(libs.junit.jupiter)
 
     testImplementation(libs.assertj)
+    testImplementation(libs.awaitility)
     testImplementation(libs.testcontainers)
 }
 

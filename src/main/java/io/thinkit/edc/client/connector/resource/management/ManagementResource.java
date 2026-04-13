@@ -1,6 +1,7 @@
 package io.thinkit.edc.client.connector.resource.management;
 
 import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
+import static io.thinkit.edc.client.connector.utils.Constants.MANAGEMENT_V2_CONTEXT_ARRAY;
 
 import io.thinkit.edc.client.connector.EdcClientContext;
 import io.thinkit.edc.client.connector.model.Result;
@@ -34,17 +35,7 @@ public class ManagementResource extends EdcResource {
             return JsonLdUtil.compact(input);
         } else {
             return JsonLdUtil.compact(
-                    input,
-                    Json.createArrayBuilder()
-                            /*
-                               json schema requires @context to be an array, but the only way to obtain it is to have
-                               at least two entries. This is caused by the compaction.
-                               After switching to v4 we can avoid the whole compaction operation and treat the input
-                               as a simple json object.
-                            */
-                            .add("https://w3id.org/edc/connector/management/v2")
-                            .add("https://w3id.org/edc/connector/management/v2")
-                            .build());
+                    input, Json.createArrayBuilder(MANAGEMENT_V2_CONTEXT_ARRAY).build());
         }
     }
 

@@ -1,5 +1,7 @@
 package io.thinkit.edc.client.connector.model.pojo;
 
+import static io.thinkit.edc.client.connector.utils.Constants.MANAGEMENT_V2_CONTEXT_ARRAY;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
@@ -79,9 +81,8 @@ public class PojoContractRequest implements ContractRequest {
         }
 
         public PojoContractRequest build() {
-            request.type = TYPE_CONTRACT_REQUEST;
-            request.context = List.of(
-                    "https://w3id.org/edc/v0.0.1/ns/context.jsonld", "https://w3id.org/edc/connector/management/v2");
+            request.type = "ContractRequest";
+            request.context = MANAGEMENT_V2_CONTEXT_ARRAY;
             return request;
         }
     }

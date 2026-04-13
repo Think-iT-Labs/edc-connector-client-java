@@ -11,6 +11,7 @@ import io.thinkit.edc.client.connector.utils.JsonLdObject;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
+import java.util.List;
 
 public class JsonLdCatalog extends JsonLdObject implements Catalog {
     private static final String TYPE_CATALOG = EDC_NAMESPACE + "Catalog";
@@ -22,12 +23,18 @@ public class JsonLdCatalog extends JsonLdObject implements Catalog {
         super(raw);
     }
 
-    public Dataset dataset() {
-        return JsonLdDataset.Builder.newInstance().raw(object(CATALOG_DATASET)).build();
+    public List<Dataset> datasets() {
+        return objects(CATALOG_DATASET)
+                .map(obj ->
+                        (Dataset) JsonLdDataset.Builder.newInstance().raw(obj).build())
+                .toList();
     }
 
-    public Service service() {
-        return JsonLdService.Builder.newInstance().raw(object(CATALOG_SERVICE)).build();
+    public List<Service> services() {
+        return objects(CATALOG_SERVICE)
+                .map(obj ->
+                        (Service) JsonLdService.Builder.newInstance().raw(obj).build())
+                .toList();
     }
 
     public String participantId() {
