@@ -52,7 +52,6 @@ class TransferProcessesEndToEndTest extends RealTimeConnectorApiTestBase {
                 .httpClient(http)
                 .management(getConsumerManagementUrl(), managementVersion)
                 .build();
-
     }
 
     @Test
@@ -61,8 +60,10 @@ class TransferProcessesEndToEndTest extends RealTimeConnectorApiTestBase {
         var offer = findOfferForAsset(assetId);
         var negotiationId = initiateNegotiation(offer, assetId);
 
-        await().atMost(timeout, SECONDS).untilAsserted(() -> assertThat(
-                        consumerClient.contractNegotiations().getState(negotiationId).getContent())
+        await().atMost(timeout, SECONDS).untilAsserted(() -> assertThat(consumerClient
+                        .contractNegotiations()
+                        .getState(negotiationId)
+                        .getContent())
                 .isEqualTo("FINALIZED"));
 
         var negotiation = consumerClient.contractNegotiations().get(negotiationId);
@@ -75,12 +76,12 @@ class TransferProcessesEndToEndTest extends RealTimeConnectorApiTestBase {
         var transferProcess = consumerClient.transferProcesses().get(transferProcessId.getContent());
 
         assertThat(transferProcess.isSucceeded()).isTrue();
-        await().atMost(timeout, SECONDS).untilAsserted(() -> assertThat(consumerClient.transferProcesses()
+        await().atMost(timeout, SECONDS).untilAsserted(() -> assertThat(consumerClient
+                        .transferProcesses()
                         .getState(transferProcessId.getContent())
                         .getContent()
                         .state())
                 .isEqualTo("STARTED"));
-
     }
 
     private Policy findOfferForAsset(String assetId) {
@@ -104,24 +105,31 @@ class TransferProcessesEndToEndTest extends RealTimeConnectorApiTestBase {
 
     private String prepareProviderCatalog() {
         var assetId = "assetId-" + UUID.randomUUID();
-        providerClient.assets().create(JsonLdAsset.Builder.newInstance()
-                .id(assetId)
-                .properties(Map.of("key1", "value1"))
-                .dataAddress(Map.of("type", "HttpData", "baseUrl", "https://jsonplaceholder.typicode.com/users"))
-                .build());
+        providerClient
+                .assets()
+                .create(JsonLdAsset.Builder.newInstance()
+                        .id(assetId)
+                        .properties(Map.of("key1", "value1"))
+                        .dataAddress(
+                                Map.of("type", "HttpData", "baseUrl", "https://jsonplaceholder.typicode.com/users"))
+                        .build());
 
         var policyId = "policyId-" + UUID.randomUUID();
-        providerClient.policyDefinitions().create(JsonLdPolicyDefinition.Builder.newInstance()
-                .id(policyId)
-                .policy(JsonLdPolicy.Builder.newInstance().build())
-                .build());
+        providerClient
+                .policyDefinitions()
+                .create(JsonLdPolicyDefinition.Builder.newInstance()
+                        .id(policyId)
+                        .policy(JsonLdPolicy.Builder.newInstance().build())
+                        .build());
 
-        providerClient.contractDefinitions().create(JsonLdContractDefinition.Builder.newInstance()
-                .id("contractDefinitionId-" + UUID.randomUUID())
-                .accessPolicyId(policyId)
-                .contractPolicyId(policyId)
-                .assetsSelector(emptyList())
-                .build());
+        providerClient
+                .contractDefinitions()
+                .create(JsonLdContractDefinition.Builder.newInstance()
+                        .id("contractDefinitionId-" + UUID.randomUUID())
+                        .accessPolicyId(policyId)
+                        .contractPolicyId(policyId)
+                        .assetsSelector(emptyList())
+                        .build());
 
         return assetId;
     }
