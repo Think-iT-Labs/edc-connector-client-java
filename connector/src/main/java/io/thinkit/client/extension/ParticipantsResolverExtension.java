@@ -25,13 +25,14 @@ import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
 
 import static io.thinkit.client.extension.ParticipantsResolverExtension.NAME;
+import static org.eclipse.edc.spi.system.ServiceExtensionContext.ANONYMOUS_PARTICIPANT;
 
 @Extension(value = NAME)
 public class ParticipantsResolverExtension implements ServiceExtension {
 
     public static final String NAME = "Participant Resolver Extension";
 
-    @Setting(key = "edc.participant.id")
+    @Setting(description = "Configures the participant id this runtime is operating on behalf of", key = "edc.participant.id", defaultValue = ANONYMOUS_PARTICIPANT)
     private String participantId;
 
     @Inject
