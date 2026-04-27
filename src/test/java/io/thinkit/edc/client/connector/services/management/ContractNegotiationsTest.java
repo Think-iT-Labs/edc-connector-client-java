@@ -1,7 +1,7 @@
 package io.thinkit.edc.client.connector.services.management;
 
 import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
-import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V4BETA;
+import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V4;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -27,7 +27,7 @@ import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.ValueSource;
 
 @ParameterizedClass
-@ValueSource(strings = {V3, V4BETA})
+@ValueSource(strings = {V3, V4})
 class ContractNegotiationsTest extends ManagementApiTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();
@@ -63,7 +63,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
 
         @Test
         void should_create_a_contract_negotiation() {
-            assumeTrue(V4BETA.equals(managementVersion));
+            assumeTrue(V4.equals(managementVersion));
             var created = contractNegotiations.create(shouldCreateAContractNegotiationRequest());
             assertThat(created.isSucceeded()).isTrue();
             assertThat(created.getContent()).isNotNull();
@@ -150,7 +150,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
 
         @Test
         void should_create_a_contract_negotiation_async() {
-            assumeTrue(V4BETA.equals(managementVersion));
+            assumeTrue(V4.equals(managementVersion));
 
             var result = contractNegotiations.createAsync(shouldCreateAContractNegotiationRequest());
             assertThat(result).succeedsWithin(timeout, TimeUnit.SECONDS).satisfies(created -> {
@@ -303,7 +303,7 @@ class ContractNegotiationsTest extends ManagementApiTestBase {
                     .policy(policy)
                     .build();
         } else {
-            // Return the new POJO for V4BETA
+            // Return the new POJO for V4
             var policy = PojoPolicy.Builder.newInstance()
                     .id("offer-id")
                     .assigner("providerId")
