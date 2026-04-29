@@ -1,8 +1,9 @@
 package io.thinkit.edc.client.connector.services.management;
 
 import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
-import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V4BETA;
+import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V4;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import io.thinkit.edc.client.connector.EdcConnectorClient;
 import io.thinkit.edc.client.connector.ManagementApiTestBase;
@@ -18,7 +19,7 @@ import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.ValueSource;
 
 @ParameterizedClass
-@ValueSource(strings = {V3, V4BETA})
+@ValueSource(strings = {V3, V4})
 class DataplanesTest extends ManagementApiTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();
@@ -42,6 +43,7 @@ class DataplanesTest extends ManagementApiTestBase {
     class Sync {
         @Test
         void should_get_dataplanes() {
+            assumeTrue(V3.equals(managementVersion));
             var dataplanesList = dataplanes.get();
             assertThat(dataplanesList).satisfies(DataplanesTest.this::shouldGetDataplanesResponse);
         }
@@ -51,6 +53,7 @@ class DataplanesTest extends ManagementApiTestBase {
     class Async {
         @Test
         void should_get_dataplanes_async() {
+            assumeTrue(V3.equals(managementVersion));
             var dataplanesList = dataplanes.getAsync();
             assertThat(dataplanesList)
                     .succeedsWithin(timeout, TimeUnit.SECONDS)

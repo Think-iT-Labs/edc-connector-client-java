@@ -233,6 +233,6 @@ public class EdcConnectorClient {
 
     public interface Versions {
         String V3 = "v3";
-        String V4BETA = "v4beta";
+        String V4 = "v4";
     }
 }

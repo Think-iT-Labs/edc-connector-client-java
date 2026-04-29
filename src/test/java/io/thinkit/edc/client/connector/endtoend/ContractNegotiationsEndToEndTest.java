@@ -1,7 +1,7 @@
 package io.thinkit.edc.client.connector.endtoend;
 
 import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
-import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V4BETA;
+import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V4;
 import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
 import static java.util.Collections.emptyList;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -26,7 +26,7 @@ import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.ValueSource;
 
 @ParameterizedClass
-@ValueSource(strings = {V3, V4BETA})
+@ValueSource(strings = {V3, V4})
 class ContractNegotiationsEndToEndTest extends RealTimeConnectorApiTestBase {
 
     private static final String PROVIDER_PROTOCOL_URL = "http://provider-connector:9194/protocol/2025-1";

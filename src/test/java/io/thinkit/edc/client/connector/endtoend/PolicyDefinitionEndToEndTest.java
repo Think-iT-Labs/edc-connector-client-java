@@ -1,7 +1,7 @@
 package io.thinkit.edc.client.connector.endtoend;
 
 import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V3;
-import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V4BETA;
+import static io.thinkit.edc.client.connector.EdcConnectorClient.Versions.V4;
 import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
 import static jakarta.json.Json.createObjectBuilder;
 import static java.util.Collections.emptyList;
@@ -21,7 +21,7 @@ import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.ValueSource;
 
 @ParameterizedClass
-@ValueSource(strings = {V3, V4BETA})
+@ValueSource(strings = {V3, V4})
 class PolicyDefinitionEndToEndTest extends RealTimeConnectorApiTestBase {
 
     private final HttpClient http = HttpClient.newBuilder().build();
