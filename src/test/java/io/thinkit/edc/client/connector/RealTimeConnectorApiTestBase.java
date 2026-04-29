@@ -107,7 +107,10 @@ public abstract class RealTimeConnectorApiTestBase {
                         MountableFile.forHostPath(configDir.resolve("configuration.properties")),
                         "/config/configuration.properties")
                 .withLogConsumer(frame -> System.out.print("[" + networkAlias + "] " + frame.getUtf8String()))
-                .waitingFor(Wait.forHealthcheck().withStartupTimeout(STARTUP_TIMEOUT))
+                .waitingFor(Wait.forHttp("/api/check/health")
+                        .forPort(9191)
+                        .forStatusCode(200)
+                        .withStartupTimeout(STARTUP_TIMEOUT))
                 .withStartupTimeout(STARTUP_TIMEOUT);
     }
 
