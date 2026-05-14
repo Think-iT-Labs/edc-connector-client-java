@@ -4,6 +4,7 @@ import static io.thinkit.edc.client.connector.utils.Constants.*;
 import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
 
+import io.thinkit.edc.client.connector.model.jsonld.JsonLdPolicy;
 import io.thinkit.edc.client.connector.utils.JsonLdObject;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
@@ -28,7 +29,7 @@ public class ContractOfferDescription extends JsonLdObject {
     }
 
     public Policy policy() {
-        return new Policy(object(CONTRACT_OFFER_POLICY));
+        return new JsonLdPolicy(object(CONTRACT_OFFER_POLICY));
     }
 
     public static class Builder extends AbstractBuilder<ContractOfferDescription, ContractOfferDescription.Builder> {
@@ -61,7 +62,7 @@ public class ContractOfferDescription extends JsonLdObject {
             return this;
         }
 
-        public ContractOfferDescription.Builder policy(Policy policy) {
+        public ContractOfferDescription.Builder policy(JsonLdPolicy policy) {
             builder.add(CONTRACT_OFFER_POLICY, Json.createObjectBuilder(policy.raw()));
             return this;
         }

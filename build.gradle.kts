@@ -4,10 +4,11 @@ plugins {
     java
     `java-library`
     alias(libs.plugins.spotless)
-   `maven-publish`
-   signing
+    `maven-publish`
+    signing
     alias(libs.plugins.publish)
 }
+
 
 repositories {
     mavenLocal()
@@ -16,17 +17,18 @@ repositories {
 
 dependencies {
     api(libs.jakarta.json.api)
-
     implementation(libs.titanium.json.ld)
     implementation(libs.jakarta.json)
     implementation(libs.parsson)
     implementation(libs.jackson.databind)
+    implementation(libs.jackson.datatype.jakarta.jsonp)
 
     testImplementation(platform(libs.junit.bom))
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.junit.jupiter)
 
     testImplementation(libs.assertj)
+    testImplementation(libs.awaitility)
     testImplementation(libs.testcontainers)
 }
 
@@ -79,6 +81,14 @@ fun registerDownloadOpenapiSpec(repository: String, context: String): Task {
 }
 
 fun download(url: String): String = URL(url).openConnection().getInputStream().bufferedReader().use { it.readText() }
+tasks.register<Exec>("dockerBuild") {
+    description = "Builds the Docker image for the connector"
+    group = "docker"
+
+    workingDir = projectDir // parent project root
+    commandLine = listOf("docker", "build", "-f", "connector/Dockerfile", "-t", "connector:test", ".")
+}
+
 
 signing {
     useGpgCmd()

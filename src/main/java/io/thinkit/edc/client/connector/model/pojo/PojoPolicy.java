@@ -1,0 +1,117 @@
+package io.thinkit.edc.client.connector.model.pojo;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.thinkit.edc.client.connector.model.Policy;
+import jakarta.json.JsonObject;
+import java.util.ArrayList;
+import java.util.List;
+
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonDeserialize(builder = PojoPolicy.Builder.class)
+public class PojoPolicy implements Policy {
+
+    @JsonProperty("@id")
+    private String id;
+
+    @JsonProperty("@type")
+    private String type;
+
+    @JsonProperty("target")
+    private String target;
+
+    @JsonProperty("assigner")
+    private String assigner;
+
+    @JsonProperty("permission")
+    private List<JsonObject> permissions = new ArrayList<>();
+
+    @JsonProperty("prohibition")
+    private List<JsonObject> prohibitions = new ArrayList<>();
+
+    @JsonProperty("obligation")
+    private List<JsonObject> obligations = new ArrayList<>();
+
+    private PojoPolicy() {}
+
+    public String id() {
+        return id;
+    }
+
+    @Override
+    public String target() {
+        return target != null ? target : "";
+    }
+
+    @Override
+    public String assigner() {
+        return assigner != null ? assigner : "";
+    }
+
+    public List<JsonObject> permissions() {
+        return permissions;
+    }
+
+    public List<JsonObject> prohibitions() {
+        return prohibitions;
+    }
+
+    public List<JsonObject> obligations() {
+        return obligations;
+    }
+
+    public static class Builder {
+        private final PojoPolicy policy = new PojoPolicy();
+
+        public static Builder newInstance() {
+            return new Builder();
+        }
+
+        @JsonProperty("@id")
+        public Builder id(String id) {
+            policy.id = id;
+            return this;
+        }
+
+        public Builder target(String target) {
+            policy.target = target;
+            return this;
+        }
+
+        public Builder assigner(String assigner) {
+            policy.assigner = assigner;
+            return this;
+        }
+
+        @JsonProperty("permission")
+        public Builder permissions(List<JsonObject> permissions) {
+            policy.permissions = permissions;
+            return this;
+        }
+
+        @JsonProperty("prohibition")
+        public Builder prohibitions(List<JsonObject> prohibitions) {
+            policy.prohibitions = prohibitions;
+            return this;
+        }
+
+        @JsonProperty("obligation")
+        public Builder obligations(List<JsonObject> obligations) {
+            policy.obligations = obligations;
+            return this;
+        }
+
+        public Builder type(String type) {
+            policy.type = type;
+            return this;
+        }
+
+        public PojoPolicy build() {
+            if (policy.type == null) {
+                policy.type = TYPE_POLICY;
+            }
+            return policy;
+        }
+    }
+}

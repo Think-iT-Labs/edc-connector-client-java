@@ -2,6 +2,7 @@ package io.thinkit.edc.client.connector.utils;
 
 import static io.thinkit.edc.client.connector.utils.Constants.CONTEXT;
 import static io.thinkit.edc.client.connector.utils.Constants.EDC_NAMESPACE;
+import static io.thinkit.edc.client.connector.utils.Constants.ODRL_NAMESPACE;
 import static io.thinkit.edc.client.connector.utils.Constants.VOCAB;
 
 import com.apicatalog.jsonld.JsonLd;
@@ -38,7 +39,11 @@ public class JsonLdUtil {
         return compact(
                 input,
                 Json.createObjectBuilder()
-                        .add(CONTEXT, Json.createObjectBuilder().add(VOCAB, EDC_NAMESPACE))
+                        .add(
+                                CONTEXT,
+                                Json.createObjectBuilder()
+                                        .add(VOCAB, EDC_NAMESPACE)
+                                        .add("odrl", ODRL_NAMESPACE))
                         .build());
     }
 
